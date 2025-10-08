@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservoir GHG Emissions Tool - IPCC Tier 1 Methodology</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🌊 Reservoir GHG Emissions Tool</h1>
+            <p>IPCC Tier 1 Methodology with Uncertainty and Sensitivity Analysis</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Instructions -->
+        <div class="alert alert-info">
+            <strong>Welcome!</strong> This tool implements the IPCC Tier 1 methodology to estimate greenhouse gas emissions from reservoirs. 
+            Enter your reservoir's location and characteristics below to calculate CH₄, CO₂, and N₂O emissions.
+        </div>
+
+        <!-- Input Form -->
+        <form id="analysisForm">
+            <!-- Location Information -->
+            <div class="card">
+                <h2>📍 Location Information</h2>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="latitude">Latitude *</label>
+                        <input type="number" id="latitude" step="0.0001" min="-90" max="90" required>
+                        <div class="help-text">Enter latitude (-90 to 90). Used to determine climate region.</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="longitude">Longitude *</label>
+                        <input type="number" id="longitude" step="0.0001" min="-180" max="180" required>
+                        <div class="help-text">Enter longitude (-180 to 180)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reservoir Characteristics -->
+            <div class="card">
+                <h2>🏞️ Reservoir Characteristics</h2>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="surfaceArea">Surface Area (km²) *</label>
+                        <input type="number" id="surfaceArea" step="0.01" min="0.01" required>
+                        <div class="help-text">Total surface area of the reservoir</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reservoirAge">Reservoir Age (years)</label>
+                        <input type="number" id="reservoirAge" step="0.1" min="0">
+                        <div class="help-text">Years since reservoir creation (optional)</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="meanDepth">Mean Depth (m)</label>
+                    <input type="number" id="meanDepth" step="0.1" min="0">
+                    <div class="help-text">Average depth of the reservoir (optional)</div>
+                </div>
+            </div>
+
+            <!-- Water Quality Data -->
+            <div class="card">
+                <h2>💧 Water Quality Data (Optional)</h2>
+                <p class="help-text" style="margin-bottom: 1rem;">
+                    Provide water quality parameters to automatically assess trophic status, which adjusts emission factors.
+                </p>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="totalPhosphorus">Total Phosphorus (mg/L)</label>
+                        <input type="number" id="totalPhosphorus" step="0.001" min="0">
+                        <div class="help-text">Total phosphorus concentration</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="totalNitrogen">Total Nitrogen (mg/L)</label>
+                        <input type="number" id="totalNitrogen" step="0.001" min="0">
+                        <div class="help-text">Total nitrogen concentration</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="chlorophyllA">Chlorophyll-a (μg/L)</label>
+                        <input type="number" id="chlorophyllA" step="0.1" min="0">
+                        <div class="help-text">Chlorophyll-a concentration</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="secchiDepth">Secchi Depth (m)</label>
+                        <input type="number" id="secchiDepth" step="0.1" min="0">
+                        <div class="help-text">Water transparency depth</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Emission Factors -->
+            <div class="card">
+                <h2>⚙️ Custom Emission Factors (Optional)</h2>
+                <p class="help-text" style="margin-bottom: 1rem;">
+                    Override default emission factors with your own values. If not provided, defaults based on climate region will be used.
+                </p>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="customCH4">CH₄ Emission Factor (kg/km²/yr)</label>
+                        <input type="number" id="customCH4" step="1000" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="customCO2">CO₂ Emission Factor (kg/km²/yr)</label>
+                        <input type="number" id="customCO2" step="1000" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="customN2O">N₂O Emission Factor (kg/km²/yr)</label>
+                        <input type="number" id="customN2O" step="1" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Options -->
+            <div class="card">
+                <h2>📊 Analysis Options</h2>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="runUncertainty" checked>
+                            <label for="runUncertainty" style="margin-bottom: 0;">Run Uncertainty Analysis</label>
+                        </div>
+                        <div class="help-text">Monte Carlo simulation to quantify uncertainty in emissions</div>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="runSensitivity" checked>
+                            <label for="runSensitivity" style="margin-bottom: 0;">Run Sensitivity Analysis</label>
+                        </div>
+                        <div class="help-text">Identify most influential parameters</div>
+                    </div>
+                </div>
+                <div class="form-group hidden" id="iterationsGroup">
+                    <label for="uncertaintyIterations">Monte Carlo Iterations</label>
+                    <input type="number" id="uncertaintyIterations" value="1000" min="100" max="10000" step="100">
+                    <div class="help-text">Number of iterations for uncertainty analysis (100-10,000)</div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
+                🚀 Run Analysis
+            </button>
+        </form>
+
+        <!-- Results Section -->
+        <div id="resultsContainer" class="results-container hidden">
+            <!-- Basic Information -->
+            <div class="card">
+                <h2>📋 Analysis Summary</h2>
+                <table class="table">
+                    <tr>
+                        <td><strong>Latitude:</strong></td>
+                        <td id="resLatitude"></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Longitude:</strong></td>
+                        <td id="resLongitude"></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Climate Region:</strong></td>
+                        <td><span class="badge badge-blue" id="resClimateRegion"></span></td>
+                    </tr>
+                    <tr id="trophicStatusRow" class="hidden">
+                        <td><strong>Trophic Status:</strong></td>
+                        <td><span class="badge badge-green" id="resTrophicStatus"></span></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Emission Factors -->
+            <div class="card">
+                <h2>📏 Emission Factors</h2>
+                <div class="grid-2">
+                    <table class="table">
+                        <tr>
+                            <td><strong>CH₄:</strong></td>
+                            <td><span id="efCH4"></span> kg/km²/yr</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CO₂:</strong></td>
+                            <td><span id="efCO2"></span> kg/km²/yr</td>
+                        </tr>
+                        <tr>
+                            <td><strong>N₂O:</strong></td>
+                            <td><span id="efN2O"></span> kg/km²/yr</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Total Emissions -->
+            <div class="card">
+                <h2>🌍 Total Annual Emissions</h2>
+                <div class="grid-4">
+                    <div class="metric-card">
+                        <div class="metric-label">Methane (CH₄)</div>
+                        <div class="metric-value" id="totalCH4">0</div>
+                        <div class="metric-unit">kg/year</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Carbon Dioxide (CO₂)</div>
+                        <div class="metric-value" id="totalCO2">0</div>
+                        <div class="metric-unit">kg/year</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Nitrous Oxide (N₂O)</div>
+                        <div class="metric-value" id="totalN2O">0</div>
+                        <div class="metric-unit">kg/year</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="metric-label">CO₂ Equivalent</div>
+                        <div class="metric-value" id="totalCO2eq">0</div>
+                        <div class="metric-unit">kg CO₂-eq/year</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Uncertainty Analysis Results -->
+            <div id="uncertaintyResults" class="card hidden">
+                <h2>📉 Uncertainty Analysis Results</h2>
+                <div class="alert alert-info">
+                    <strong>Note:</strong> These results show the range of possible emission values based on parameter uncertainties.
+                </div>
+                
+                <h3>CO₂ Equivalent Summary</h3>
+                <div class="grid-2">
+                    <div>
+                        <p><strong>Mean:</strong> <span id="uncMean"></span> kg CO₂-eq/yr</p>
+                        <p><strong>Standard Deviation:</strong> <span id="uncStd"></span> kg CO₂-eq/yr</p>
+                    </div>
+                    <div>
+                        <p><strong>Median:</strong> <span id="uncMedian"></span> kg CO₂-eq/yr</p>
+                        <p><strong>95% Confidence Interval:</strong> <span id="uncCI"></span> kg CO₂-eq/yr</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 1.5rem;">Detailed Statistics</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Gas</th>
+                            <th>Mean</th>
+                            <th>Std Dev</th>
+                            <th>Median</th>
+                            <th>CI Lower (2.5%)</th>
+                            <th>CI Upper (97.5%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="uncertaintyTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Sensitivity Analysis Results -->
+            <div id="sensitivityResults" class="card hidden">
+                <h2>🎯 Sensitivity Analysis Results</h2>
+                <div class="alert alert-info">
+                    <strong>Note:</strong> Parameters are ranked by their influence on total CO₂ equivalent emissions.
+                    Higher correlation values indicate greater influence.
+                </div>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Correlation</th>
+                            <th>Rank Correlation</th>
+                            <th>Relative Importance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sensitivityTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer style="margin-top: 3rem; padding: 2rem; text-align: center; background-color: var(--card-bg); border-top: 1px solid var(--border-color);">
+        <p style="color: var(--text-secondary);">
+            Reservoir GHG Emissions Tool v1.0.0 | IPCC Tier 1 Methodology
+        </p>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Developed for reservoir greenhouse gas emission analysis
+        </p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
