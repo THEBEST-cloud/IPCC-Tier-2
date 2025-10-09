@@ -262,6 +262,53 @@ async def profile_page(request: Request):
     """Serve profile page"""
     return templates.TemplateResponse("profile.html", {"request": request})
 
+@app.get("/api/user/profile")
+async def get_user_profile(token: str = Depends(verify_token), db: Session = Depends(get_db)):
+    """Get current user profile"""
+    user = db.query(models.User).filter(models.User.username == token).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "username": user.username,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "organization": user.organization,
+        "created_at": user.created_at
+    }
+
+@app.put("/api/user/profile")
+async def update_user_profile(
+    profile_data: dict,
+    token: str = Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """Update current user profile"""
+    user = db.query(models.User).filter(models.User.username == token).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # 更新允许的字段
+    if "first_name" in profile_data:
+        user.first_name = profile_data["first_name"]
+    if "last_name" in profile_data:
+        user.last_name = profile_data["last_name"]
+    if "organization" in profile_data:
+        user.organization = profile_data["organization"]
+    
+    db.commit()
+    db.refresh(user)
+    
+    return {
+        "username": user.username,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "organization": user.organization,
+        "created_at": user.created_at
+    }
+
 @app.get("/settings", response_class=HTMLResponse)
 async def settings_page(request: Request):
     """Serve user settings page"""
