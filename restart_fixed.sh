@@ -4,11 +4,11 @@ echo "🔄 重启修复后的服务..."
 
 # 停止现有容器
 echo "1. 停止现有容器..."
-docker-compose -f docker-compose.china.yml down 2>/dev/null || true
+docker compose -f docker compose.china.yml down 2>/dev/null || true
 
 # 重新构建并启动
 echo "2. 重新构建并启动服务..."
-docker-compose -f docker-compose.china.yml up --build -d
+docker compose -f docker compose.china.yml up --build -d
 
 # 等待服务启动
 echo "3. 等待服务启动..."
@@ -16,7 +16,7 @@ sleep 15
 
 # 检查状态
 echo "4. 检查服务状态..."
-if docker-compose -f docker-compose.china.yml ps | grep -q "Up"; then
+if docker compose -f docker compose.china.yml ps | grep -q "Up"; then
     echo ""
     echo "🎉 服务重启成功！"
     echo ""
@@ -47,5 +47,5 @@ else
     echo "❌ 服务启动失败"
     echo ""
     echo "📋 查看详细日志："
-    docker-compose -f docker-compose.china.yml logs web
+    docker compose -f docker compose.china.yml logs web
 fi
