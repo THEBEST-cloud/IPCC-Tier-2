@@ -1,4 +1,4 @@
-from passlib.context import CryptContext
+import bcrypt
 import jwt
 from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta
@@ -6,9 +6,6 @@ from typing import Optional
 import os
 from sqlalchemy.orm import Session
 from . import models, schemas
-
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 
 # JWT settings
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
@@ -20,14 +17,16 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     # bcrypt has a 72-byte limit, so truncate if necessary
     if len(plain_password.encode('utf-8')) > 72:
         plain_password = plain_password[:72]
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 def get_password_hash(password: str) -> str:
     """Hash a password"""
     # bcrypt has a 72-byte limit, so truncate if necessary
     if len(password.encode('utf-8')) > 72:
         password = password[:72]
-    return pwd_context.hash(password)
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create a JWT access token"""
