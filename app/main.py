@@ -13,7 +13,7 @@ import os
 import jwt
 from datetime import datetime, timedelta
 
-from . import models, schemas
+from . import models, schemas, auth
 from .database import engine, get_db
 from .ipcc_tier1 import (
     get_climate_region,
@@ -26,10 +26,7 @@ from .analysis import run_full_analysis
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 
-# JWT Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# JWT Configuration (moved to auth.py)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -295,43 +292,40 @@ async def results_page(request: Request, analysis_id: int):
 
 # User Authentication API
 @app.post("/api/auth/login")
-async def login(credentials: schemas.LoginRequest):
+async def login(credentials: schemas.LoginRequest, db: Session = Depends(get_db)):
     """User login"""
-    # Simple demo authentication
-    if credentials.username == "demo" and credentials.password == "demo123":
-        access_token = create_access_token(data={"sub": credentials.username})
-        return {"access_token": access_token, "token_type": "bearer"}
-    else:
+    user = auth.authenticate_user(db, credentials.username, credentials.password)
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password"
+            detail="用户名或密码错误"
         )
-
-@app.post("/api/auth/register")
-async def register(user_data: schemas.RegisterRequest):
-    """User registration"""
-    # Simple demo registration
-    access_token = create_access_token(data={"sub": user_data.username})
+    
+    access_token = auth.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
-def create_access_token(data: dict):
-    """Create JWT access token"""
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+@app.post("/api/auth/register")
+async def register(user_data: schemas.RegisterRequest, db: Session = Depends(get_db)):
+    """User registration"""
+    try:
+        user = auth.create_user(db, user_data)
+        access_token = auth.create_access_token(data={"sub": user.username})
+        return {"access_token": access_token, "token_type": "bearer"}
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """Verify JWT token"""
-    try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-        return username
-    except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    username = auth.verify_token(credentials.credentials)
+    if username is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials"
+        )
+    return username
 
 @app.get("/health")
 async def health_check():

@@ -565,18 +565,49 @@
                 return;
             }
             
-            // 模拟注册过程
+            // 调用真实的注册API
             showLoading();
             
-            setTimeout(() => {
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                first_name: document.getElementById('firstName').value,
+                last_name: document.getElementById('lastName').value,
+                organization: document.getElementById('organization').value || null
+            };
+            
+            fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
                 hideLoading();
-                showSuccess();
-                
-                // 3秒后跳转到登录页面
-                setTimeout(() => {
-                    window.location.href = '/login';
-                }, 3000);
-            }, 2000);
+                if (data.access_token) {
+                    // 保存token到localStorage
+                    localStorage.setItem('access_token', data.access_token);
+                    showSuccess();
+                    // 3秒后跳转到主页
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 3000);
+                } else {
+                    showError('注册失败，请重试');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Register error:', error);
+                if (error.message) {
+                    showError(error.message);
+                } else {
+                    showError('注册失败，请重试');
+                }
+            });
         });
 
         // 显示错误信息
