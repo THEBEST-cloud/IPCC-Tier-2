@@ -38,6 +38,17 @@ app = FastAPI(
 # Security
 security = HTTPBearer()
 
+# JWT Token verification function
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify JWT token"""
+    username = auth.verify_token(credentials.credentials)
+    if username is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials"
+        )
+    return username
+
 # Setup templates
 templates = Jinja2Templates(directory="/app/app/templates")
 
@@ -336,17 +347,6 @@ async def results_page(request: Request, analysis_id: int):
         "request": request, 
         "analysis_id": analysis_id
     })
-
-# JWT Token verification function
-def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    """Verify JWT token"""
-    username = auth.verify_token(credentials.credentials)
-    if username is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials"
-        )
-    return username
 
 # User Authentication API
 @app.post("/api/auth/login")
