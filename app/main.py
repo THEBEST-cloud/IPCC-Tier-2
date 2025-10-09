@@ -265,6 +265,11 @@ async def profile_page(request: Request):
     """Serve profile page"""
     return templates.TemplateResponse("profile.html", {"request": request})
 
+@app.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request):
+    """Serve user settings page"""
+    return templates.TemplateResponse("settings.html", {"request": request})
+
 @app.get("/projects", response_class=HTMLResponse)
 async def projects_page(request: Request):
     """Serve projects page"""

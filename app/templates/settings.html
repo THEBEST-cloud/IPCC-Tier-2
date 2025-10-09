@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户设置 - Reservoir Carbon Accounting</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <header class="header">
+            <div class="nav-container">
+                <div class="logo-section">
+                    <div class="logo"></div>
+                    <h1 class="app-title">Reservoir Carbon Accounting</h1>
+                </div>
+                <nav class="nav-links">
+                    <a href="/dashboard" class="nav-link">新建计算</a>
+                    <a href="/projects" class="nav-link">我的项目</a>
+                    <a href="/methodology" class="nav-link">方法学说明</a>
+                    <a href="/help" class="nav-link">帮助</a>
+                </nav>
+                <div class="user-section">
+                    <div class="user-dropdown">
+                        <div class="user-avatar" onclick="toggleUserDropdown()">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="dropdown-menu" id="userDropdown">
+                            <a href="/profile" class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                个人信息
+                            </a>
+                            <a href="/settings" class="dropdown-item active">
+                                <i class="fas fa-cog"></i>
+                                设置
+                            </a>
+                            <a href="/projects" class="dropdown-item">
+                                <i class="fas fa-folder"></i>
+                                我的项目
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="/login" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="settings-container">
+                <div class="settings-header">
+                    <h1 class="settings-title">
+                        <i class="fas fa-cog"></i>
+                        用户设置
+                    </h1>
+                    <p class="settings-subtitle">管理您的账户偏好和应用程序设置</p>
+                </div>
+
+                <div class="settings-content">
+                    <!-- 账户设置 -->
+                    <div class="settings-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-user-circle"></i>
+                                账户设置
+                            </h2>
+                        </div>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label for="username" class="form-label">用户名</label>
+                                <input type="text" id="username" class="form-input" value="demo" readonly>
+                                <small class="form-hint">用户名不可修改</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="form-label">邮箱地址</label>
+                                <input type="email" id="email" class="form-input" value="demo@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="fullName" class="form-label">姓名</label>
+                                <input type="text" id="fullName" class="form-input" value="演示用户">
+                            </div>
+                            <div class="form-group">
+                                <label for="organization" class="form-label">所属机构</label>
+                                <input type="text" id="organization" class="form-input" value="环境科学研究院">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 密码设置 -->
+                    <div class="settings-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-lock"></i>
+                                密码设置
+                            </h2>
+                        </div>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label for="currentPassword" class="form-label">当前密码</label>
+                                <div class="password-input-group">
+                                    <input type="password" id="currentPassword" class="form-input">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('currentPassword')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword" class="form-label">新密码</label>
+                                <div class="password-input-group">
+                                    <input type="password" id="newPassword" class="form-input">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('newPassword')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength" id="passwordStrength">
+                                    <div class="strength-bar"></div>
+                                    <span class="strength-text">密码强度：弱</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword" class="form-label">确认新密码</label>
+                                <div class="password-input-group">
+                                    <input type="password" id="confirmPassword" class="form-input">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 偏好设置 -->
+                    <div class="settings-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-sliders-h"></i>
+                                偏好设置
+                            </h2>
+                        </div>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label class="form-label">语言设置</label>
+                                <select class="form-select" id="language">
+                                    <option value="zh-CN" selected>简体中文</option>
+                                    <option value="en-US">English</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">时区设置</label>
+                                <select class="form-select" id="timezone">
+                                    <option value="Asia/Shanghai" selected>北京时间 (UTC+8)</option>
+                                    <option value="UTC">协调世界时 (UTC+0)</option>
+                                    <option value="America/New_York">美国东部时间 (UTC-5)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">默认分析设置</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="enableUncertainty" checked>
+                                        <span class="checkmark"></span>
+                                        默认启用不确定性分析
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="enableSensitivity" checked>
+                                        <span class="checkmark"></span>
+                                        默认启用敏感性分析
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="autoSave" checked>
+                                        <span class="checkmark"></span>
+                                        自动保存草稿
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 通知设置 -->
+                    <div class="settings-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-bell"></i>
+                                通知设置
+                            </h2>
+                        </div>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label class="form-label">邮件通知</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="emailAnalysisComplete" checked>
+                                        <span class="checkmark"></span>
+                                        分析完成时发送邮件通知
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="emailWeeklyReport">
+                                        <span class="checkmark"></span>
+                                        每周发送项目报告
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="emailSystemUpdate" checked>
+                                        <span class="checkmark"></span>
+                                        系统更新通知
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="settings-actions">
+                        <button type="button" class="btn btn-secondary" onclick="resetSettings()">
+                            <i class="fas fa-undo"></i>
+                            重置设置
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                            <i class="fas fa-save"></i>
+                            保存设置
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 密码显示/隐藏切换
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = field.nextElementSibling.querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // 密码强度检测
+        document.getElementById('newPassword').addEventListener('input', function() {
+            const password = this.value;
+            const strengthDiv = document.getElementById('passwordStrength');
+            const strengthBar = strengthDiv.querySelector('.strength-bar');
+            const strengthText = strengthDiv.querySelector('.strength-text');
+            
+            let strength = 0;
+            let strengthClass = '';
+            let strengthLabel = '';
+            
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            if (strength < 2) {
+                strengthClass = 'strength-weak';
+                strengthLabel = '密码强度：弱';
+            } else if (strength < 3) {
+                strengthClass = 'strength-medium';
+                strengthLabel = '密码强度：中等';
+            } else if (strength < 4) {
+                strengthClass = 'strength-strong';
+                strengthLabel = '密码强度：强';
+            } else {
+                strengthClass = 'strength-very-strong';
+                strengthLabel = '密码强度：很强';
+            }
+            
+            strengthBar.className = `strength-bar ${strengthClass}`;
+            strengthText.textContent = strengthLabel;
+        });
+
+        // 用户下拉菜单
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 点击外部关闭下拉菜单
+        window.onclick = function(event) {
+            if (!event.target.matches('.user-avatar') && !event.target.matches('.user-avatar i')) {
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        }
+
+        // 保存设置
+        function saveSettings() {
+            // 验证密码
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword && newPassword !== confirmPassword) {
+                alert('新密码和确认密码不匹配');
+                return;
+            }
+            
+            if (newPassword && !currentPassword) {
+                alert('请输入当前密码');
+                return;
+            }
+            
+            // 模拟保存过程
+            const saveBtn = document.querySelector('.btn-primary');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+            saveBtn.disabled = true;
+            
+            setTimeout(() => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+                alert('设置保存成功！');
+            }, 1500);
+        }
+
+        // 重置设置
+        function resetSettings() {
+            if (confirm('确定要重置所有设置到默认值吗？')) {
+                // 重置表单
+                document.getElementById('email').value = 'demo@example.com';
+                document.getElementById('fullName').value = '演示用户';
+                document.getElementById('organization').value = '环境科学研究院';
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                document.getElementById('language').value = 'zh-CN';
+                document.getElementById('timezone').value = 'Asia/Shanghai';
+                
+                // 重置复选框
+                document.getElementById('enableUncertainty').checked = true;
+                document.getElementById('enableSensitivity').checked = true;
+                document.getElementById('autoSave').checked = true;
+                document.getElementById('emailAnalysisComplete').checked = true;
+                document.getElementById('emailWeeklyReport').checked = false;
+                document.getElementById('emailSystemUpdate').checked = true;
+                
+                alert('设置已重置到默认值');
+            }
+        }
+    </script>
+
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .settings-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .settings-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .settings-subtitle {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .settings-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .settings-section {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            background: #f8fafc;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .settings-form {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input[readonly] {
+            background-color: #f9fafb;
+            color: #6b7280;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .form-hint {
+            display: block;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .password-input-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .password-strength {
+            margin-top: 0.5rem;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            margin-bottom: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .strength-bar.strength-weak {
+            width: 25%;
+            background: #ef4444;
+        }
+
+        .strength-bar.strength-medium {
+            width: 50%;
+            background: #f59e0b;
+        }
+
+        .strength-bar.strength-strong {
+            width: 75%;
+            background: #3b82f6;
+        }
+
+        .strength-bar.strength-very-strong {
+            width: 100%;
+            background: #10b981;
+        }
+
+        .strength-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 0.75rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+        }
+
+        .settings-actions {
+            padding: 2rem;
+            background: #f8fafc;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .settings-container {
+                padding: 1rem;
+            }
+            
+            .settings-title {
+                font-size: 2rem;
+            }
+            
+            .settings-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</body>
+</html>
