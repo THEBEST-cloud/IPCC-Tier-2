@@ -42,14 +42,19 @@ app = FastAPI(
 security = HTTPBearer()
 
 # Setup templates
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory="/app/app/templates")
 
 # Serve static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="/app/app/static"), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
+    """Redirect to login page"""
+    return RedirectResponse(url="/login")
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
     """Serve the main web interface"""
     return templates.TemplateResponse("index.html", {"request": request})
 
