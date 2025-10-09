@@ -1,5 +1,6 @@
 from passlib.context import CryptContext
-from jose import JWTError, jwt
+import jwt
+from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta
 from typing import Optional
 import os
@@ -42,7 +43,7 @@ def verify_token(token: str) -> Optional[str]:
         if username is None:
             return None
         return username
-    except JWTError:
+    except InvalidTokenError:
         return None
 
 def authenticate_user(db: Session, username: str, password: str) -> Optional[models.User]:
