@@ -35,7 +35,7 @@ cd /path/to/this/directory
 ```
 
 ### Step 3: Access the Application
-Open your browser: **http://localhost:8000**
+Open your browser: **http://localhost:8080**
 
 ## 📚 Documentation Files
 
@@ -92,9 +92,9 @@ docker-compose stop
 
 ## 🌐 Access Points
 
-- **Web Interface**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
-- **API Endpoint**: http://localhost:8000/api/analyze
+- **Web Interface**: http://localhost:8080
+- **API Documentation**: http://localhost:8080/docs
+- **API Endpoint**: http://localhost:8080/api/analyze
 
 ## 📁 Project Structure
 
@@ -182,10 +182,10 @@ docker-compose down
 docker-compose up --build -d
 ```
 
-### Port 8000 in use?
+### Port 8080 in use?
 ```bash
 # Find process
-sudo lsof -i :8000
+sudo lsof -i :8080
 
 # Or change port in docker-compose.yml
 ```
@@ -247,7 +247,7 @@ Plus uncertainty ranges and sensitivity rankings!
 
 ### Using curl:
 ```bash
-curl -X POST http://localhost:8000/api/analyze \
+curl -X POST http://localhost:8080/api/analyze \
   -H "Content-Type: application/json" \
   -d @example_request.json
 ```
@@ -257,7 +257,7 @@ curl -X POST http://localhost:8000/api/analyze \
 import requests
 
 response = requests.post(
-    'http://localhost:8000/api/analyze',
+    'http://localhost:8080/api/analyze',
     json={
         'latitude': 45.5,
         'longitude': -73.5,
@@ -280,7 +280,7 @@ Your reservoir GHG emissions tool is ready to use.
 ./start.sh
 ```
 
-Then open: **http://localhost:8000**
+Then open: **http://localhost:8080**
 
 ## 📧 Need Help?
 
@@ -308,8 +308,8 @@ Then open: **http://localhost:8000**
 | Stop | `docker-compose stop` |
 | Logs | `docker-compose logs -f` |
 | Test | `./test_api.sh` |
-| Web UI | http://localhost:8000 |
-| API Docs | http://localhost:8000/docs |
+| Web UI | http://localhost:8080 |
+| API Docs | http://localhost:8080/docs |
 | Help | Read USER_GUIDE.md |
 
 **Happy Analyzing! 🌊📊**

@@ -87,9 +87,9 @@ docker-compose up --build -d
 
 ### Step 4: Verify Installation
 
-1. Open browser and navigate to: `http://localhost:8000`
+1. Open browser and navigate to: `http://localhost:8080`
 2. You should see the application interface
-3. Check API documentation at: `http://localhost:8000/docs`
+3. Check API documentation at: `http://localhost:8080/docs`
 
 ## Using the Web Interface
 
@@ -253,7 +253,7 @@ Override default emission factors with site-specific values:
 
 ### Base URL
 ```
-http://localhost:8000/api
+http://localhost:8080/api
 ```
 
 ### Endpoints
@@ -322,7 +322,7 @@ data = {
 
 # Send request
 response = requests.post(
-    "http://localhost:8000/api/analyze",
+    "http://localhost:8080/api/analyze",
     json=data
 )
 
