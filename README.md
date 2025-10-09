@@ -44,7 +44,7 @@ Trophic status adjusts emission factors accordingly.
 ### Prerequisites
 - Docker and Docker Compose installed on Ubuntu 22.04
 - At least 512MB RAM available
-- Port 8000 available
+- Port 8080 available
 
 ### Installation and Launch
 
@@ -68,7 +68,7 @@ Trophic status adjusts emission factors accordingly.
 5. **Access the application:**
    Open your web browser and navigate to:
    ```
-   http://localhost:8000
+   http://localhost:8080
    ```
 
 ### Launch Commands
@@ -198,7 +198,7 @@ GET /health
 ### API Documentation (Swagger)
 Once the application is running, access interactive API documentation at:
 ```
-http://localhost:8000/docs
+http://localhost:8080/docs
 ```
 
 ## 📁 Project Structure
@@ -260,8 +260,8 @@ Default emission factors by climate region (kg/km²/yr):
 
 ### Container won't start
 ```bash
-# Check if port 8000 is in use
-sudo lsof -i :8000
+# Check if port 8080 is in use
+sudo lsof -i :8080
 
 # View container logs
 docker-compose logs -f
