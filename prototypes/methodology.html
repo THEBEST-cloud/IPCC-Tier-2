@@ -166,53 +166,7 @@
             margin: 0 auto;
         }
 
-        /* 目录导航 */
-        .toc-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            position: sticky;
-            top: 90px;
-        }
-
-        .toc-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 1rem;
-        }
-
-        .toc-list {
-            list-style: none;
-        }
-
-        .toc-item {
-            margin-bottom: 0.5rem;
-        }
-
-        .toc-link {
-            color: #3b82f6;
-            text-decoration: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            display: block;
-            transition: all 0.3s ease;
-        }
-
-        .toc-link:hover {
-            background: #f1f5f9;
-            color: #1d4ed8;
-        }
-
         /* 内容区域 */
-        .content-container {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 2rem;
-        }
-
         .main-content-area {
             background: white;
             border-radius: 12px;
@@ -365,15 +319,6 @@
         }
 
         /* 响应式设计 */
-        @media (max-width: 1024px) {
-            .content-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .toc-container {
-                position: static;
-            }
-        }
 
         @media (max-width: 768px) {
             .nav-container {
@@ -428,46 +373,31 @@
             <p class="page-subtitle">基于政府间气候变化专门委员会第一层级方法的水库温室气体排放计算指南</p>
         </div>
 
-        <div class="content-container">
-            <!-- 目录导航 -->
-            <div class="toc-container">
-                <h3 class="toc-title">目录</h3>
-                <ul class="toc-list">
-                    <li class="toc-item"><a href="#overview" class="toc-link">1. 方法学概述</a></li>
-                    <li class="toc-item"><a href="#scope" class="toc-link">2. 适用范围</a></li>
-                    <li class="toc-item"><a href="#parameters" class="toc-link">3. 关键参数</a></li>
-                    <li class="toc-item"><a href="#calculation" class="toc-link">4. 计算方法</a></li>
-                    <li class="toc-item"><a href="#uncertainty" class="toc-link">5. 不确定性分析</a></li>
-                    <li class="toc-item"><a href="#quality" class="toc-link">6. 数据质量要求</a></li>
-                    <li class="toc-item"><a href="#references" class="toc-link">7. 参考文献</a></li>
-                </ul>
-            </div>
-
-            <!-- 主要内容 -->
-            <div class="main-content-area">
-                <!-- 1. 方法学概述 -->
-                <section id="overview" class="content-section">
-                    <h2 class="section-title">1. 方法学概述</h2>
+        <!-- 主要内容 -->
+        <div class="main-content-area">
+                <!-- 方法学概述 -->
+                <section class="content-section">
+                    <h2 class="section-title">方法学概述</h2>
                     <div class="section-content">
-                        <p>IPCC Tier 1 方法是政府间气候变化专门委员会（IPCC）推荐的最基础、最简化的温室气体排放计算方法。该方法适用于缺乏详细监测数据的情况，通过使用默认参数和简化的计算公式来估算水库的温室气体排放。</p>
+                        <p>IPCC Tier 1 方法是政府间气候变化专门委员会（IPCC）推荐的最基础、最简化的温室气体排放计算方法。该方法通过使用默认参数和简化的计算公式来估算水库的温室气体排放，特别适用于缺乏详细监测数据的情况。</p>
                         
                         <div class="highlight-box">
-                            <div class="highlight-title">方法特点</div>
+                            <div class="highlight-title">核心特点</div>
                             <ul>
-                                <li>使用默认排放因子和参数</li>
-                                <li>计算过程简单，易于实施</li>
+                                <li>使用经过验证的默认排放因子和参数</li>
+                                <li>计算过程简单，易于实施和验证</li>
                                 <li>适用于大尺度、快速评估</li>
-                                <li>数据要求相对较低</li>
+                                <li>数据要求相对较低，成本效益高</li>
                             </ul>
                         </div>
 
-                        <p>本系统基于 IPCC 2019 年修订的《2006年IPCC国家温室气体清单指南》中关于内陆水域温室气体排放的相关章节，专门针对水库环境进行了优化和调整。</p>
+                        <p>本系统基于 IPCC 2019 年修订的《2006年IPCC国家温室气体清单指南》中关于内陆水域温室气体排放的相关章节，专门针对水库环境进行了优化和调整，确保计算结果的科学性和准确性。</p>
                     </div>
                 </section>
 
-                <!-- 2. 适用范围 -->
-                <section id="scope" class="content-section">
-                    <h2 class="section-title">2. 适用范围</h2>
+                <!-- 适用范围 -->
+                <section class="content-section">
+                    <h2 class="section-title">适用范围</h2>
                     <div class="section-content">
                         <p>IPCC Tier 1 方法适用于以下情况：</p>
                         
@@ -489,9 +419,9 @@
                     </div>
                 </section>
 
-                <!-- 3. 关键参数 -->
-                <section id="parameters" class="content-section">
-                    <h2 class="section-title">3. 关键参数</h2>
+                <!-- 关键参数 -->
+                <section class="content-section">
+                    <h2 class="section-title">关键参数</h2>
                     <div class="section-content">
                         <p>IPCC Tier 1 方法主要依赖以下关键参数：</p>
 
@@ -539,11 +469,11 @@
                     </div>
                 </section>
 
-                <!-- 4. 计算方法 -->
-                <section id="calculation" class="content-section">
-                    <h2 class="section-title">4. 计算方法</h2>
+                <!-- 计算方法 -->
+                <section class="content-section">
+                    <h2 class="section-title">计算方法</h2>
                     <div class="section-content">
-                        <h3 class="section-subtitle">4.1 甲烷排放 (CH₄)</h3>
+                        <h3 class="section-subtitle">甲烷排放 (CH₄)</h3>
                         <p>甲烷是水库温室气体排放的主要成分，其计算基于以下公式：</p>
                         
                         <div class="formula">
@@ -558,21 +488,21 @@
                             <li><strong>f_temp</strong>：温度修正因子</li>
                         </ul>
 
-                        <h3 class="section-subtitle">4.2 二氧化碳排放 (CO₂)</h3>
+                        <h3 class="section-subtitle">二氧化碳排放 (CO₂)</h3>
                         <p>二氧化碳排放主要来源于有机碳的分解：</p>
                         
                         <div class="formula">
                             CO₂ = A × EF_CO₂ × f_nutrient
                         </div>
 
-                        <h3 class="section-subtitle">4.3 氧化亚氮排放 (N₂O)</h3>
+                        <h3 class="section-subtitle">氧化亚氮排放 (N₂O)</h3>
                         <p>氧化亚氮排放与氮循环过程相关：</p>
                         
                         <div class="formula">
                             N₂O = A × EF_N₂O × f_nitrogen
                         </div>
 
-                        <h3 class="section-subtitle">4.4 总排放量</h3>
+                        <h3 class="section-subtitle">总排放量计算</h3>
                         <p>将各气体排放量转换为 CO₂ 当量：</p>
                         
                         <div class="formula">
@@ -583,9 +513,9 @@
                     </div>
                 </section>
 
-                <!-- 5. 不确定性分析 -->
-                <section id="uncertainty" class="content-section">
-                    <h2 class="section-title">5. 不确定性分析</h2>
+                <!-- 不确定性分析 -->
+                <section class="content-section">
+                    <h2 class="section-title">不确定性分析</h2>
                     <div class="section-content">
                         <p>IPCC Tier 1 方法的不确定性主要来源于以下几个方面：</p>
 
@@ -628,11 +558,11 @@
                     </div>
                 </section>
 
-                <!-- 6. 数据质量要求 -->
-                <section id="quality" class="content-section">
-                    <h2 class="section-title">6. 数据质量要求</h2>
+                <!-- 数据质量要求 -->
+                <section class="content-section">
+                    <h2 class="section-title">数据质量要求</h2>
                     <div class="section-content">
-                        <h3 class="section-subtitle">6.1 数据来源优先级</h3>
+                        <h3 class="section-subtitle">数据来源优先级</h3>
                         <ol>
                             <li><strong>现场监测数据</strong>：最准确，但成本高</li>
                             <li><strong>卫星遥感数据</strong>：中等精度，覆盖范围大</li>
@@ -640,7 +570,7 @@
                             <li><strong>默认参数</strong>：精度最低，但简单易用</li>
                         </ol>
 
-                        <h3 class="section-subtitle">6.2 数据质量控制</h3>
+                        <h3 class="section-subtitle">数据质量控制</h3>
                         <ul>
                             <li>所有输入数据应进行合理性检查</li>
                             <li>异常值应进行标记和说明</li>
@@ -650,9 +580,9 @@
                     </div>
                 </section>
 
-                <!-- 7. 参考文献 -->
-                <section id="references" class="content-section">
-                    <h2 class="section-title">7. 参考文献</h2>
+                <!-- 参考文献 -->
+                <section class="content-section">
+                    <h2 class="section-title">参考文献</h2>
                     <div class="section-content">
                         <div class="reference">
                             <p><strong>主要参考文献：</strong></p>
@@ -666,44 +596,5 @@
             </div>
         </div>
     </main>
-
-    <script>
-        // 平滑滚动到锚点
-        document.querySelectorAll('.toc-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // 高亮当前查看的章节
-        window.addEventListener('scroll', function() {
-            const sections = document.querySelectorAll('.content-section');
-            const navLinks = document.querySelectorAll('.toc-link');
-            
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.clientHeight;
-                if (window.pageYOffset >= sectionTop - 200) {
-                    current = section.getAttribute('id');
-                }
-            });
-
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === '#' + current) {
-                    link.classList.add('active');
-                }
-            });
-        });
-    </script>
 </body>
 </html>
