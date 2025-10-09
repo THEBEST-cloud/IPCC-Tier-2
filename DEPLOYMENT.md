@@ -66,8 +66,8 @@ docker ps
    ```
 
 4. **Access application:**
-   - Web Interface: http://localhost:8000
-   - API Docs: http://localhost:8000/docs
+   - Web Interface: http://localhost:8080
+   - API Docs: http://localhost:8080/docs
 
 ### Option 2: Manual Deployment
 
@@ -105,7 +105,7 @@ docker ps
 
 ### 1. Test Health Endpoint
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8080/health
 ```
 
 Expected response:
@@ -120,7 +120,7 @@ chmod +x test_api.sh
 ```
 
 ### 3. Access Web Interface
-Open browser and navigate to: http://localhost:8000
+Open browser and navigate to: http://localhost:8080
 
 ## Container Management
 
@@ -233,12 +233,12 @@ docker-compose start
 
 ### Change Port
 
-Edit `docker-compose.yml`:
+The port is currently set to 8080. To change to a different port, edit `docker-compose.yml`:
 ```yaml
 services:
   web:
     ports:
-      - "8080:8000"  # Changed from 8000:8000
+      - "9000:8000"  # Change host port (left side) to desired port
 ```
 
 Then restart:
@@ -247,14 +247,14 @@ docker-compose down
 docker-compose up -d
 ```
 
-Access at: http://localhost:8080
+Access at the new port: http://localhost:9000
 
 ### Firewall Configuration
 
 If using UFW:
 ```bash
-# Allow port 8000
-sudo ufw allow 8000/tcp
+# Allow port 8080
+sudo ufw allow 8080/tcp
 
 # Check status
 sudo ufw status
@@ -267,17 +267,17 @@ To allow remote access (be careful with security!):
 1. **Modify docker-compose.yml** - bind to all interfaces:
    ```yaml
    ports:
-     - "0.0.0.0:8000:8000"
+     - "0.0.0.0:8080:8000"
    ```
 
 2. **Configure firewall:**
    ```bash
-   sudo ufw allow 8000/tcp
+   sudo ufw allow 8080/tcp
    ```
 
 3. **Access from remote:**
    ```
-   http://<server-ip>:8000
+   http://<server-ip>:8080
    ```
 
 **Security Warning:** Only expose to trusted networks. Consider using NGINX reverse proxy with HTTPS for production deployments.
@@ -299,7 +299,7 @@ server {
     server_name your-domain.com;
 
     location / {
-        proxy_pass http://localhost:8000;
+        proxy_pass http://localhost:8080;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
@@ -359,10 +359,10 @@ Add line:
 ### Check Application Health
 ```bash
 # Using curl
-curl http://localhost:8000/health
+curl http://localhost:8080/health
 
 # Using watch for continuous monitoring
-watch -n 5 'curl -s http://localhost:8000/health | python3 -m json.tool'
+watch -n 5 'curl -s http://localhost:8080/health | python3 -m json.tool'
 ```
 
 ### Monitor Container
@@ -388,7 +388,7 @@ docker inspect reservoir-emissions-tool
 
 2. **Check port availability:**
    ```bash
-   sudo lsof -i :8000
+   sudo lsof -i :8080
    ```
 
 3. **Check Docker service:**

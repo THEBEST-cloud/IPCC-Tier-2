@@ -32,7 +32,7 @@ docker-compose up --build -d
 
 Open your web browser and go to:
 ```
-http://localhost:8000
+http://localhost:8080
 ```
 
 ## 📝 Example Usage
@@ -102,8 +102,8 @@ docker-compose down
 
 ### Port Already in Use
 ```bash
-# Find what's using port 8000
-sudo lsof -i :8000
+# Find what's using port 8080
+sudo lsof -i :8080
 
 # Kill the process or change port in docker-compose.yml
 ```
@@ -131,7 +131,7 @@ chmod -R 755 data/
 
 ```bash
 # Analyze a reservoir
-curl -X POST http://localhost:8000/api/analyze \
+curl -X POST http://localhost:8080/api/analyze \
   -H "Content-Type: application/json" \
   -d '{
     "latitude": 45.5,
@@ -142,10 +142,10 @@ curl -X POST http://localhost:8000/api/analyze \
   }'
 
 # Get all analyses
-curl http://localhost:8000/api/analyses
+curl http://localhost:8080/api/analyses
 
 # Health check
-curl http://localhost:8000/health
+curl http://localhost:8080/health
 ```
 
 ### Using Python
@@ -155,7 +155,7 @@ import requests
 
 # Analyze reservoir
 response = requests.post(
-    'http://localhost:8000/api/analyze',
+    'http://localhost:8080/api/analyze',
     json={
         'latitude': 45.5,
         'longitude': -73.5,
@@ -194,7 +194,7 @@ print(f"Total CO2 equivalent: {results['emissions']['co2_equivalent']} kg/yr")
 ## 📖 Next Steps
 
 - Read the full [README.md](README.md) for detailed documentation
-- Explore the API at http://localhost:8000/docs
+- Explore the API at http://localhost:8080/docs
 - Experiment with different parameter combinations
 - Export results for further analysis
 

@@ -38,7 +38,7 @@ The Reservoir GHG Emissions Tool is a scientific software application designed t
 - **Disk Space:** 500 MB
 - **Docker:** Version 20.10 or higher
 - **Docker Compose:** Version 1.29 or higher
-- **Network:** Port 8000 available
+- **Network:** Port 8080 available
 
 ### Recommended Requirements
 - **RAM:** 2 GB available
@@ -87,9 +87,9 @@ docker-compose up --build -d
 
 ### Step 4: Verify Installation
 
-1. Open browser and navigate to: `http://localhost:8000`
+1. Open browser and navigate to: `http://localhost:8080`
 2. You should see the application interface
-3. Check API documentation at: `http://localhost:8000/docs`
+3. Check API documentation at: `http://localhost:8080/docs`
 
 ## Using the Web Interface
 
@@ -253,7 +253,7 @@ Override default emission factors with site-specific values:
 
 ### Base URL
 ```
-http://localhost:8000/api
+http://localhost:8080/api
 ```
 
 ### Endpoints
@@ -322,7 +322,7 @@ data = {
 
 # Send request
 response = requests.post(
-    "http://localhost:8000/api/analyze",
+    "http://localhost:8080/api/analyze",
     json=data
 )
 
@@ -454,17 +454,17 @@ docker-compose down
 docker-compose up --build -d
 ```
 
-**Port 8000 Already in Use**
+**Port 8080 Already in Use**
 ```bash
 # Find what's using the port
-sudo lsof -i :8000
+sudo lsof -i :8080
 
 # Option 1: Kill the process
 sudo kill -9 <PID>
 
 # Option 2: Change port in docker-compose.yml
-# Change "8000:8000" to "8080:8000"
-# Then access at http://localhost:8080
+# Change "8080:8000" to "9000:8000"
+# Then access at http://localhost:9000
 ```
 
 **Database Errors**
