@@ -2,13 +2,16 @@
 Main FastAPI application for Reservoir Emissions Tool
 """
 
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import FastAPI, Depends, HTTPException, Request, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 import os
+import jwt
+from datetime import datetime, timedelta
 
 from . import models, schemas
 from .database import engine, get_db
@@ -23,12 +26,20 @@ from .analysis import run_full_analysis
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 
+# JWT Configuration
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 # Initialize FastAPI app
 app = FastAPI(
-    title="Reservoir GHG Emissions Tool",
-    description="IPCC Tier 1 Methodology for Reservoir Greenhouse Gas Emissions with Uncertainty and Sensitivity Analysis",
+    title="Reservoir Carbon Accounting",
+    description="水库碳核算系统 - IPCC Tier 1 Methodology for Reservoir Greenhouse Gas Emissions",
     version="1.0.0"
 )
+
+# Security
+security = HTTPBearer()
 
 # Setup templates
 templates = Jinja2Templates(directory="app/templates")
@@ -232,6 +243,85 @@ async def get_climate_info(latitude: float):
     climate_region = get_climate_region(latitude)
     return {"latitude": latitude, "climate_region": climate_region}
 
+
+# User Authentication Routes
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """Serve login page"""
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    """Serve register page"""
+    return templates.TemplateResponse("register.html", {"request": request})
+
+@app.get("/profile", response_class=HTMLResponse)
+async def profile_page(request: Request):
+    """Serve profile page"""
+    return templates.TemplateResponse("profile.html", {"request": request})
+
+@app.get("/projects", response_class=HTMLResponse)
+async def projects_page(request: Request):
+    """Serve projects page"""
+    return templates.TemplateResponse("my-projects.html", {"request": request})
+
+@app.get("/methodology", response_class=HTMLResponse)
+async def methodology_page(request: Request):
+    """Serve methodology page"""
+    return templates.TemplateResponse("methodology.html", {"request": request})
+
+@app.get("/help", response_class=HTMLResponse)
+async def help_page(request: Request):
+    """Serve help page"""
+    return templates.TemplateResponse("help.html", {"request": request})
+
+@app.get("/results/{analysis_id}", response_class=HTMLResponse)
+async def results_page(request: Request, analysis_id: int):
+    """Serve results page"""
+    return templates.TemplateResponse("results.html", {
+        "request": request, 
+        "analysis_id": analysis_id
+    })
+
+# User Authentication API
+@app.post("/api/auth/login")
+async def login(credentials: schemas.LoginRequest):
+    """User login"""
+    # Simple demo authentication
+    if credentials.username == "demo" and credentials.password == "demo123":
+        access_token = create_access_token(data={"sub": credentials.username})
+        return {"access_token": access_token, "token_type": "bearer"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password"
+        )
+
+@app.post("/api/auth/register")
+async def register(user_data: schemas.RegisterRequest):
+    """User registration"""
+    # Simple demo registration
+    access_token = create_access_token(data={"sub": user_data.username})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+def create_access_token(data: dict):
+    """Create JWT access token"""
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify JWT token"""
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        return username
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
 @app.get("/health")
 async def health_check():

@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人信息 - Reservoir Carbon Accounting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        /* 导航栏样式 */
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+            color: white;
+            padding: 0 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #10b981, #059669);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            top: 12px;
+            left: 12px;
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 用户下拉菜单 */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .dropdown-item.active {
+            background: #e0f2fe;
+            color: #0c4a6e;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-top: 70px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .breadcrumb {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #1d4ed8;
+        }
+
+        /* 内容布局 */
+        .profile-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        /* 侧边栏 */
+        .profile-sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+
+        .profile-avatar {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .avatar-large {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .avatar-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid white;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-upload:hover {
+            background: #059669;
+            transform: scale(1.1);
+        }
+
+        .user-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-role {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-link:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .menu-link.active {
+            background: #e0f2fe;
+            color: #0c4a6e;
+        }
+
+        /* 主内容区域 */
+        .profile-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .content-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .content-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .content-body {
+            padding: 2rem;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8fafc;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* 密码修改区域 */
+        .password-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: 1rem 0;
+            }
+
+            .nav-links {
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-sidebar {
+                position: static;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo"></div>
+                <h1 class="app-title">Reservoir Carbon Accounting</h1>
+            </div>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">新建计算</a>
+                <a href="my-projects.html" class="nav-link">我的项目</a>
+                <a href="methodology.html" class="nav-link">方法学说明</a>
+                <a href="help.html" class="nav-link">帮助</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserDropdown()">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item active">
+                            <i class="fas fa-user-circle"></i>
+                            个人信息
+                        </a>
+                        <a href="my-projects.html" class="dropdown-item">
+                            <i class="fas fa-folder"></i>
+                            我的项目
+                        </a>
+                        <a href="settings.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            设置
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="login.html" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">个人信息</h1>
+                <div class="breadcrumb">
+                    <a href="index.html">首页</a> / 个人信息
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-container">
+            <!-- 侧边栏 -->
+            <div class="profile-sidebar">
+                <div class="profile-avatar">
+                    <div class="avatar-large">
+                        <i class="fas fa-user"></i>
+                        <div class="avatar-upload" onclick="uploadAvatar()">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <div class="user-name">张三</div>
+                    <div class="user-role">环境科学家</div>
+                </div>
+
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">项目数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">已完成</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">156</div>
+                        <div class="stat-label">总计算</div>
+                    </div>
+                </div>
+
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="#basic-info" class="menu-link active" onclick="showSection('basic-info')">
+                            <i class="fas fa-user"></i>
+                            基本信息
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#contact-info" class="menu-link" onclick="showSection('contact-info')">
+                            <i class="fas fa-envelope"></i>
+                            联系信息
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#security" class="menu-link" onclick="showSection('security')">
+                            <i class="fas fa-shield-alt"></i>
+                            安全设置
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#preferences" class="menu-link" onclick="showSection('preferences')">
+                            <i class="fas fa-cog"></i>
+                            偏好设置
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 主内容 -->
+            <div class="profile-content">
+                <!-- 基本信息 -->
+                <div id="basic-info" class="content-section">
+                    <div class="content-header">
+                        <h2 class="content-title">基本信息</h2>
+                    </div>
+                    <div class="content-body">
+                        <form id="basicInfoForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName" class="form-label">姓</label>
+                                    <input type="text" id="firstName" class="form-input" value="三">
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName" class="form-label">名</label>
+                                    <input type="text" id="lastName" class="form-input" value="张">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="username" class="form-label">用户名</label>
+                                <input type="text" id="username" class="form-input" value="zhangsan" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="displayName" class="form-label">显示名称</label>
+                                <input type="text" id="displayName" class="form-input" value="张三">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="bio" class="form-label">个人简介</label>
+                                <textarea id="bio" class="form-input form-textarea" placeholder="介绍一下自己...">专注于水库温室气体排放研究，具有10年环境科学经验。</textarea>
+                            </div>
+
+                            <div class="button-group">
+                                <button type="button" class="btn btn-secondary">取消</button>
+                                <button type="submit" class="btn btn-primary">保存更改</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 联系信息 -->
+                <div id="contact-info" class="content-section" style="display: none;">
+                    <div class="content-header">
+                        <h2 class="content-title">联系信息</h2>
+                    </div>
+                    <div class="content-body">
+                        <form id="contactInfoForm">
+                            <div class="form-group">
+                                <label for="email" class="form-label">邮箱地址</label>
+                                <input type="email" id="email" class="form-input" value="zhangsan@example.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone" class="form-label">手机号码</label>
+                                <input type="tel" id="phone" class="form-input" value="13800138000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="organization" class="form-label">所属机构</label>
+                                <input type="text" id="organization" class="form-input" value="中国环境科学研究院">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="department" class="form-label">部门</label>
+                                <input type="text" id="department" class="form-input" value="水环境研究所">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="position" class="form-label">职位</label>
+                                <input type="text" id="position" class="form-input" value="高级研究员">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="address" class="form-label">地址</label>
+                                <textarea id="address" class="form-input form-textarea" placeholder="请输入详细地址">北京市朝阳区安外大羊坊8号</textarea>
+                            </div>
+
+                            <div class="button-group">
+                                <button type="button" class="btn btn-secondary">取消</button>
+                                <button type="submit" class="btn btn-primary">保存更改</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 安全设置 -->
+                <div id="security" class="content-section" style="display: none;">
+                    <div class="content-header">
+                        <h2 class="content-title">安全设置</h2>
+                    </div>
+                    <div class="content-body">
+                        <div class="password-section">
+                            <h3 class="section-title">修改密码</h3>
+                            <form id="passwordForm">
+                                <div class="form-group">
+                                    <label for="currentPassword" class="form-label">当前密码</label>
+                                    <input type="password" id="currentPassword" class="form-input" placeholder="请输入当前密码">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="newPassword" class="form-label">新密码</label>
+                                    <input type="password" id="newPassword" class="form-input" placeholder="请输入新密码">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="confirmPassword" class="form-label">确认新密码</label>
+                                    <input type="password" id="confirmPassword" class="form-input" placeholder="请再次输入新密码">
+                                </div>
+
+                                <div class="button-group">
+                                    <button type="submit" class="btn btn-primary">修改密码</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="password-section">
+                            <h3 class="section-title">两步验证</h3>
+                            <p style="color: #64748b; margin-bottom: 1rem;">为您的账户添加额外的安全保护</p>
+                            <div class="button-group">
+                                <button type="button" class="btn btn-primary">启用两步验证</button>
+                            </div>
+                        </div>
+
+                        <div class="password-section">
+                            <h3 class="section-title">登录设备</h3>
+                            <p style="color: #64748b; margin-bottom: 1rem;">管理您的登录设备</p>
+                            <div class="button-group">
+                                <button type="button" class="btn btn-secondary">查看设备</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 偏好设置 -->
+                <div id="preferences" class="content-section" style="display: none;">
+                    <div class="content-header">
+                        <h2 class="content-title">偏好设置</h2>
+                    </div>
+                    <div class="content-body">
+                        <form id="preferencesForm">
+                            <div class="form-group">
+                                <label for="language" class="form-label">语言</label>
+                                <select id="language" class="form-input form-select">
+                                    <option value="zh-CN" selected>简体中文</option>
+                                    <option value="en-US">English</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="timezone" class="form-label">时区</label>
+                                <select id="timezone" class="form-input form-select">
+                                    <option value="Asia/Shanghai" selected>北京时间 (UTC+8)</option>
+                                    <option value="UTC">协调世界时 (UTC)</option>
+                                    <option value="America/New_York">纽约时间 (UTC-5)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="units" class="form-label">单位制</label>
+                                <select id="units" class="form-input form-select">
+                                    <option value="metric" selected>公制 (米、千克、升)</option>
+                                    <option value="imperial">英制 (英尺、磅、加仑)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="notifications" class="form-label">通知设置</label>
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" checked> 邮件通知
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" checked> 项目更新通知
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox"> 营销邮件
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="button-group">
+                                <button type="button" class="btn btn-secondary">取消</button>
+                                <button type="submit" class="btn btn-primary">保存设置</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 用户下拉菜单功能
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const avatar = document.querySelector('.user-avatar');
+            
+            if (!avatar.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // 显示指定部分
+        function showSection(sectionId) {
+            // 隐藏所有内容部分
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // 显示选中的部分
+            document.getElementById(sectionId).style.display = 'block';
+
+            // 更新菜单状态
+            const menuLinks = document.querySelectorAll('.menu-link');
+            menuLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // 头像上传
+        function uploadAvatar() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // 这里应该上传文件到服务器
+                    alert('头像上传功能正在开发中');
+                }
+            };
+            input.click();
+        }
+
+        // 表单提交处理
+        document.getElementById('basicInfoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('基本信息已保存');
+        });
+
+        document.getElementById('contactInfoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('联系信息已保存');
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                alert('两次输入的密码不一致');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                alert('新密码长度至少8位');
+                return;
+            }
+
+            alert('密码修改成功');
+            document.getElementById('passwordForm').reset();
+        });
+
+        document.getElementById('preferencesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('偏好设置已保存');
+        });
+    </script>
+</body>
+</html>

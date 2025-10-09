@@ -7,7 +7,16 @@ services:
       - "8080:8000"
     volumes:
       - ./data:/app/data
+      - ./app/static:/app/app/static
     environment:
       - DATABASE_URL=sqlite:///./data/reservoir_emissions.db
+      - SECRET_KEY=your-secret-key-change-in-production
+      - PYTHONPATH=/app
     restart: unless-stopped
-    container_name: reservoir-emissions-tool
+    container_name: reservoir-carbon-accounting
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

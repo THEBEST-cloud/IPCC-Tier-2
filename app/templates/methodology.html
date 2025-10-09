@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方法学说明 - Reservoir Carbon Accounting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        /* 导航栏样式 */
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+            color: white;
+            padding: 0 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #10b981, #059669);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            top: 12px;
+            left: 12px;
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 用户下拉菜单 */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-top: 70px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 内容区域 */
+        .main-content-area {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .content-section {
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .content-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        .section-subtitle {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #374151;
+            margin: 2rem 0 1rem 0;
+        }
+
+        .section-content {
+            color: #4b5563;
+            line-height: 1.8;
+        }
+
+        .section-content p {
+            margin-bottom: 1rem;
+        }
+
+        .section-content ul, .section-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        .section-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* 高亮框 */
+        .highlight-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid #0ea5e9;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .highlight-title {
+            font-weight: 600;
+            color: #0c4a6e;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 公式样式 */
+        .formula {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1.125rem;
+        }
+
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+
+        /* 参数说明卡片 */
+        .parameter-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .parameter-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .parameter-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .parameter-description {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .parameter-details {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .parameter-details strong {
+            color: #374151;
+        }
+
+        /* 引用样式 */
+        .reference {
+            background: #f9fafb;
+            border-left: 4px solid #6b7280;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* 响应式设计 */
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: 1rem 0;
+            }
+
+            .nav-links {
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-title {
+                font-size: 1.875rem;
+            }
+
+            .parameter-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo"></div>
+                <h1 class="app-title">Reservoir Carbon Accounting</h1>
+            </div>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">新建计算</a>
+                <a href="my-projects.html" class="nav-link">我的项目</a>
+                <a href="methodology.html" class="nav-link active">方法学说明</a>
+                <a href="help.html" class="nav-link">帮助</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserDropdown()">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i>
+                            个人信息
+                        </a>
+                        <a href="my-projects.html" class="dropdown-item">
+                            <i class="fas fa-folder"></i>
+                            我的项目
+                        </a>
+                        <a href="settings.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            设置
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="login.html" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title">IPCC Tier 1 方法学说明</h1>
+            <p class="page-subtitle">基于政府间气候变化专门委员会第一层级方法的水库温室气体排放计算指南</p>
+        </div>
+
+        <!-- 主要内容 -->
+        <div class="main-content-area">
+                <!-- 方法学概述 -->
+                <section class="content-section">
+                    <h2 class="section-title">方法学概述</h2>
+                    <div class="section-content">
+                        <p>IPCC Tier 1 方法是政府间气候变化专门委员会（IPCC）推荐的最基础、最简化的温室气体排放计算方法。该方法通过使用默认参数和简化的计算公式来估算水库的温室气体排放，特别适用于缺乏详细监测数据的情况。</p>
+                        
+                        <div class="highlight-box">
+                            <div class="highlight-title">核心特点</div>
+                            <ul>
+                                <li>使用经过验证的默认排放因子和参数</li>
+                                <li>计算过程简单，易于实施和验证</li>
+                                <li>适用于大尺度、快速评估</li>
+                                <li>数据要求相对较低，成本效益高</li>
+                            </ul>
+                        </div>
+
+                        <p>本系统基于 IPCC 2019 年修订的《2006年IPCC国家温室气体清单指南》中关于内陆水域温室气体排放的相关章节，专门针对水库环境进行了优化和调整，确保计算结果的科学性和准确性。</p>
+                    </div>
+                </section>
+
+                <!-- 适用范围 -->
+                <section class="content-section">
+                    <h2 class="section-title">适用范围</h2>
+                    <div class="section-content">
+                        <p>IPCC Tier 1 方法适用于以下情况：</p>
+                        
+                        <h3 class="section-subtitle">适用条件</h3>
+                        <ul>
+                            <li>水库面积大于 0.1 km²</li>
+                            <li>缺乏详细的现场监测数据</li>
+                            <li>需要进行快速、初步的排放估算</li>
+                            <li>作为更高级别方法（Tier 2/3）的初步评估</li>
+                        </ul>
+
+                        <h3 class="section-subtitle">不适用情况</h3>
+                        <ul>
+                            <li>水库面积小于 0.1 km² 的小型水体</li>
+                            <li>需要高精度排放估算的详细研究</li>
+                            <li>具有特殊地质或气候条件的水库</li>
+                            <li>已进行过详细监测和建模的水库</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- 关键参数 -->
+                <section class="content-section">
+                    <h2 class="section-title">关键参数</h2>
+                    <div class="section-content">
+                        <p>IPCC Tier 1 方法主要依赖以下关键参数：</p>
+
+                        <div class="parameter-cards">
+                            <div class="parameter-card">
+                                <div class="parameter-name">水库面积 (A)</div>
+                                <div class="parameter-description">水库的水面面积，单位为 km²</div>
+                                <div class="parameter-details">
+                                    <strong>获取方式：</strong>卫星遥感、地形图测量<br>
+                                    <strong>精度要求：</strong>±10%<br>
+                                    <strong>默认值：</strong>根据气候区域确定
+                                </div>
+                            </div>
+
+                            <div class="parameter-card">
+                                <div class="parameter-name">水库年龄 (Age)</div>
+                                <div class="parameter-description">水库建成后的年数</div>
+                                <div class="parameter-details">
+                                    <strong>获取方式：</strong>历史记录查询<br>
+                                    <strong>精度要求：</strong>±1年<br>
+                                    <strong>影响：</strong>影响甲烷排放强度
+                                </div>
+                            </div>
+
+                            <div class="parameter-card">
+                                <div class="parameter-name">年平均水温 (T)</div>
+                                <div class="parameter-description">水库年平均水温，单位为 °C</div>
+                                <div class="parameter-details">
+                                    <strong>获取方式：</strong>现场监测、气候数据<br>
+                                    <strong>精度要求：</strong>±2°C<br>
+                                    <strong>默认值：</strong>基于气候区域
+                                </div>
+                            </div>
+
+                            <div class="parameter-card">
+                                <div class="parameter-name">总磷浓度 (TP)</div>
+                                <div class="parameter-description">水体总磷浓度，单位为 μg/L</div>
+                                <div class="parameter-details">
+                                    <strong>获取方式：</strong>水质监测<br>
+                                    <strong>精度要求：</strong>±20%<br>
+                                    <strong>用途：</strong>营养状态评估
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 计算方法 -->
+                <section class="content-section">
+                    <h2 class="section-title">计算方法</h2>
+                    <div class="section-content">
+                        <h3 class="section-subtitle">甲烷排放 (CH₄)</h3>
+                        <p>甲烷是水库温室气体排放的主要成分，其计算基于以下公式：</p>
+                        
+                        <div class="formula">
+                            CH₄ = A × EF_CH₄ × f_age × f_temp
+                        </div>
+
+                        <p>其中：</p>
+                        <ul>
+                            <li><strong>A</strong>：水库面积 (km²)</li>
+                            <li><strong>EF_CH₄</strong>：甲烷排放因子 (kg CH₄/km²/年)</li>
+                            <li><strong>f_age</strong>：年龄修正因子</li>
+                            <li><strong>f_temp</strong>：温度修正因子</li>
+                        </ul>
+
+                        <h3 class="section-subtitle">二氧化碳排放 (CO₂)</h3>
+                        <p>二氧化碳排放主要来源于有机碳的分解：</p>
+                        
+                        <div class="formula">
+                            CO₂ = A × EF_CO₂ × f_nutrient
+                        </div>
+
+                        <h3 class="section-subtitle">氧化亚氮排放 (N₂O)</h3>
+                        <p>氧化亚氮排放与氮循环过程相关：</p>
+                        
+                        <div class="formula">
+                            N₂O = A × EF_N₂O × f_nitrogen
+                        </div>
+
+                        <h3 class="section-subtitle">总排放量计算</h3>
+                        <p>将各气体排放量转换为 CO₂ 当量：</p>
+                        
+                        <div class="formula">
+                            Total = CH₄ × GWP_CH₄ + CO₂ × 1 + N₂O × GWP_N₂O
+                        </div>
+
+                        <p>其中 GWP 为全球变暖潜势值（CH₄ = 28, N₂O = 265）。</p>
+                    </div>
+                </section>
+
+                <!-- 不确定性分析 -->
+                <section class="content-section">
+                    <h2 class="section-title">不确定性分析</h2>
+                    <div class="section-content">
+                        <p>IPCC Tier 1 方法的不确定性主要来源于以下几个方面：</p>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>不确定性来源</th>
+                                    <th>不确定性范围</th>
+                                    <th>影响程度</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>排放因子</td>
+                                    <td>±50%</td>
+                                    <td>高</td>
+                                </tr>
+                                <tr>
+                                    <td>水库面积</td>
+                                    <td>±10%</td>
+                                    <td>中</td>
+                                </tr>
+                                <tr>
+                                    <td>水温数据</td>
+                                    <td>±20%</td>
+                                    <td>中</td>
+                                </tr>
+                                <tr>
+                                    <td>水质参数</td>
+                                    <td>±30%</td>
+                                    <td>中</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="highlight-box">
+                            <div class="highlight-title">建议</div>
+                            <p>为提高计算精度，建议进行蒙特卡洛模拟分析，通过多次随机采样来评估总排放量的概率分布和置信区间。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 数据质量要求 -->
+                <section class="content-section">
+                    <h2 class="section-title">数据质量要求</h2>
+                    <div class="section-content">
+                        <h3 class="section-subtitle">数据来源优先级</h3>
+                        <ol>
+                            <li><strong>现场监测数据</strong>：最准确，但成本高</li>
+                            <li><strong>卫星遥感数据</strong>：中等精度，覆盖范围大</li>
+                            <li><strong>气候模型数据</strong>：精度较低，但易于获取</li>
+                            <li><strong>默认参数</strong>：精度最低，但简单易用</li>
+                        </ol>
+
+                        <h3 class="section-subtitle">数据质量控制</h3>
+                        <ul>
+                            <li>所有输入数据应进行合理性检查</li>
+                            <li>异常值应进行标记和说明</li>
+                            <li>数据来源应记录在案</li>
+                            <li>定期更新默认参数值</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- 参考文献 -->
+                <section class="content-section">
+                    <h2 class="section-title">参考文献</h2>
+                    <div class="section-content">
+                        <div class="reference">
+                            <p><strong>主要参考文献：</strong></p>
+                            <p>1. IPCC (2019). 2019 Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories. Geneva, Switzerland: IPCC.</p>
+                            <p>2. Deemer, B.R., et al. (2016). Greenhouse gas emissions from reservoir water surfaces: a new global synthesis. BioScience, 66(11), 949-964.</p>
+                            <p>3. Barros, N., et al. (2011). Carbon emission from hydroelectric reservoirs linked to reservoir age and latitude. Nature Geoscience, 4(9), 593-596.</p>
+                            <p>4. 中国水利部 (2020). 水库温室气体排放监测技术指南. 北京: 中国水利水电出版社.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 用户下拉菜单功能
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const avatar = document.querySelector('.user-avatar');
+            
+            if (!avatar.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

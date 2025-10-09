@@ -98,3 +98,35 @@ class AnalysisListItem(BaseModel):
     
     class Config:
         from_attributes = True
+
+# User Authentication Schemas
+class LoginRequest(BaseModel):
+    """User login request"""
+    username: str = Field(..., description="Username or email")
+    password: str = Field(..., description="Password")
+
+class RegisterRequest(BaseModel):
+    """User registration request"""
+    username: str = Field(..., min_length=3, max_length=20, description="Username")
+    email: str = Field(..., description="Email address")
+    password: str = Field(..., min_length=8, description="Password")
+    first_name: str = Field(..., description="First name")
+    last_name: str = Field(..., description="Last name")
+    organization: Optional[str] = Field(None, description="Organization")
+
+class UserProfile(BaseModel):
+    """User profile information"""
+    username: str
+    email: str
+    first_name: str
+    last_name: str
+    organization: Optional[str] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class TokenResponse(BaseModel):
+    """Authentication token response"""
+    access_token: str
+    token_type: str
