@@ -295,7 +295,7 @@ Total Documentation: ~1,500+ lines
 
 ### User Testing Steps
 1. Run `./start.sh`
-2. Access http://localhost:8000
+2. Access http://localhost:8080
 3. Submit example analysis
 4. Verify results display
 5. Check API at /docs
@@ -320,7 +320,7 @@ Potential improvements for future versions:
 - **QUICKSTART.md**: Get started in 3 steps
 - **USER_GUIDE.md**: Comprehensive user manual
 - **DEPLOYMENT.md**: Production deployment guide
-- **API Docs**: http://localhost:8000/docs (when running)
+- **API Docs**: http://localhost:8080/docs (when running)
 
 ## ✨ Conclusion
 

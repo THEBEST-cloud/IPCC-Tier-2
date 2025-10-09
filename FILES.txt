@@ -51,7 +51,7 @@ OR:
   docker-compose up --build -d
 
 ACCESS:
-  Web Interface: http://localhost:8000
-  API Docs: http://localhost:8000/docs
+  Web Interface: http://localhost:8080
+  API Docs: http://localhost:8080/docs
 
 STATUS: ✅ PRODUCTION READY
