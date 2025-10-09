@@ -337,6 +337,17 @@ async def results_page(request: Request, analysis_id: int):
         "analysis_id": analysis_id
     })
 
+# JWT Token verification function
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify JWT token"""
+    username = auth.verify_token(credentials.credentials)
+    if username is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials"
+        )
+    return username
+
 # User Authentication API
 @app.post("/api/auth/login")
 async def login(credentials: schemas.LoginRequest, db: Session = Depends(get_db)):
@@ -363,16 +374,6 @@ async def register(user_data: schemas.RegisterRequest, db: Session = Depends(get
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
-
-def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    """Verify JWT token"""
-    username = auth.verify_token(credentials.credentials)
-    if username is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials"
-        )
-    return username
 
 @app.get("/health")
 async def health_check():
