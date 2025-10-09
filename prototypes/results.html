@@ -130,6 +130,56 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
+        /* 用户下拉菜单 */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
         /* 主内容区域 */
         .main-content {
             margin-top: 70px;
@@ -445,8 +495,29 @@
                 <a href="help.html" class="nav-link">帮助</a>
             </nav>
             <div class="user-section">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserDropdown()">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i>
+                            个人信息
+                        </a>
+                        <a href="my-projects.html" class="dropdown-item">
+                            <i class="fas fa-folder"></i>
+                            我的项目
+                        </a>
+                        <a href="settings.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            设置
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="login.html" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            退出登录
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -688,6 +759,22 @@
                     }
                 }
             });
+        });
+
+        // 用户下拉菜单功能
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const avatar = document.querySelector('.user-avatar');
+            
+            if (!avatar.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
         });
     </script>
 </body>
