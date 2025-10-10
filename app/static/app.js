@@ -290,6 +290,11 @@ function generateResultsHTML(result) {
     const uncertainty = result.uncertainty;
     const sensitivity = result.sensitivity;
     
+    // 调试信息
+    console.log('Result data:', result);
+    console.log('Uncertainty data:', uncertainty);
+    console.log('Sensitivity data:', sensitivity);
+    
     return `
         <div class="results-header">
             <h2 class="results-title">计算结果：${document.getElementById('projectName').value}</h2>
@@ -379,7 +384,7 @@ function generateUncertaintyHTML(uncertainty) {
                             </tr>
                             <tr>
                                 <td>中位数</td>
-                                <td>${formatNumber(stats.median)}</td>
+                                <td>${formatNumber(stats.percentile_50)}</td>
                                 <td>kg CO₂-当量/年</td>
                             </tr>
                             <tr>
@@ -407,11 +412,9 @@ function generateUncertaintyHTML(uncertainty) {
 
 // 生成敏感性分析HTML
 function generateSensitivityHTML(sensitivity) {
-    if (!sensitivity || !sensitivity.parameters) return '';
+    if (!sensitivity || !Array.isArray(sensitivity) || sensitivity.length === 0) return '';
     
-    const params = sensitivity.parameters;
-    const sortedParams = Object.entries(params)
-        .sort(([,a], [,b]) => Math.abs(b.correlation) - Math.abs(a.correlation));
+    const sortedParams = sensitivity.sort((a, b) => Math.abs(b.rank_correlation) - Math.abs(a.rank_correlation));
     
     return `
         <div class="card">
@@ -422,13 +425,13 @@ function generateSensitivityHTML(sensitivity) {
                 <div class="chart-container">
                     <h3 class="chart-title">参数敏感性分析</h3>
                     <div class="tornado-chart">
-                        ${sortedParams.map(([param, data]) => `
+                        ${sortedParams.map((data) => `
                             <div class="tornado-item">
-                                <div class="tornado-label">${getParameterLabel(param)}</div>
-                                <div class="tornado-bar" style="width: ${Math.abs(data.correlation) * 100}%;">
-                                    ${(Math.abs(data.correlation) * 100).toFixed(1)}%
+                                <div class="tornado-label">${getParameterLabel(data.parameter)}</div>
+                                <div class="tornado-bar" style="width: ${Math.abs(data.rank_correlation) * 100}%;">
+                                    ${(Math.abs(data.rank_correlation) * 100).toFixed(1)}%
                                 </div>
-                                <div class="tornado-value">${data.correlation.toFixed(3)}</div>
+                                <div class="tornado-value">${data.rank_correlation.toFixed(3)}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -441,6 +444,10 @@ function generateSensitivityHTML(sensitivity) {
 // 获取参数标签
 function getParameterLabel(param) {
     const labels = {
+        'Surface Area': '水库面积',
+        'CH4 Emission Factor': '甲烷排放因子',
+        'CO2 Emission Factor': '二氧化碳排放因子',
+        'N2O Emission Factor': '氧化亚氮排放因子',
         'surface_area': '水库面积',
         'reservoir_age': '水库年龄',
         'mean_depth': '平均水深',
