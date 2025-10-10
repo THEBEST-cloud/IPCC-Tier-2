@@ -641,6 +641,118 @@ function generateIPCCResultsHTML(ipccResults) {
                         ` : ''}
                     </div>
                 </div>
+                
+                <!-- 详细计算过程 -->
+                <div class="chart-container">
+                    <h3 class="chart-title">详细计算过程</h3>
+                    <div class="calculation-details">
+                        <div class="detail-section">
+                            <h4>输入参数</h4>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">气候区</span>
+                                    <span class="detail-value">${ipccResults.climate_region}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">营养状态</span>
+                                    <span class="detail-value">${ipccResults.trophic_status}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">水库年龄</span>
+                                    <span class="detail-value">${ipccResults.reservoir_age} 年</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">水库面积</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.surface_area_ha)} 公顷</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>排放因子</h4>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">CO₂排放因子</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.EF_CO2_age_le_20)} tCO₂-C/(ha·yr)</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">≤20年CH₄排放因子</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.EF_CH4_age_le_20)} kgCH₄/(ha·yr)</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">>20年CH₄排放因子</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.EF_CH4_age_gt_20)} kgCH₄/(ha·yr)</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">营养状态调整系数</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.trophic_factor)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>中间计算值</h4>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">年均CO₂排放总量</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CO2_tot)} tCO₂-C/yr</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">≤20年水库表面CH₄排放</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_res_age_le_20)} kgCH₄/yr</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">≤20年下游CH₄排放</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_downstream_age_le_20)} kgCH₄/yr</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">>20年水库表面CH₄排放</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_res_age_gt_20)} kgCH₄/yr</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">>20年下游CH₄排放</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_downstream_age_gt_20)} kgCH₄/yr</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>分阶段CH₄排放总量</h4>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">≤20年CH₄排放总量</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.E_CH4_age_le_20)} tCO₂-当量</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">>20年CH₄排放总量</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.E_CH4_age_gt_20)} tCO₂-当量</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>常量</h4>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">CO₂相对分子质量</span>
+                                    <span class="detail-value">${ipccResults.M_CO2}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">C相对原子质量</span>
+                                    <span class="detail-value">${ipccResults.M_C}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">下游CH₄通量比值</span>
+                                    <span class="detail-value">${ipccResults.R_d_i}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">CH₄全球变暖潜势</span>
+                                    <span class="detail-value">${ipccResults.GWP_100yr_CH4}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     `;
