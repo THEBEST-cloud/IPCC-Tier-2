@@ -27,25 +27,25 @@ def get_climate_region(latitude: float) -> str:
     abs_lat = abs(latitude)
     
     if abs_lat <= 25:
-        return "Tropical_Moist"  # 炎热潮湿区
+        return "炎热潮湿区"  # Tropical_Moist
     elif abs_lat <= 50:
-        return "Warm_Temperate"  # 温暖区（需要进一步确认湿润/干燥）
+        return "温暖区"  # Warm_Temperate（需要进一步确认湿润/干燥）
     else:
-        return "Other"  # 其他区域
+        return "其他区域"  # Other
 
 # IPCC Tier 1 排放因子表
 EMISSION_FACTORS = {
-    "Warm_Dry": {  # 温暖干燥区
+    "温暖干燥区": {  # Warm_Dry
         "EF_CO2_age_le_20": 1.7,  # tCO2-C/(ha·yr)
         "EF_CH4_age_le_20": 195.6,  # kgCH4/(ha·yr)
         "EF_CH4_age_gt_20": 150.9,  # kgCH4/(ha·yr)
     },
-    "Warm_Moist": {  # 温暖湿润区
+    "温暖湿润区": {  # Warm_Moist
         "EF_CO2_age_le_20": 1.46,  # tCO2-C/(ha·yr)
         "EF_CH4_age_le_20": 127.5,  # kgCH4/(ha·yr)
         "EF_CH4_age_gt_20": 80.3,  # kgCH4/(ha·yr)
     },
-    "Tropical_Moist": {  # 炎热潮湿区
+    "炎热潮湿区": {  # Tropical_Moist
         "EF_CO2_age_le_20": 2.77,  # tCO2-C/(ha·yr)
         "EF_CH4_age_le_20": 251.6,  # kgCH4/(ha·yr)
         "EF_CH4_age_gt_20": 141.1,  # kgCH4/(ha·yr)
@@ -164,7 +164,7 @@ def get_emission_factors(
     """
     # 获取基础排放因子
     if climate_region not in EMISSION_FACTORS:
-        climate_region = "Warm_Moist"  # 默认温暖湿润区
+        climate_region = "温暖湿润区"  # 默认温暖湿润区
     
     factors = EMISSION_FACTORS[climate_region]
     

@@ -628,13 +628,8 @@ function generateIPCCResultsHTML(ipccResults) {
 
 // 获取气候区标签
 function getClimateRegionLabel(region) {
-    const labels = {
-        'Tropical_Moist': '炎热潮湿区',
-        'Warm_Dry': '温暖干燥区',
-        'Warm_Moist': '温暖湿润区',
-        'Other': '其他区域'
-    };
-    return labels[region] || region;
+    // 现在气候区已经是中文，直接返回
+    return region || '未知区域';
 }
 
 // 获取营养状态标签

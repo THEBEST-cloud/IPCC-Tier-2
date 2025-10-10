@@ -98,14 +98,12 @@ class UncertaintyAnalysis:
         # Calculate emissions for each iteration
         ch4_results = area_samples * ch4_ef_samples
         co2_results = area_samples * co2_ef_samples
-        n2o_results = area_samples * n2o_ef_samples
-        co2eq_results = co2_results + (ch4_results * GWP_CH4) + (n2o_results * GWP_N2O)
+        co2eq_results = co2_results + (ch4_results * GWP_CH4)
         
         # Calculate statistics
         return {
             "CH4": self._calculate_statistics(ch4_results),
             "CO2": self._calculate_statistics(co2_results),
-            "N2O": self._calculate_statistics(n2o_results),
             "CO2_equivalent": self._calculate_statistics(co2eq_results),
         }
     
@@ -189,8 +187,7 @@ class SensitivityAnalysis:
         # Calculate CO2 equivalent for sensitivity
         co2eq_results = (
             area_samples * co2_ef_samples +
-            area_samples * ch4_ef_samples * GWP_CH4 +
-            area_samples * n2o_ef_samples * GWP_N2O
+            area_samples * ch4_ef_samples * GWP_CH4
         )
         
         # Create parameter matrix
@@ -198,7 +195,6 @@ class SensitivityAnalysis:
             "Surface Area": area_samples,
             "CH4 Emission Factor": ch4_ef_samples,
             "CO2 Emission Factor": co2_ef_samples,
-            "N2O Emission Factor": n2o_ef_samples,
         }
         
         # Calculate correlations
