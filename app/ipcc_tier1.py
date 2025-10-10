@@ -230,7 +230,7 @@ def calculate_ipcc_tier1_emissions(
     
     # 第4步：计算CH4排放
     # 获取不同年龄段的CH4排放因子
-    factors = EMISSION_FACTORS.get(climate_region, EMISSION_FACTORS["Warm_Moist"])
+    factors = EMISSION_FACTORS.get(climate_region, EMISSION_FACTORS["温暖湿润区"])
     trophic_factor = TROPHIC_ADJUSTMENT_FACTORS.get(trophic_status, 3)
     
     # 库龄≤20年的CH4排放
