@@ -145,23 +145,35 @@ class SensitivityAnalysis:
         co2_std = co2_ef * uncertainty_ranges.get("CO2", 0.4)
         n2o_std = n2o_ef * uncertainty_ranges.get("N2O", 0.6)
         
-        ch4_ef_samples = np.random.lognormal(
-            np.log(ch4_ef) - 0.5 * (ch4_std/ch4_ef)**2,
-            ch4_std/ch4_ef,
-            self.iterations
-        )
+        # 处理CH4排放因子
+        if ch4_ef > 0:
+            ch4_ef_samples = np.random.lognormal(
+                np.log(ch4_ef) - 0.5 * (ch4_std/ch4_ef)**2,
+                ch4_std/ch4_ef,
+                self.iterations
+            )
+        else:
+            ch4_ef_samples = np.zeros(self.iterations)
         
-        co2_ef_samples = np.random.lognormal(
-            np.log(co2_ef) - 0.5 * (co2_std/co2_ef)**2,
-            co2_std/co2_ef,
-            self.iterations
-        )
+        # 处理CO2排放因子
+        if co2_ef > 0:
+            co2_ef_samples = np.random.lognormal(
+                np.log(co2_ef) - 0.5 * (co2_std/co2_ef)**2,
+                co2_std/co2_ef,
+                self.iterations
+            )
+        else:
+            co2_ef_samples = np.zeros(self.iterations)
         
-        n2o_ef_samples = np.random.lognormal(
-            np.log(n2o_ef) - 0.5 * (n2o_std/n2o_ef)**2,
-            n2o_std/n2o_ef,
-            self.iterations
-        )
+        # 处理N2O排放因子（IPCC Tier 1通常为0）
+        if n2o_ef > 0:
+            n2o_ef_samples = np.random.lognormal(
+                np.log(n2o_ef) - 0.5 * (n2o_std/n2o_ef)**2,
+                n2o_std/n2o_ef,
+                self.iterations
+            )
+        else:
+            n2o_ef_samples = np.zeros(self.iterations)
         
         # Calculate CO2 equivalent for sensitivity
         co2eq_results = (
