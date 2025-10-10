@@ -103,6 +103,7 @@ async def analyze_reservoir(
     ipcc_results = calculate_ipcc_tier1_emissions(
         surface_area_ha=surface_area_ha,
         latitude=reservoir_input.latitude,
+        longitude=reservoir_input.longitude,
         trophic_status=trophic_status,
         reservoir_age=reservoir_input.reservoir_age
     )

@@ -6,6 +6,7 @@ IPCC Tier 1 Methodology for Reservoir Greenhouse Gas Emissions
 import numpy as np
 import math
 from typing import Tuple, Optional, Dict
+from .climate_zones import get_ipcc_aggregated_zone_in_chinese, get_climate_zone_emission_factors
 
 # IPCC Tier 1 常量定义
 M_CO2 = 44  # CO2的相对分子质量
@@ -13,46 +14,33 @@ M_C = 12    # C元素的相对原子质量
 R_d_i = 0.09  # 大坝下游CH4通量与水库表面CH4通量的比值
 GWP_100yr_CH4 = 27.2  # 非化石源CH4的100年全球变暖潜势
 
-# 气候区定义（基于纬度）
-def get_climate_region(latitude: float) -> str:
+# 气候区定义（基于经纬度和Beck-Köppen-Geiger分类）
+def get_climate_region(latitude: float, longitude: float) -> str:
     """
-    根据纬度确定气候区
+    根据经纬度确定气候区（使用Beck-Köppen-Geiger分类）
     
     Args:
         latitude: 纬度（度）
+        longitude: 经度（度）
     
     Returns:
         气候区名称
     """
-    abs_lat = abs(latitude)
-    
-    if abs_lat <= 25:
-        return "炎热潮湿区"  # Tropical_Moist
-    elif abs_lat <= 50:
-        # 对于25-50度纬度，需要进一步确认湿润/干燥
-        # 这里默认返回温暖湿润区，实际应用中需要用户选择
-        return "温暖湿润区"  # 默认温暖湿润区
+    climate_zone = get_ipcc_aggregated_zone_in_chinese(latitude, longitude)
+    if climate_zone:
+        return climate_zone
     else:
-        return "其他区域"  # Other
+        # 如果无法从文件获取，使用基于纬度的简单判断作为后备
+        abs_lat = abs(latitude)
+        if abs_lat <= 25:
+            return "热带湿润/潮湿"  # 默认热带湿润
+        elif abs_lat <= 50:
+            return "暖温带湿润"  # 默认暖温带湿润
+        else:
+            return "北方"  # 默认北方
 
-# IPCC Tier 1 排放因子表
-EMISSION_FACTORS = {
-    "温暖干燥区": {  # Warm_Dry
-        "EF_CO2_age_le_20": 1.7,  # tCO2-C/(ha·yr)
-        "EF_CH4_age_le_20": 195.6,  # kgCH4/(ha·yr)
-        "EF_CH4_age_gt_20": 150.9,  # kgCH4/(ha·yr)
-    },
-    "温暖湿润区": {  # Warm_Moist
-        "EF_CO2_age_le_20": 1.46,  # tCO2-C/(ha·yr)
-        "EF_CH4_age_le_20": 127.5,  # kgCH4/(ha·yr)
-        "EF_CH4_age_gt_20": 80.3,  # kgCH4/(ha·yr)
-    },
-    "炎热潮湿区": {  # Tropical_Moist
-        "EF_CO2_age_le_20": 2.77,  # tCO2-C/(ha·yr)
-        "EF_CH4_age_le_20": 251.6,  # kgCH4/(ha·yr)
-        "EF_CH4_age_gt_20": 141.1,  # kgCH4/(ha·yr)
-    }
-}
+# IPCC Tier 1 排放因子表（6种IPCC聚合气候区）
+EMISSION_FACTORS = get_climate_zone_emission_factors()
 
 # 营养状态调整系数
 TROPHIC_ADJUSTMENT_FACTORS = {
@@ -166,7 +154,7 @@ def get_emission_factors(
     """
     # 获取基础排放因子
     if climate_region not in EMISSION_FACTORS:
-        climate_region = "温暖湿润区"  # 默认温暖湿润区
+        climate_region = "暖温带湿润"  # 默认暖温带湿润区
     
     factors = EMISSION_FACTORS[climate_region]
     
@@ -196,6 +184,7 @@ def get_emission_factors(
 def calculate_ipcc_tier1_emissions(
     surface_area_ha: float,
     latitude: float,
+    longitude: float,
     trophic_status: str = "Mesotrophic",
     reservoir_age: float = 100,
     climate_region_override: Optional[str] = None
@@ -206,6 +195,7 @@ def calculate_ipcc_tier1_emissions(
     Args:
         surface_area_ha: 水库面积（公顷）
         latitude: 纬度
+        longitude: 经度
         trophic_status: 营养状态
         reservoir_age: 水库年龄（年）
         climate_region_override: 手动指定的气候区
@@ -217,7 +207,7 @@ def calculate_ipcc_tier1_emissions(
     if climate_region_override:
         climate_region = climate_region_override
     else:
-        climate_region = get_climate_region(latitude)
+        climate_region = get_climate_region(latitude, longitude)
     
     # 第2步：获取排放因子
     ch4_ef, co2_ef, n2o_ef = get_emission_factors(
@@ -230,7 +220,7 @@ def calculate_ipcc_tier1_emissions(
     
     # 第4步：计算CH4排放
     # 获取不同年龄段的CH4排放因子
-    factors = EMISSION_FACTORS.get(climate_region, EMISSION_FACTORS["温暖湿润区"])
+    factors = EMISSION_FACTORS.get(climate_region, EMISSION_FACTORS["暖温带湿润"])
     trophic_factor = TROPHIC_ADJUSTMENT_FACTORS.get(trophic_status, 3)
     
     # 库龄≤20年的CH4排放
