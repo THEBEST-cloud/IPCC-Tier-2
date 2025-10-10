@@ -17,16 +17,15 @@ class ReservoirInput(BaseModel):
     
     # Water quality
     water_quality: Optional[WaterQualityInput] = None
+    trophic_status: Optional[str] = Field(None, description="Trophic status (Oligotrophic, Mesotrophic, Eutrophic, Hypereutrophic)")
     
     # Reservoir characteristics
     surface_area: float = Field(..., gt=0, description="Surface area (km²)")
     reservoir_age: Optional[float] = Field(None, ge=0, description="Reservoir age (years)")
-    mean_depth: Optional[float] = Field(None, gt=0, description="Mean depth (m)")
     
     # Custom emission factors (optional)
     custom_ch4_ef: Optional[float] = Field(None, description="Custom CH4 emission factor (kg/km²/yr)")
     custom_co2_ef: Optional[float] = Field(None, description="Custom CO2 emission factor (kg/km²/yr)")
-    custom_n2o_ef: Optional[float] = Field(None, description="Custom N2O emission factor (kg/km²/yr)")
     
     # Analysis options
     run_uncertainty: bool = Field(True, description="Run uncertainty analysis")
@@ -37,15 +36,16 @@ class EmissionResults(BaseModel):
     """Emission calculation results"""
     total_ch4_emissions: float = Field(..., description="Total CH4 emissions (kg/yr)")
     total_co2_emissions: float = Field(..., description="Total CO2 emissions (kg/yr)")
-    total_n2o_emissions: float = Field(..., description="Total N2O emissions (kg/yr)")
     co2_equivalent: float = Field(..., description="Total CO2 equivalent (kg CO2-eq/yr)")
     
     ch4_emission_factor: float
     co2_emission_factor: float
-    n2o_emission_factor: float
     
     climate_region: str
     trophic_status: Optional[str] = None
+    
+    # IPCC Tier 1 详细结果
+    ipcc_tier1_results: Optional[Dict] = Field(None, description="Detailed IPCC Tier 1 calculation results")
 
 class UncertaintyResults(BaseModel):
     """Uncertainty analysis results"""
@@ -98,3 +98,35 @@ class AnalysisListItem(BaseModel):
     
     class Config:
         from_attributes = True
+
+# User Authentication Schemas
+class LoginRequest(BaseModel):
+    """User login request"""
+    username: str = Field(..., description="Username or email")
+    password: str = Field(..., description="Password")
+
+class RegisterRequest(BaseModel):
+    """User registration request"""
+    username: str = Field(..., min_length=3, max_length=20, description="Username")
+    email: str = Field(..., description="Email address")
+    password: str = Field(..., min_length=8, description="Password")
+    first_name: str = Field(..., description="First name")
+    last_name: str = Field(..., description="Last name")
+    organization: Optional[str] = Field(None, description="Organization")
+
+class UserProfile(BaseModel):
+    """User profile information"""
+    username: str
+    email: str
+    first_name: str
+    last_name: str
+    organization: Optional[str] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class TokenResponse(BaseModel):
+    """Authentication token response"""
+    access_token: str
+    token_type: str

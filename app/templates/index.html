@@ -1,291 +1,257 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reservoir GHG Emissions Tool - IPCC Tier 1 Methodology</title>
+    <title>Reservoir Carbon Accounting - 水库碳核算系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>🌊 Reservoir GHG Emissions Tool</h1>
-            <p>IPCC Tier 1 Methodology with Uncertainty and Sensitivity Analysis</p>
+    <!-- 导航栏 -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo"></div>
+                <h1 class="app-title">Reservoir Carbon Accounting</h1>
+            </div>
+            <nav class="nav-links">
+                <a href="/dashboard" class="nav-link active">新建计算</a>
+                <a href="/projects" class="nav-link">我的项目</a>
+                <a href="/methodology" class="nav-link">方法学说明</a>
+                <a href="/help" class="nav-link">帮助</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserDropdown()">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="/profile" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i>
+                            个人信息
+                        </a>
+                        <a href="/projects" class="dropdown-item">
+                            <i class="fas fa-folder"></i>
+                            我的项目
+                        </a>
+                        <a href="/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            设置
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/login" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
-    <div class="container">
-        <!-- Instructions -->
-        <div class="alert alert-info">
-            <strong>Welcome!</strong> This tool implements the IPCC Tier 1 methodology to estimate greenhouse gas emissions from reservoirs. 
-            Enter your reservoir's location and characteristics below to calculate CH₄, CO₂, and N₂O emissions.
-        </div>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 第一步：项目信息与位置 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">第一步：项目信息与位置</h2>
+                <p class="card-subtitle">输入项目基本信息并选择水库位置</p>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="projectName" class="form-label">
+                        项目名称 <span class="required">*</span>
+                    </label>
+                    <input type="text" id="projectName" class="form-input" placeholder="请输入项目名称" required>
+                </div>
 
-        <!-- Input Form -->
-        <form id="analysisForm">
-            <!-- Location Information -->
-            <div class="card">
-                <h2>📍 Location Information</h2>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="latitude">Latitude *</label>
-                        <input type="number" id="latitude" step="0.0001" min="-90" max="90" required>
-                        <div class="help-text">Enter latitude (-90 to 90). Used to determine climate region.</div>
+                <div class="map-container">
+                    <div id="map" class="interactive-map"></div>
+                    <div class="map-instructions">
+                        <i class="fas fa-map-marked-alt"></i>
+                        点击地图选择水库位置
                     </div>
-                    <div class="form-group">
-                        <label for="longitude">Longitude *</label>
-                        <input type="number" id="longitude" step="0.0001" min="-180" max="180" required>
-                        <div class="help-text">Enter longitude (-180 to 180)</div>
+                    <div class="coordinates-input">
+                        <div class="form-group">
+                            <label for="latitude" class="form-label">纬度 (Latitude)</label>
+                            <input type="number" id="latitude" class="form-input" placeholder="例如: 39.9042" step="0.0001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="longitude" class="form-label">经度 (Longitude)</label>
+                            <input type="number" id="longitude" class="form-input" placeholder="例如: 116.4074" step="0.0001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="climateRegion" class="form-label">气候区域</label>
+                            <input type="text" id="climateRegion" class="form-input" placeholder="根据位置自动填充" readonly>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Reservoir Characteristics -->
-            <div class="card">
-                <h2>🏞️ Reservoir Characteristics</h2>
-                <div class="grid-2">
+        <!-- 第二步：水质参数 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">第二步：水质参数</h2>
+                <p class="card-subtitle">输入水质数据以评估水库营养状态</p>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="surfaceArea">Surface Area (km²) *</label>
-                        <input type="number" id="surfaceArea" step="0.01" min="0.01" required>
-                        <div class="help-text">Total surface area of the reservoir</div>
+                        <label for="totalPhosphorus" class="form-label">
+                            总磷 (μg/L) <i class="fas fa-info-circle info-icon" title="总磷浓度，用于评估水体富营养化程度"></i>
+                        </label>
+                        <input type="number" id="totalPhosphorus" class="form-input" placeholder="例如: 25.5" step="0.1">
                     </div>
                     <div class="form-group">
-                        <label for="reservoirAge">Reservoir Age (years)</label>
-                        <input type="number" id="reservoirAge" step="0.1" min="0">
-                        <div class="help-text">Years since reservoir creation (optional)</div>
+                        <label for="totalNitrogen" class="form-label">
+                            总氮 (mg/L) <i class="fas fa-info-circle info-icon" title="总氮浓度，影响水体营养状态"></i>
+                        </label>
+                        <input type="number" id="totalNitrogen" class="form-input" placeholder="例如: 1.2" step="0.01">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="meanDepth">Mean Depth (m)</label>
-                    <input type="number" id="meanDepth" step="0.1" min="0">
-                    <div class="help-text">Average depth of the reservoir (optional)</div>
-                </div>
-            </div>
-
-            <!-- Water Quality Data -->
-            <div class="card">
-                <h2>💧 Water Quality Data (Optional)</h2>
-                <p class="help-text" style="margin-bottom: 1rem;">
-                    Provide water quality parameters to automatically assess trophic status, which adjusts emission factors.
-                </p>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="totalPhosphorus">Total Phosphorus (mg/L)</label>
-                        <input type="number" id="totalPhosphorus" step="0.001" min="0">
-                        <div class="help-text">Total phosphorus concentration</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="totalNitrogen">Total Nitrogen (mg/L)</label>
-                        <input type="number" id="totalNitrogen" step="0.001" min="0">
-                        <div class="help-text">Total nitrogen concentration</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="chlorophyllA">Chlorophyll-a (μg/L)</label>
-                        <input type="number" id="chlorophyllA" step="0.1" min="0">
-                        <div class="help-text">Chlorophyll-a concentration</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="secchiDepth">Secchi Depth (m)</label>
-                        <input type="number" id="secchiDepth" step="0.1" min="0">
-                        <div class="help-text">Water transparency depth</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Custom Emission Factors -->
-            <div class="card">
-                <h2>⚙️ Custom Emission Factors (Optional)</h2>
-                <p class="help-text" style="margin-bottom: 1rem;">
-                    Override default emission factors with your own values. If not provided, defaults based on climate region will be used.
-                </p>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="customCH4">CH₄ Emission Factor (kg/km²/yr)</label>
-                        <input type="number" id="customCH4" step="1000" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="customCO2">CO₂ Emission Factor (kg/km²/yr)</label>
-                        <input type="number" id="customCO2" step="1000" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="customN2O">N₂O Emission Factor (kg/km²/yr)</label>
-                        <input type="number" id="customN2O" step="1" min="0">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Analysis Options -->
-            <div class="card">
-                <h2>📊 Analysis Options</h2>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="runUncertainty" checked>
-                            <label for="runUncertainty" style="margin-bottom: 0;">Run Uncertainty Analysis</label>
-                        </div>
-                        <div class="help-text">Monte Carlo simulation to quantify uncertainty in emissions</div>
-                    </div>
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="runSensitivity" checked>
-                            <label for="runSensitivity" style="margin-bottom: 0;">Run Sensitivity Analysis</label>
-                        </div>
-                        <div class="help-text">Identify most influential parameters</div>
-                    </div>
-                </div>
-                <div class="form-group hidden" id="iterationsGroup">
-                    <label for="uncertaintyIterations">Monte Carlo Iterations</label>
-                    <input type="number" id="uncertaintyIterations" value="1000" min="100" max="10000" step="100">
-                    <div class="help-text">Number of iterations for uncertainty analysis (100-10,000)</div>
-                </div>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
-                🚀 Run Analysis
-            </button>
-        </form>
-
-        <!-- Results Section -->
-        <div id="resultsContainer" class="results-container hidden">
-            <!-- Basic Information -->
-            <div class="card">
-                <h2>📋 Analysis Summary</h2>
-                <table class="table">
-                    <tr>
-                        <td><strong>Latitude:</strong></td>
-                        <td id="resLatitude"></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Longitude:</strong></td>
-                        <td id="resLongitude"></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Climate Region:</strong></td>
-                        <td><span class="badge badge-blue" id="resClimateRegion"></span></td>
-                    </tr>
-                    <tr id="trophicStatusRow" class="hidden">
-                        <td><strong>Trophic Status:</strong></td>
-                        <td><span class="badge badge-green" id="resTrophicStatus"></span></td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- Emission Factors -->
-            <div class="card">
-                <h2>📏 Emission Factors</h2>
-                <div class="grid-2">
-                    <table class="table">
-                        <tr>
-                            <td><strong>CH₄:</strong></td>
-                            <td><span id="efCH4"></span> kg/km²/yr</td>
-                        </tr>
-                        <tr>
-                            <td><strong>CO₂:</strong></td>
-                            <td><span id="efCO2"></span> kg/km²/yr</td>
-                        </tr>
-                        <tr>
-                            <td><strong>N₂O:</strong></td>
-                            <td><span id="efN2O"></span> kg/km²/yr</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Total Emissions -->
-            <div class="card">
-                <h2>🌍 Total Annual Emissions</h2>
-                <div class="grid-4">
-                    <div class="metric-card">
-                        <div class="metric-label">Methane (CH₄)</div>
-                        <div class="metric-value" id="totalCH4">0</div>
-                        <div class="metric-unit">kg/year</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Carbon Dioxide (CO₂)</div>
-                        <div class="metric-value" id="totalCO2">0</div>
-                        <div class="metric-unit">kg/year</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Nitrous Oxide (N₂O)</div>
-                        <div class="metric-value" id="totalN2O">0</div>
-                        <div class="metric-unit">kg/year</div>
-                    </div>
-                    <div class="metric-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                        <div class="metric-label">CO₂ Equivalent</div>
-                        <div class="metric-value" id="totalCO2eq">0</div>
-                        <div class="metric-unit">kg CO₂-eq/year</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Uncertainty Analysis Results -->
-            <div id="uncertaintyResults" class="card hidden">
-                <h2>📉 Uncertainty Analysis Results</h2>
-                <div class="alert alert-info">
-                    <strong>Note:</strong> These results show the range of possible emission values based on parameter uncertainties.
+                    <label for="chlorophyllA" class="form-label">
+                        叶绿素a (μg/L) <i class="fas fa-info-circle info-icon" title="叶绿素a浓度，反映浮游植物生物量"></i>
+                    </label>
+                    <input type="number" id="chlorophyllA" class="form-input" placeholder="例如: 8.3" step="0.1">
                 </div>
                 
-                <h3>CO₂ Equivalent Summary</h3>
-                <div class="grid-2">
-                    <div>
-                        <p><strong>Mean:</strong> <span id="uncMean"></span> kg CO₂-eq/yr</p>
-                        <p><strong>Standard Deviation:</strong> <span id="uncStd"></span> kg CO₂-eq/yr</p>
-                    </div>
-                    <div>
-                        <p><strong>Median:</strong> <span id="uncMedian"></span> kg CO₂-eq/yr</p>
-                        <p><strong>95% Confidence Interval:</strong> <span id="uncCI"></span> kg CO₂-eq/yr</p>
-                    </div>
-                </div>
-
-                <h3 style="margin-top: 1.5rem;">Detailed Statistics</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Gas</th>
-                            <th>Mean</th>
-                            <th>Std Dev</th>
-                            <th>Median</th>
-                            <th>CI Lower (2.5%)</th>
-                            <th>CI Upper (97.5%)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="uncertaintyTableBody"></tbody>
-                </table>
-            </div>
-
-            <!-- Sensitivity Analysis Results -->
-            <div id="sensitivityResults" class="card hidden">
-                <h2>🎯 Sensitivity Analysis Results</h2>
-                <div class="alert alert-info">
-                    <strong>Note:</strong> Parameters are ranked by their influence on total CO₂ equivalent emissions.
-                    Higher correlation values indicate greater influence.
+                <div class="form-group">
+                    <label for="trophicStatusSelect" class="form-label">
+                        营养状态 <i class="fas fa-info-circle info-icon" title="选择营养状态或通过水质参数自动评估"></i>
+                    </label>
+                    <select id="trophicStatusSelect" class="form-input">
+                        <option value="">通过水质参数自动评估</option>
+                        <option value="Oligotrophic">贫营养型 (Oligotrophic)</option>
+                        <option value="Mesotrophic">中营养型 (Mesotrophic)</option>
+                        <option value="Eutrophic">富营养型 (Eutrophic)</option>
+                        <option value="Hypereutrophic">超富营养型 (Hypereutrophic)</option>
+                    </select>
                 </div>
                 
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Correlation</th>
-                            <th>Rank Correlation</th>
-                            <th>Relative Importance</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sensitivityTableBody"></tbody>
-                </table>
+                <div class="trophic-status trophic-eutrophic" id="trophicStatus" style="display: none;">
+                    评估的营养状态：<span id="trophicStatusText">富营养 (Eutrophic)</span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <footer style="margin-top: 3rem; padding: 2rem; text-align: center; background-color: var(--card-bg); border-top: 1px solid var(--border-color);">
-        <p style="color: var(--text-secondary);">
-            Reservoir GHG Emissions Tool v1.0.0 | IPCC Tier 1 Methodology
-        </p>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
-            Developed for reservoir greenhouse gas emission analysis
-        </p>
-    </footer>
+        <!-- 第三步：IPCC Tier 1 模型参数设置 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">第三步：IPCC Tier 1 模型参数设置</h2>
+                <p class="card-subtitle">配置IPCC第一层级方法的基本参数</p>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="surfaceArea" class="form-label">水库面积 (km²)</label>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <input type="number" id="surfaceArea" class="form-input" placeholder="例如: 15.5" step="0.1" required>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="useDefaultArea">
+                                <span class="slider"></span>
+                            </label>
+                            <span style="font-size: 0.875rem; color: #6b7280;">使用默认值</span>
+                        </div>
+                        <p class="help-text">基于气候区域的推荐默认值：<span id="defaultArea">10.0</span> km²</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="reservoirAge" class="form-label">水库年龄 (年)</label>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <input type="number" id="reservoirAge" class="form-input" placeholder="例如: 25" step="1">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="useDefaultAge">
+                                <span class="slider"></span>
+                            </label>
+                            <span style="font-size: 0.875rem; color: #6b7280;">使用默认值</span>
+                        </div>
+                        <p class="help-text">水库建成后的年数</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- 第四步：选择分析类型 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">第四步：选择分析类型</h2>
+                <p class="card-subtitle">选择需要进行的分析类型</p>
+            </div>
+            <div class="card-body">
+                <div class="analysis-cards">
+                    <div class="analysis-card">
+                        <h3 class="analysis-title">不确定性分析</h3>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="enableUncertainty" checked>
+                            <label for="enableUncertainty">启用不确定性分析</label>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label for="monteCarloRuns" class="form-label">蒙特卡洛模拟次数</label>
+                            <select id="monteCarloRuns" class="form-input">
+                                <option value="1000">1,000 次</option>
+                                <option value="5000" selected>5,000 次</option>
+                                <option value="10000">10,000 次</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3 class="analysis-title">敏感性分析</h3>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="enableSensitivity" checked>
+                            <label for="enableSensitivity">启用敏感性分析</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sensitivityArea" checked>
+                                <label for="sensitivityArea">水库面积</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sensitivityAge" checked>
+                                <label for="sensitivityAge">水库年龄</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sensitivityPhosphorus" checked>
+                                <label for="sensitivityPhosphorus">总磷浓度</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" id="calculateBtn">
+                <i class="fas fa-calculator" style="margin-right: 8px;"></i>
+                计算温室气体排放
+            </button>
+            <button class="btn btn-secondary" id="saveDraftBtn">
+                <i class="fas fa-save" style="margin-right: 8px;"></i>
+                保存为草稿
+            </button>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loadingContainer" class="loading-container" style="display: none;">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>正在计算中，请稍候...</p>
+            </div>
+        </div>
+
+        <!-- 结果展示区域 -->
+        <div id="resultsContainer" class="results-container" style="display: none;">
+            <!-- 这里将显示计算结果 -->
+        </div>
+    </main>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/static/app.js"></script>
 </body>
 </html>

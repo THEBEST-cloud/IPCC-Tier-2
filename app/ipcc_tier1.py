@@ -1,67 +1,76 @@
 """
 IPCC Tier 1 Methodology for Reservoir Greenhouse Gas Emissions
-Based on IPCC Guidelines and scientific literature
+严格遵循IPCC指南的Tier 1方法
 """
 
 import numpy as np
-from typing import Tuple, Optional
+import math
+from typing import Tuple, Optional, Dict
 
-# Global Warming Potential (GWP) for 100-year time horizon
-GWP_CH4 = 28  # IPCC AR5
-GWP_N2O = 265  # IPCC AR5
+# IPCC Tier 1 常量定义
+M_CO2 = 44  # CO2的相对分子质量
+M_C = 12    # C元素的相对原子质量
+R_d_i = 0.09  # 大坝下游CH4通量与水库表面CH4通量的比值
+GWP_100yr_CH4 = 27.2  # 非化石源CH4的100年全球变暖潜势
 
-# Climate region definitions based on latitude
+# 气候区定义（基于纬度）
 def get_climate_region(latitude: float) -> str:
     """
-    Determine climate region based on latitude
+    根据纬度确定气候区
     
-    Tropical: 0° to 23.5°
-    Subtropical: 23.5° to 35°
-    Temperate: 35° to 60°
-    Boreal/Polar: 60° to 90°
+    Args:
+        latitude: 纬度（度）
+    
+    Returns:
+        气候区名称
     """
     abs_lat = abs(latitude)
     
-    if abs_lat <= 23.5:
-        return "Tropical"
-    elif abs_lat <= 35:
-        return "Subtropical"
-    elif abs_lat <= 60:
-        return "Temperate"
+    if abs_lat <= 25:
+        return "炎热潮湿区"  # Tropical_Moist
+    elif abs_lat <= 50:
+        # 对于25-50度纬度，需要进一步确认湿润/干燥
+        # 这里默认返回温暖湿润区，实际应用中需要用户选择
+        return "温暖湿润区"  # 默认温暖湿润区
     else:
-        return "Boreal"
+        return "其他区域"  # Other
 
-# Default emission factors based on climate regions (kg/km²/yr)
-# These are representative values based on IPCC guidance and scientific literature
+# IPCC Tier 1 排放因子表
 EMISSION_FACTORS = {
-    "Tropical": {
-        "CH4": 150000,  # Higher emissions in tropical regions
-        "CO2": 500000,
-        "N2O": 80,
+    "温暖干燥区": {  # Warm_Dry
+        "EF_CO2_age_le_20": 1.7,  # tCO2-C/(ha·yr)
+        "EF_CH4_age_le_20": 195.6,  # kgCH4/(ha·yr)
+        "EF_CH4_age_gt_20": 150.9,  # kgCH4/(ha·yr)
     },
-    "Subtropical": {
-        "CH4": 100000,
-        "CO2": 350000,
-        "N2O": 60,
+    "温暖湿润区": {  # Warm_Moist
+        "EF_CO2_age_le_20": 1.46,  # tCO2-C/(ha·yr)
+        "EF_CH4_age_le_20": 127.5,  # kgCH4/(ha·yr)
+        "EF_CH4_age_gt_20": 80.3,  # kgCH4/(ha·yr)
     },
-    "Temperate": {
-        "CH4": 70000,
-        "CO2": 250000,
-        "N2O": 40,
-    },
-    "Boreal": {
-        "CH4": 40000,
-        "CO2": 150000,
-        "N2O": 25,
+    "炎热潮湿区": {  # Tropical_Moist
+        "EF_CO2_age_le_20": 2.77,  # tCO2-C/(ha·yr)
+        "EF_CH4_age_le_20": 251.6,  # kgCH4/(ha·yr)
+        "EF_CH4_age_gt_20": 141.1,  # kgCH4/(ha·yr)
     }
 }
 
-# Uncertainty ranges (as percentage of the mean)
-UNCERTAINTY_RANGES = {
-    "CH4": 0.50,  # ±50%
-    "CO2": 0.40,  # ±40%
-    "N2O": 0.60,  # ±60%
+# 营养状态调整系数
+TROPHIC_ADJUSTMENT_FACTORS = {
+    "Oligotrophic": 0.7,    # 贫营养型
+    "Mesotrophic": 3,       # 中营养型
+    "Eutrophic": 10,        # 富营养型
+    "Hypereutrophic": 25,   # 超富营养型
 }
+
+def clean_numeric_value(value):
+    """
+    清理数值，确保JSON兼容
+    """
+    if value is None:
+        return 0.0
+    if math.isnan(value) or math.isinf(value):
+        return 0.0
+    return float(value)
 
 def assess_trophic_status(
     total_phosphorus: Optional[float] = None,
@@ -70,34 +79,37 @@ def assess_trophic_status(
     secchi_depth: Optional[float] = None
 ) -> str:
     """
-    Assess trophic status based on water quality parameters
+    根据水质参数评估营养状态
     
-    Criteria (simplified):
-    - Oligotrophic: TP < 10 μg/L, TN < 350 μg/L, Chl-a < 2.5 μg/L, Secchi > 4m
-    - Mesotrophic: TP 10-30 μg/L, TN 350-650 μg/L, Chl-a 2.5-8 μg/L, Secchi 2-4m
-    - Eutrophic: TP 30-100 μg/L, TN 650-1200 μg/L, Chl-a 8-25 μg/L, Secchi 1-2m
-    - Hypereutrophic: TP > 100 μg/L, TN > 1200 μg/L, Chl-a > 25 μg/L, Secchi < 1m
+    Args:
+        total_phosphorus: 总磷浓度 (mg/L)
+        total_nitrogen: 总氮浓度 (mg/L)
+        chlorophyll_a: 叶绿素a浓度 (μg/L)
+        secchi_depth: 透明度 (m)
+    
+    Returns:
+        营养状态分类
     """
     scores = []
     
     if total_phosphorus is not None:
-        tp_mg = total_phosphorus * 1000  # Convert mg/L to μg/L
-        if tp_mg < 10:
+        tp_ug = total_phosphorus * 1000  # 转换为μg/L
+        if tp_ug < 10:
             scores.append(1)
-        elif tp_mg < 30:
+        elif tp_ug < 30:
             scores.append(2)
-        elif tp_mg < 100:
+        elif tp_ug < 100:
             scores.append(3)
         else:
             scores.append(4)
     
     if total_nitrogen is not None:
-        tn_mg = total_nitrogen * 1000  # Convert mg/L to μg/L
-        if tn_mg < 350:
+        tn_ug = total_nitrogen * 1000  # 转换为μg/L
+        if tn_ug < 350:
             scores.append(1)
-        elif tn_mg < 650:
+        elif tn_ug < 650:
             scores.append(2)
-        elif tn_mg < 1200:
+        elif tn_ug < 1200:
             scores.append(3)
         else:
             scores.append(4)
@@ -123,7 +135,7 @@ def assess_trophic_status(
             scores.append(4)
     
     if not scores:
-        return "Unknown"
+        return "Mesotrophic"  # 默认中营养型
     
     avg_score = np.mean(scores)
     
@@ -138,49 +150,188 @@ def assess_trophic_status(
 
 def get_emission_factors(
     climate_region: str,
-    trophic_status: Optional[str] = None,
-    reservoir_age: Optional[float] = None
+    trophic_status: str = "Mesotrophic",
+    reservoir_age: float = 100
 ) -> Tuple[float, float, float]:
     """
-    Get emission factors based on climate region and optional modifiers
+    根据气候区和营养状态获取排放因子
     
-    Returns: (CH4_EF, CO2_EF, N2O_EF) in kg/km²/yr
+    Args:
+        climate_region: 气候区
+        trophic_status: 营养状态
+        reservoir_age: 水库年龄（年）
+    
+    Returns:
+        (CH4_EF, CO2_EF, N2O_EF) in kg/km²/yr
     """
-    base_factors = EMISSION_FACTORS.get(climate_region, EMISSION_FACTORS["Temperate"])
+    # 获取基础排放因子
+    if climate_region not in EMISSION_FACTORS:
+        climate_region = "温暖湿润区"  # 默认温暖湿润区
     
-    ch4_ef = base_factors["CH4"]
-    co2_ef = base_factors["CO2"]
-    n2o_ef = base_factors["N2O"]
+    factors = EMISSION_FACTORS[climate_region]
     
-    # Adjust based on trophic status (higher productivity → higher emissions)
-    if trophic_status:
-        trophic_multipliers = {
-            "Oligotrophic": 0.7,
-            "Mesotrophic": 1.0,
-            "Eutrophic": 1.3,
-            "Hypereutrophic": 1.6,
-        }
-        multiplier = trophic_multipliers.get(trophic_status, 1.0)
-        ch4_ef *= multiplier
-        co2_ef *= multiplier
-        n2o_ef *= multiplier
+    # 根据水库年龄选择CH4排放因子
+    if reservoir_age <= 20:
+        ch4_ef = factors["EF_CH4_age_le_20"]
+    else:
+        ch4_ef = factors["EF_CH4_age_gt_20"]
     
-    # Adjust based on reservoir age (emissions decrease over time)
-    if reservoir_age is not None:
-        if reservoir_age < 5:
-            age_multiplier = 1.5
-        elif reservoir_age < 10:
-            age_multiplier = 1.2
-        elif reservoir_age < 20:
-            age_multiplier = 1.0
-        else:
-            age_multiplier = 0.8
-        
-        ch4_ef *= age_multiplier
-        co2_ef *= age_multiplier
+    co2_ef = factors["EF_CO2_age_le_20"]
+    
+    # 应用营养状态调整系数
+    trophic_factor = TROPHIC_ADJUSTMENT_FACTORS.get(trophic_status, 3)
+    ch4_ef *= trophic_factor
+    
+    # 转换单位：tCO2-C/(ha·yr) -> kgCO2/(km²/yr)
+    co2_ef = co2_ef * 100 * (M_CO2 / M_C)  # 100 ha/km² * 分子量转换
+    
+    # 转换单位：kgCH4/(ha·yr) -> kgCH4/(km²/yr)
+    ch4_ef = ch4_ef * 100  # 100 ha/km²
+    
+    # N2O排放因子（IPCC Tier 1方法中通常忽略）
+    n2o_ef = 0
     
     return ch4_ef, co2_ef, n2o_ef
 
+def calculate_ipcc_tier1_emissions(
+    surface_area_ha: float,
+    latitude: float,
+    trophic_status: str = "Mesotrophic",
+    reservoir_age: float = 100,
+    climate_region_override: Optional[str] = None
+) -> Dict[str, float]:
+    """
+    按照IPCC Tier 1方法计算水库温室气体排放
+    
+    Args:
+        surface_area_ha: 水库面积（公顷）
+        latitude: 纬度
+        trophic_status: 营养状态
+        reservoir_age: 水库年龄（年）
+        climate_region_override: 手动指定的气候区
+    
+    Returns:
+        包含所有排放指标的字典
+    """
+    # 第1步：确定气候区
+    if climate_region_override:
+        climate_region = climate_region_override
+    else:
+        climate_region = get_climate_region(latitude)
+    
+    # 第2步：获取排放因子
+    ch4_ef, co2_ef, n2o_ef = get_emission_factors(
+        climate_region, trophic_status, reservoir_age
+    )
+    
+    # 第3步：计算年均CO2排放总量 (F_CO2,tot)
+    # 注意：这里使用≤20年的CO2排放因子，因为IPCC方法中CO2排放因子不区分年龄
+    F_CO2_tot = surface_area_ha * (co2_ef / 100)  # 转换为tCO2-C/yr
+    
+    # 第4步：计算CH4排放
+    # 获取不同年龄段的CH4排放因子
+    factors = EMISSION_FACTORS.get(climate_region, EMISSION_FACTORS["温暖湿润区"])
+    trophic_factor = TROPHIC_ADJUSTMENT_FACTORS.get(trophic_status, 3)
+    
+    # 库龄≤20年的CH4排放
+    F_CH4_res_age_le_20 = trophic_factor * (factors["EF_CH4_age_le_20"] * surface_area_ha)
+    F_CH4_downstream_age_le_20 = F_CH4_res_age_le_20 * R_d_i
+    
+    # 库龄>20年的CH4排放
+    F_CH4_res_age_gt_20 = trophic_factor * (factors["EF_CH4_age_gt_20"] * surface_area_ha)
+    F_CH4_downstream_age_gt_20 = F_CH4_res_age_gt_20 * R_d_i
+    
+    # 第5步：计算生命周期总排放量
+    # 库龄≤20年的CH4排放总量
+    E_CH4_age_le_20 = ((F_CH4_res_age_le_20 + F_CH4_downstream_age_le_20) * 
+                       GWP_100yr_CH4 / 1000) * min(20, reservoir_age)
+    
+    # 库龄>20年的CH4排放总量
+    if reservoir_age > 20:
+        E_CH4_age_gt_20 = ((F_CH4_res_age_gt_20 + F_CH4_downstream_age_gt_20) * 
+                           GWP_100yr_CH4 / 1000) * (reservoir_age - 20)
+    else:
+        E_CH4_age_gt_20 = 0
+    
+    # 水库寿命内CO2排放总量
+    E_CO2 = F_CO2_tot * (M_CO2 / M_C) * reservoir_age
+    
+    # 水库寿命内CH4排放总量
+    E_CH4 = E_CH4_age_le_20 + E_CH4_age_gt_20
+    
+    # 水库生命周期碳排放总量
+    E_total = E_CO2 + E_CH4
+    
+    # 计算年均排放量
+    annual_CO2_kg = F_CO2_tot * (M_CO2 / M_C) * 1000  # kgCO2eq/yr
+    
+    # 分阶段年均CH4排放量
+    if reservoir_age <= 20:
+        annual_CH4_age_le_20_kg = (E_CH4_age_le_20 / reservoir_age) * 1000
+        annual_CH4_age_gt_20_kg = 0
+    else:
+        annual_CH4_age_le_20_kg = (E_CH4_age_le_20 / 20) * 1000
+        annual_CH4_age_gt_20_kg = (E_CH4_age_gt_20 / (reservoir_age - 20)) * 1000
+    
+    # 水库表面和下游CH4排放的年均排放量
+    annual_CH4_res_surface_le_20 = F_CH4_res_age_le_20 * GWP_100yr_CH4
+    annual_CH4_downstream_le_20 = F_CH4_downstream_age_le_20 * GWP_100yr_CH4
+    
+    if reservoir_age > 20:
+        annual_CH4_res_surface_gt_20 = F_CH4_res_age_gt_20 * GWP_100yr_CH4
+        annual_CH4_downstream_gt_20 = F_CH4_downstream_age_gt_20 * GWP_100yr_CH4
+    else:
+        annual_CH4_res_surface_gt_20 = 0
+        annual_CH4_downstream_gt_20 = 0
+    
+    return {
+        # 主要结果
+        "E_total": clean_numeric_value(E_total),  # 水库生命周期碳排放总量 (tCO2eq)
+        "E_CO2": clean_numeric_value(E_CO2),  # 水库寿命内CO2排放总量 (tCO2eq)
+        "E_CH4": clean_numeric_value(E_CH4),  # 水库寿命内CH4排放总量 (tCO2eq)
+        
+        # 年均排放量
+        "annual_CO2": clean_numeric_value(annual_CO2_kg),  # 年均CO2排放量 (kgCO2eq/yr)
+        "annual_CH4_age_le_20": clean_numeric_value(annual_CH4_age_le_20_kg),  # ≤20年CH4年均排放量 (kgCO2eq/yr)
+        "annual_CH4_age_gt_20": clean_numeric_value(annual_CH4_age_gt_20_kg),  # >20年CH4年均排放量 (kgCO2eq/yr)
+        
+        # 分源CH4排放
+        "annual_CH4_res_surface_le_20": clean_numeric_value(annual_CH4_res_surface_le_20),  # ≤20年水库表面CH4排放 (kgCO2eq/yr)
+        "annual_CH4_res_surface_gt_20": clean_numeric_value(annual_CH4_res_surface_gt_20),  # >20年水库表面CH4排放 (kgCO2eq/yr)
+        "annual_CH4_downstream_le_20": clean_numeric_value(annual_CH4_downstream_le_20),  # ≤20年下游CH4排放 (kgCO2eq/yr)
+        "annual_CH4_downstream_gt_20": clean_numeric_value(annual_CH4_downstream_gt_20),  # >20年下游CH4排放 (kgCO2eq/yr)
+        
+        # 输入参数
+        "climate_region": climate_region,
+        "trophic_status": trophic_status,
+        "reservoir_age": clean_numeric_value(reservoir_age),
+        "surface_area_ha": clean_numeric_value(surface_area_ha),
+        
+        # 排放因子
+        "EF_CO2_age_le_20": clean_numeric_value(factors["EF_CO2_age_le_20"]),  # CO2排放因子 (tCO2-C/(ha·yr))
+        "EF_CH4_age_le_20": clean_numeric_value(factors["EF_CH4_age_le_20"]),  # ≤20年CH4排放因子 (kgCH4/(ha·yr))
+        "EF_CH4_age_gt_20": clean_numeric_value(factors["EF_CH4_age_gt_20"]),  # >20年CH4排放因子 (kgCH4/(ha·yr))
+        "trophic_factor": clean_numeric_value(trophic_factor),  # 营养状态调整系数
+        
+        # 中间计算值
+        "F_CO2_tot": clean_numeric_value(F_CO2_tot),  # 年均CO2排放总量 (tCO2-C/yr)
+        "F_CH4_res_age_le_20": clean_numeric_value(F_CH4_res_age_le_20),  # ≤20年水库表面CH4排放 (kgCH4/yr)
+        "F_CH4_downstream_age_le_20": clean_numeric_value(F_CH4_downstream_age_le_20),  # ≤20年下游CH4排放 (kgCH4/yr)
+        "F_CH4_res_age_gt_20": clean_numeric_value(F_CH4_res_age_gt_20),  # >20年水库表面CH4排放 (kgCH4/yr)
+        "F_CH4_downstream_age_gt_20": clean_numeric_value(F_CH4_downstream_age_gt_20),  # >20年下游CH4排放 (kgCH4/yr)
+        
+        # 分阶段CH4排放总量
+        "E_CH4_age_le_20": clean_numeric_value(E_CH4_age_le_20),  # ≤20年CH4排放总量 (tCO2eq)
+        "E_CH4_age_gt_20": clean_numeric_value(E_CH4_age_gt_20),  # >20年CH4排放总量 (tCO2eq)
+        
+        # 常量
+        "M_CO2": M_CO2,  # CO2相对分子质量
+        "M_C": M_C,  # C相对原子质量
+        "R_d_i": R_d_i,  # 下游CH4通量比值
+        "GWP_100yr_CH4": GWP_100yr_CH4,  # CH4全球变暖潜势
+    }
+
+# 保持向后兼容的函数
 def calculate_emissions(
     surface_area: float,
     ch4_ef: float,
@@ -188,22 +339,29 @@ def calculate_emissions(
     n2o_ef: float
 ) -> Tuple[float, float, float, float]:
     """
-    Calculate total emissions
+    计算总排放量（向后兼容函数）
     
     Args:
-        surface_area: Reservoir surface area (km²)
-        ch4_ef: CH4 emission factor (kg/km²/yr)
-        co2_ef: CO2 emission factor (kg/km²/yr)
-        n2o_ef: N2O emission factor (kg/km²/yr)
+        surface_area: 水库面积 (km²)
+        ch4_ef: CH4排放因子 (kg/km²/yr)
+        co2_ef: CO2排放因子 (kg/km²/yr)
+        n2o_ef: N2O排放因子 (kg/km²/yr)
     
     Returns:
-        (CH4 emissions, CO2 emissions, N2O emissions, CO2-equivalent) in kg/yr
+        (CH4排放量, CO2排放量, N2O排放量, CO2当量) in kg/yr
     """
     ch4_total = surface_area * ch4_ef
     co2_total = surface_area * co2_ef
     n2o_total = surface_area * n2o_ef
     
-    # Calculate CO2 equivalent
-    co2_eq = co2_total + (ch4_total * GWP_CH4) + (n2o_total * GWP_N2O)
+    # 计算CO2当量
+    co2_eq = co2_total + (ch4_total * GWP_100yr_CH4) + (n2o_total * 265)
     
     return ch4_total, co2_total, n2o_total, co2_eq
+
+# 不确定性范围（作为均值的百分比）
+UNCERTAINTY_RANGES = {
+    "CH4": 0.50,  # ±50%
+    "CO2": 0.40,  # ±40%
+    "N2O": 0.60,  # ±60%
+}

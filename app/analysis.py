@@ -3,9 +3,24 @@ Uncertainty and Sensitivity Analysis for Reservoir Emissions
 """
 
 import numpy as np
+import math
 from scipy import stats
 from typing import Dict, List, Tuple
-from .ipcc_tier1 import calculate_emissions, GWP_CH4, GWP_N2O, UNCERTAINTY_RANGES
+from .ipcc_tier1 import calculate_emissions, UNCERTAINTY_RANGES
+
+# 定义GWP常量
+GWP_CH4 = 28  # IPCC AR5
+GWP_N2O = 265  # IPCC AR5
+
+def clean_numeric_value(value):
+    """
+    清理数值，确保JSON兼容
+    """
+    if value is None:
+        return 0.0
+    if math.isnan(value) or math.isinf(value):
+        return 0.0
+    return float(value)
 
 class UncertaintyAnalysis:
     """Monte Carlo uncertainty analysis"""
@@ -50,50 +65,60 @@ class UncertaintyAnalysis:
         co2_std = co2_ef * uncertainty_ranges.get("CO2", 0.4)
         n2o_std = n2o_ef * uncertainty_ranges.get("N2O", 0.6)
         
-        ch4_ef_samples = np.random.lognormal(
-            np.log(ch4_ef) - 0.5 * (ch4_std/ch4_ef)**2,
-            ch4_std/ch4_ef,
-            self.iterations
-        )
+        # 处理CH4排放因子
+        if ch4_ef > 0:
+            ch4_ef_samples = np.random.lognormal(
+                np.log(ch4_ef) - 0.5 * (ch4_std/ch4_ef)**2,
+                ch4_std/ch4_ef,
+                self.iterations
+            )
+        else:
+            ch4_ef_samples = np.zeros(self.iterations)
         
-        co2_ef_samples = np.random.lognormal(
-            np.log(co2_ef) - 0.5 * (co2_std/co2_ef)**2,
-            co2_std/co2_ef,
-            self.iterations
-        )
+        # 处理CO2排放因子
+        if co2_ef > 0:
+            co2_ef_samples = np.random.lognormal(
+                np.log(co2_ef) - 0.5 * (co2_std/co2_ef)**2,
+                co2_std/co2_ef,
+                self.iterations
+            )
+        else:
+            co2_ef_samples = np.zeros(self.iterations)
         
-        n2o_ef_samples = np.random.lognormal(
-            np.log(n2o_ef) - 0.5 * (n2o_std/n2o_ef)**2,
-            n2o_std/n2o_ef,
-            self.iterations
-        )
+        # 处理N2O排放因子（IPCC Tier 1通常为0）
+        if n2o_ef > 0:
+            n2o_ef_samples = np.random.lognormal(
+                np.log(n2o_ef) - 0.5 * (n2o_std/n2o_ef)**2,
+                n2o_std/n2o_ef,
+                self.iterations
+            )
+        else:
+            n2o_ef_samples = np.zeros(self.iterations)
         
         # Calculate emissions for each iteration
         ch4_results = area_samples * ch4_ef_samples
         co2_results = area_samples * co2_ef_samples
-        n2o_results = area_samples * n2o_ef_samples
-        co2eq_results = co2_results + (ch4_results * GWP_CH4) + (n2o_results * GWP_N2O)
+        co2eq_results = co2_results + (ch4_results * GWP_CH4)
         
         # Calculate statistics
         return {
             "CH4": self._calculate_statistics(ch4_results),
             "CO2": self._calculate_statistics(co2_results),
-            "N2O": self._calculate_statistics(n2o_results),
             "CO2_equivalent": self._calculate_statistics(co2eq_results),
         }
     
     def _calculate_statistics(self, data: np.ndarray) -> Dict[str, float]:
         """Calculate statistical measures from sample data"""
         return {
-            "mean": float(np.mean(data)),
-            "std": float(np.std(data)),
-            "ci_lower": float(np.percentile(data, 2.5)),
-            "ci_upper": float(np.percentile(data, 97.5)),
-            "percentile_5": float(np.percentile(data, 5)),
-            "percentile_25": float(np.percentile(data, 25)),
-            "percentile_50": float(np.percentile(data, 50)),
-            "percentile_75": float(np.percentile(data, 75)),
-            "percentile_95": float(np.percentile(data, 95)),
+            "mean": clean_numeric_value(np.mean(data)),
+            "std": clean_numeric_value(np.std(data)),
+            "ci_lower": clean_numeric_value(np.percentile(data, 2.5)),
+            "ci_upper": clean_numeric_value(np.percentile(data, 97.5)),
+            "percentile_5": clean_numeric_value(np.percentile(data, 5)),
+            "percentile_25": clean_numeric_value(np.percentile(data, 25)),
+            "percentile_50": clean_numeric_value(np.percentile(data, 50)),
+            "percentile_75": clean_numeric_value(np.percentile(data, 75)),
+            "percentile_95": clean_numeric_value(np.percentile(data, 95)),
         }
 
 
@@ -129,29 +154,40 @@ class SensitivityAnalysis:
         co2_std = co2_ef * uncertainty_ranges.get("CO2", 0.4)
         n2o_std = n2o_ef * uncertainty_ranges.get("N2O", 0.6)
         
-        ch4_ef_samples = np.random.lognormal(
-            np.log(ch4_ef) - 0.5 * (ch4_std/ch4_ef)**2,
-            ch4_std/ch4_ef,
-            self.iterations
-        )
+        # 处理CH4排放因子
+        if ch4_ef > 0:
+            ch4_ef_samples = np.random.lognormal(
+                np.log(ch4_ef) - 0.5 * (ch4_std/ch4_ef)**2,
+                ch4_std/ch4_ef,
+                self.iterations
+            )
+        else:
+            ch4_ef_samples = np.zeros(self.iterations)
         
-        co2_ef_samples = np.random.lognormal(
-            np.log(co2_ef) - 0.5 * (co2_std/co2_ef)**2,
-            co2_std/co2_ef,
-            self.iterations
-        )
+        # 处理CO2排放因子
+        if co2_ef > 0:
+            co2_ef_samples = np.random.lognormal(
+                np.log(co2_ef) - 0.5 * (co2_std/co2_ef)**2,
+                co2_std/co2_ef,
+                self.iterations
+            )
+        else:
+            co2_ef_samples = np.zeros(self.iterations)
         
-        n2o_ef_samples = np.random.lognormal(
-            np.log(n2o_ef) - 0.5 * (n2o_std/n2o_ef)**2,
-            n2o_std/n2o_ef,
-            self.iterations
-        )
+        # 处理N2O排放因子（IPCC Tier 1通常为0）
+        if n2o_ef > 0:
+            n2o_ef_samples = np.random.lognormal(
+                np.log(n2o_ef) - 0.5 * (n2o_std/n2o_ef)**2,
+                n2o_std/n2o_ef,
+                self.iterations
+            )
+        else:
+            n2o_ef_samples = np.zeros(self.iterations)
         
         # Calculate CO2 equivalent for sensitivity
         co2eq_results = (
             area_samples * co2_ef_samples +
-            area_samples * ch4_ef_samples * GWP_CH4 +
-            area_samples * n2o_ef_samples * GWP_N2O
+            area_samples * ch4_ef_samples * GWP_CH4
         )
         
         # Create parameter matrix
@@ -159,7 +195,6 @@ class SensitivityAnalysis:
             "Surface Area": area_samples,
             "CH4 Emission Factor": ch4_ef_samples,
             "CO2 Emission Factor": co2_ef_samples,
-            "N2O Emission Factor": n2o_ef_samples,
         }
         
         # Calculate correlations
@@ -173,8 +208,8 @@ class SensitivityAnalysis:
             
             results.append({
                 "parameter": param_name,
-                "correlation": float(pearson_corr),
-                "rank_correlation": float(spearman_corr),
+                "correlation": clean_numeric_value(pearson_corr),
+                "rank_correlation": clean_numeric_value(spearman_corr),
             })
         
         # Sort by absolute correlation (most influential first)

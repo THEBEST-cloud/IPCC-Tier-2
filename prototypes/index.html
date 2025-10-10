@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservoir Carbon Accounting - 水库碳核算系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        /* 导航栏样式 */
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+            color: white;
+            padding: 0 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #10b981, #059669);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            top: 12px;
+            left: 12px;
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 用户下拉菜单 */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-top: 70px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        /* 地图容器 */
+        .map-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .map-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0369a1;
+            font-weight: 600;
+            border: 2px dashed #0ea5e9;
+        }
+
+        .coordinates-input {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* 信息图标 */
+        .info-icon {
+            color: #6b7280;
+            cursor: help;
+            margin-left: 8px;
+        }
+
+        /* 营养状态标签 */
+        .trophic-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .trophic-eutrophic {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        /* 切换开关 */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3b82f6;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* 分析选项卡片 */
+        .analysis-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .analysis-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .analysis-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+        }
+
+        .analysis-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8fafc;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        /* 帮助文本 */
+        .help-text {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: 1rem 0;
+            }
+
+            .nav-links {
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .map-container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo"></div>
+                <h1 class="app-title">Reservoir Carbon Accounting</h1>
+            </div>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link active">新建计算</a>
+                <a href="my-projects.html" class="nav-link">我的项目</a>
+                <a href="methodology.html" class="nav-link">方法学说明</a>
+                <a href="help.html" class="nav-link">帮助</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserDropdown()">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i>
+                            个人信息
+                        </a>
+                        <a href="my-projects.html" class="dropdown-item">
+                            <i class="fas fa-folder"></i>
+                            我的项目
+                        </a>
+                        <a href="settings.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            设置
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="login.html" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 第一步：项目信息与位置 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">第一步：项目信息与位置</h2>
+                <p class="card-subtitle">输入项目基本信息并选择水库位置</p>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="projectName" class="form-label">
+                        项目名称 <span class="required">*</span>
+                    </label>
+                    <input type="text" id="projectName" class="form-input" placeholder="请输入项目名称">
+                </div>
+
+                <div class="map-container">
+                    <div class="map-placeholder">
+                        <i class="fas fa-map-marked-alt" style="font-size: 2rem; margin-right: 1rem;"></i>
+                        交互式地图 - 点击选择位置
+                    </div>
+                    <div class="coordinates-input">
+                        <div class="form-group">
+                            <label for="longitude" class="form-label">经度 (Longitude)</label>
+                            <input type="number" id="longitude" class="form-input" placeholder="例如: 116.4074" step="0.0001">
+                        </div>
+                        <div class="form-group">
+                            <label for="latitude" class="form-label">纬度 (Latitude)</label>
+                            <input type="number" id="latitude" class="form-input" placeholder="例如: 39.9042" step="0.0001">
+                        </div>
+                        <div class="form-group">
+                            <label for="climateRegion" class="form-label">气候区域</label>
+                            <input type="text" id="climateRegion" class="form-input" placeholder="根据位置自动填充" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第二步：水质参数 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">第二步：水质参数</h2>
+                <p class="card-subtitle">输入水质数据以评估水库营养状态</p>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="totalPhosphorus" class="form-label">
+                            总磷 (μg/L) <i class="fas fa-info-circle info-icon" title="总磷浓度，用于评估水体富营养化程度"></i>
+                        </label>
+                        <input type="number" id="totalPhosphorus" class="form-input" placeholder="例如: 25.5" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="totalNitrogen" class="form-label">
+                            总氮 (mg/L) <i class="fas fa-info-circle info-icon" title="总氮浓度，影响水体营养状态"></i>
+                        </label>
+                        <input type="number" id="totalNitrogen" class="form-input" placeholder="例如: 1.2" step="0.01">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="chlorophyllA" class="form-label">
+                        叶绿素a (μg/L) <i class="fas fa-info-circle info-icon" title="叶绿素a浓度，反映浮游植物生物量"></i>
+                    </label>
+                    <input type="number" id="chlorophyllA" class="form-input" placeholder="例如: 8.3" step="0.1">
+                </div>
+                
+                <div class="trophic-status trophic-eutrophic">
+                    评估的营养状态：富营养 (Eutrophic)
+                </div>
+            </div>
+        </div>
+
+        <!-- 第三步：IPCC Tier 1 模型参数设置 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">第三步：IPCC Tier 1 模型参数设置</h2>
+                <p class="card-subtitle">配置IPCC第一层级方法的基本参数</p>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reservoirArea" class="form-label">水库面积 (km²)</label>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <input type="number" id="reservoirArea" class="form-input" placeholder="例如: 15.5" step="0.1">
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                            <span style="font-size: 0.875rem; color: #6b7280;">使用默认值</span>
+                        </div>
+                        <p class="help-text">基于气候区域的推荐默认值：10.0 km²</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="reservoirAge" class="form-label">水库年龄 (年)</label>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <input type="number" id="reservoirAge" class="form-input" placeholder="例如: 25" step="1">
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                            <span style="font-size: 0.875rem; color: #6b7280;">使用默认值</span>
+                        </div>
+                        <p class="help-text">水库建成后的年数</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="waterTemperature" class="form-label">年平均水温 (°C)</label>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <input type="number" id="waterTemperature" class="form-input" placeholder="例如: 18.5" step="0.1">
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                        <span style="font-size: 0.875rem; color: #6b7280;">使用默认值</span>
+                    </div>
+                    <p class="help-text">基于气候区域的推荐默认值：20.0°C</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第四步：选择分析类型 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">第四步：选择分析类型</h2>
+                <p class="card-subtitle">选择需要进行的分析类型</p>
+            </div>
+            <div class="card-body">
+                <div class="analysis-cards">
+                    <div class="analysis-card">
+                        <h3 class="analysis-title">不确定性分析</h3>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="enableUncertainty">
+                            <label for="enableUncertainty">启用不确定性分析</label>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label for="monteCarloRuns" class="form-label">蒙特卡洛模拟次数</label>
+                            <select id="monteCarloRuns" class="form-input">
+                                <option value="1000">1,000 次</option>
+                                <option value="5000" selected>5,000 次</option>
+                                <option value="10000">10,000 次</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3 class="analysis-title">敏感性分析</h3>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="enableSensitivity">
+                            <label for="enableSensitivity">启用敏感性分析</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sensitivityArea">
+                                <label for="sensitivityArea">水库面积</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sensitivityAge">
+                                <label for="sensitivityAge">水库年龄</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sensitivityTemp">
+                                <label for="sensitivityTemp">年平均水温</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sensitivityPhosphorus">
+                                <label for="sensitivityPhosphorus">总磷浓度</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+            <button class="btn btn-primary">
+                <i class="fas fa-calculator" style="margin-right: 8px;"></i>
+                计算温室气体排放
+            </button>
+            <button class="btn btn-secondary">
+                <i class="fas fa-save" style="margin-right: 8px;"></i>
+                保存为草稿
+            </button>
+        </div>
+    </main>
+
+    <script>
+        // 简单的交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 切换开关功能
+            const toggles = document.querySelectorAll('.toggle-switch input');
+            toggles.forEach(toggle => {
+                toggle.addEventListener('change', function() {
+                    const input = this.closest('.form-group').querySelector('.form-input');
+                    if (this.checked) {
+                        input.readOnly = true;
+                        input.style.backgroundColor = '#f8fafc';
+                        input.style.color = '#6b7280';
+                    } else {
+                        input.readOnly = false;
+                        input.style.backgroundColor = 'white';
+                        input.style.color = '#334155';
+                    }
+                });
+            });
+
+        // 分析选项显示/隐藏
+        const uncertaintyCheckbox = document.getElementById('enableUncertainty');
+        const sensitivityCheckbox = document.getElementById('enableSensitivity');
+        const monteCarloSelect = document.getElementById('monteCarloRuns');
+        const sensitivityOptions = document.querySelector('.checkbox-group');
+
+        uncertaintyCheckbox.addEventListener('change', function() {
+            monteCarloSelect.style.display = this.checked ? 'block' : 'none';
+        });
+
+        sensitivityCheckbox.addEventListener('change', function() {
+            sensitivityOptions.style.display = this.checked ? 'block' : 'none';
+        });
+
+        // 初始状态
+        monteCarloSelect.style.display = 'none';
+        sensitivityOptions.style.display = 'none';
+    });
+
+    // 用户下拉菜单功能
+    function toggleUserDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+    }
+
+    // 点击外部关闭下拉菜单
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('userDropdown');
+        const avatar = document.querySelector('.user-avatar');
+        
+        if (!avatar.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+        });
+    </script>
+</body>
+</html>

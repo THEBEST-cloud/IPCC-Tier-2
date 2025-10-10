@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算结果 - Reservoir Carbon Accounting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        /* 导航栏样式 */
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+            color: white;
+            padding: 0 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #10b981, #059669);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            top: 12px;
+            left: 12px;
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 用户下拉菜单 */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-top: 70px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .project-name {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(16, 185, 129, 0.3);
+        }
+
+        /* 标签页样式 */
+        .tabs-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tabs-header {
+            display: flex;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button.active {
+            color: #3b82f6;
+            background: white;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #3b82f6;
+        }
+
+        .tab-content {
+            padding: 2rem;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 排放总量样式 */
+        .emissions-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .emission-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+
+        .emission-card.co2 {
+            border-color: #ef4444;
+        }
+
+        .emission-card.ch4 {
+            border-color: #f59e0b;
+        }
+
+        .emission-card.n2o {
+            border-color: #8b5cf6;
+        }
+
+        .emission-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .emission-card.co2 .emission-icon {
+            color: #ef4444;
+        }
+
+        .emission-card.ch4 .emission-icon {
+            color: #f59e0b;
+        }
+
+        .emission-card.n2o .emission-icon {
+            color: #8b5cf6;
+        }
+
+        .emission-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .emission-unit {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .emission-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .total-emissions {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .total-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .total-label {
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        /* 统计表格 */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .stats-table th,
+        .stats-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stats-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .stats-table tr:hover {
+            background: #f8fafc;
+        }
+
+        /* 龙卷风图样式 */
+        .tornado-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .tornado-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tornado-label {
+            min-width: 120px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .tornado-bar {
+            flex: 1;
+            height: 30px;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            border-radius: 15px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .tornado-value {
+            min-width: 80px;
+            text-align: right;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: 1rem 0;
+            }
+
+            .nav-links {
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .emissions-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs-header {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                border-bottom: 1px solid #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo"></div>
+                <h1 class="app-title">Reservoir Carbon Accounting</h1>
+            </div>
+            <nav class="nav-links">
+                <a href="/dashboard" class="nav-link">新建计算</a>
+                <a href="/projects" class="nav-link">我的项目</a>
+                <a href="/methodology" class="nav-link">方法学说明</a>
+                <a href="/help" class="nav-link">帮助</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserDropdown()">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="/profile" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i>
+                            个人信息
+                        </a>
+                        <a href="/projects" class="dropdown-item">
+                            <i class="fas fa-folder"></i>
+                            我的项目
+                        </a>
+                        <a href="/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            设置
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/login" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">计算结果：<span class="project-name">北京密云水库碳核算项目</span></h1>
+            </div>
+            <a href="#" class="download-btn">
+                <i class="fas fa-download"></i>
+                下载报告 (PDF)
+            </a>
+        </div>
+
+        <!-- 标签页容器 -->
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-button active" onclick="showTab('emissions')">排放总量</button>
+                <button class="tab-button" onclick="showTab('uncertainty')">不确定性分析</button>
+                <button class="tab-button" onclick="showTab('sensitivity')">敏感性分析</button>
+            </div>
+
+            <!-- 排放总量标签页 -->
+            <div id="emissions" class="tab-content active">
+                <div class="emissions-summary">
+                    <div class="emission-card co2">
+                        <div class="emission-icon">
+                            <i class="fas fa-smog"></i>
+                        </div>
+                        <div class="emission-label">二氧化碳 (CO₂)</div>
+                        <div class="emission-value">1,250</div>
+                        <div class="emission-unit">吨 CO₂-当量/年</div>
+                    </div>
+                    <div class="emission-card ch4">
+                        <div class="emission-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="emission-label">甲烷 (CH₄)</div>
+                        <div class="emission-value">850</div>
+                        <div class="emission-unit">吨 CO₂-当量/年</div>
+                    </div>
+                    <div class="emission-card n2o">
+                        <div class="emission-icon">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <div class="emission-label">氧化亚氮 (N₂O)</div>
+                        <div class="emission-value">180</div>
+                        <div class="emission-unit">吨 CO₂-当量/年</div>
+                    </div>
+                </div>
+
+                <div class="total-emissions">
+                    <div class="total-value">2,280</div>
+                    <div class="total-label">总温室气体排放量 (吨 CO₂-当量/年)</div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">温室气体排放组成</h3>
+                    <canvas id="emissionsChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- 不确定性分析标签页 -->
+            <div id="uncertainty" class="tab-content">
+                <div class="chart-container">
+                    <h3 class="chart-title">总排放量概率分布</h3>
+                    <canvas id="uncertaintyChart" width="400" height="200"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">关键统计数据</h3>
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>统计指标</th>
+                                <th>数值</th>
+                                <th>单位</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>均值</td>
+                                <td>2,280</td>
+                                <td>吨 CO₂-当量/年</td>
+                            </tr>
+                            <tr>
+                                <td>中位数</td>
+                                <td>2,265</td>
+                                <td>吨 CO₂-当量/年</td>
+                            </tr>
+                            <tr>
+                                <td>标准差</td>
+                                <td>245</td>
+                                <td>吨 CO₂-当量/年</td>
+                            </tr>
+                            <tr>
+                                <td>95% 置信区间下限</td>
+                                <td>1,820</td>
+                                <td>吨 CO₂-当量/年</td>
+                            </tr>
+                            <tr>
+                                <td>95% 置信区间上限</td>
+                                <td>2,740</td>
+                                <td>吨 CO₂-当量/年</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 敏感性分析标签页 -->
+            <div id="sensitivity" class="tab-content">
+                <div class="chart-container">
+                    <h3 class="chart-title">参数敏感性分析</h3>
+                    <div class="tornado-chart">
+                        <div class="tornado-item">
+                            <div class="tornado-label">水库面积</div>
+                            <div class="tornado-bar" style="width: 85%;">85%</div>
+                            <div class="tornado-value">+0.85</div>
+                        </div>
+                        <div class="tornado-item">
+                            <div class="tornado-label">年平均水温</div>
+                            <div class="tornado-bar" style="width: 72%;">72%</div>
+                            <div class="tornado-value">+0.72</div>
+                        </div>
+                        <div class="tornado-item">
+                            <div class="tornado-label">总磷浓度</div>
+                            <div class="tornado-bar" style="width: 58%;">58%</div>
+                            <div class="tornado-value">+0.58</div>
+                        </div>
+                        <div class="tornado-item">
+                            <div class="tornado-label">水库年龄</div>
+                            <div class="tornado-bar" style="width: 35%;">35%</div>
+                            <div class="tornado-value">+0.35</div>
+                        </div>
+                        <div class="tornado-item">
+                            <div class="tornado-label">总氮浓度</div>
+                            <div class="tornado-bar" style="width: 28%;">28%</div>
+                            <div class="tornado-value">+0.28</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">敏感性分析说明</h3>
+                    <p style="color: #64748b; line-height: 1.6;">
+                        敏感性分析结果显示，水库面积对总排放量的影响最大（85%），其次是年平均水温（72%）和总磷浓度（58%）。
+                        这些参数的变化会显著影响温室气体排放的计算结果，建议在数据收集时重点关注这些参数的准确性。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 标签页切换功能
+        function showTab(tabName) {
+            // 隐藏所有标签页内容
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // 移除所有标签按钮的激活状态
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // 显示选中的标签页内容
+            document.getElementById(tabName).classList.add('active');
+
+            // 激活对应的标签按钮
+            event.target.classList.add('active');
+        }
+
+        // 图表初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 排放组成饼图
+            const emissionsCtx = document.getElementById('emissionsChart').getContext('2d');
+            new Chart(emissionsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CO₂', 'CH₄', 'N₂O'],
+                    datasets: [{
+                        data: [1250, 850, 180],
+                        backgroundColor: ['#ef4444', '#f59e0b', '#8b5cf6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 不确定性分析直方图
+            const uncertaintyCtx = document.getElementById('uncertaintyChart').getContext('2d');
+            new Chart(uncertaintyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['1800-1900', '1900-2000', '2000-2100', '2100-2200', '2200-2300', '2300-2400', '2400-2500', '2500-2600', '2600-2700', '2700-2800'],
+                    datasets: [{
+                        label: '频次',
+                        data: [5, 15, 35, 65, 85, 75, 45, 25, 10, 3],
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '频次'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '排放量 (吨 CO₂-当量/年)'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        // 用户下拉菜单功能
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const avatar = document.querySelector('.user-avatar');
+            
+            if (!avatar.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

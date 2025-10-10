@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>帮助中心 - Reservoir Carbon Accounting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        /* 导航栏样式 */
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+            color: white;
+            padding: 0 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #10b981, #059669);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            top: 12px;
+            left: 12px;
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 用户下拉菜单 */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-top: 70px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 搜索框 */
+        .search-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 50px 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 1.25rem;
+        }
+
+        /* 帮助分类 */
+        .help-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-card.getting-started .category-icon { color: #3b82f6; }
+        .category-card.calculation .category-icon { color: #10b981; }
+        .category-card.results .category-icon { color: #f59e0b; }
+        .category-card.troubleshooting .category-icon { color: #ef4444; }
+
+        .category-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-description {
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .category-count {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* FAQ 部分 */
+        .faq-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1.5rem 0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question:hover {
+            color: #3b82f6;
+        }
+
+        .faq-answer {
+            color: #4b5563;
+            line-height: 1.7;
+            display: none;
+        }
+
+        .faq-answer.show {
+            display: block;
+        }
+
+        .faq-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* 联系支持 */
+        .support-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .support-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0c4a6e;
+            margin-bottom: 1rem;
+        }
+
+        .support-description {
+            color: #0369a1;
+            margin-bottom: 2rem;
+        }
+
+        .support-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .support-method {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .support-icon {
+            font-size: 2rem;
+            color: #0ea5e9;
+            margin-bottom: 1rem;
+        }
+
+        .support-method-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .support-method-desc {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        /* 快速链接 */
+        .quick-links {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .quick-links-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #374151;
+            transition: all 0.3s ease;
+        }
+
+        .quick-link:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .quick-link-icon {
+            font-size: 1.25rem;
+            color: #3b82f6;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: 1rem 0;
+            }
+
+            .nav-links {
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-title {
+                font-size: 1.875rem;
+            }
+
+            .help-categories {
+                grid-template-columns: 1fr;
+            }
+
+            .support-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-links-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo"></div>
+                <h1 class="app-title">Reservoir Carbon Accounting</h1>
+            </div>
+            <nav class="nav-links">
+                <a href="/dashboard" class="nav-link">新建计算</a>
+                <a href="/projects" class="nav-link">我的项目</a>
+                <a href="/methodology" class="nav-link">方法学说明</a>
+                <a href="/help" class="nav-link active">帮助</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserDropdown()">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="/profile" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i>
+                            个人信息
+                        </a>
+                        <a href="/projects" class="dropdown-item">
+                            <i class="fas fa-folder"></i>
+                            我的项目
+                        </a>
+                        <a href="/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            设置
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/login" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title">帮助中心</h1>
+            <p class="page-subtitle">快速找到您需要的帮助信息，让水库碳核算变得简单易用</p>
+        </div>
+
+        <!-- 搜索框 -->
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="搜索帮助内容...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+
+        <!-- 帮助分类 -->
+        <div class="help-categories">
+            <div class="category-card getting-started" onclick="showCategory('getting-started')">
+                <div class="category-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3 class="category-title">快速开始</h3>
+                <p class="category-description">了解如何开始使用系统，创建您的第一个项目</p>
+                <div class="category-count">8 个主题</div>
+            </div>
+
+            <div class="category-card calculation" onclick="showCategory('calculation')">
+                <div class="category-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <h3 class="category-title">计算流程</h3>
+                <p class="category-description">详细的计算步骤和参数设置指南</p>
+                <div class="category-count">12 个主题</div>
+            </div>
+
+            <div class="category-card results" onclick="showCategory('results')">
+                <div class="category-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="category-title">结果解读</h3>
+                <p class="category-description">如何理解和分析计算结果</p>
+                <div class="category-count">6 个主题</div>
+            </div>
+
+            <div class="category-card troubleshooting" onclick="showCategory('troubleshooting')">
+                <div class="category-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <h3 class="category-title">问题排查</h3>
+                <p class="category-description">常见问题解决方案和故障排除</p>
+                <div class="category-count">10 个主题</div>
+            </div>
+        </div>
+
+        <!-- FAQ 部分 -->
+        <div class="faq-section">
+            <h2 class="section-title">常见问题</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>如何开始创建新的计算项目？</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>创建新项目非常简单：</p>
+                    <ol>
+                        <li>点击导航栏中的"新建计算"按钮</li>
+                        <li>输入项目名称</li>
+                        <li>在地图上选择水库位置或手动输入经纬度</li>
+                        <li>填写水质参数和IPCC模型参数</li>
+                        <li>选择分析类型（不确定性分析、敏感性分析）</li>
+                        <li>点击"计算温室气体排放"按钮开始计算</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>系统支持哪些数据格式？</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>系统支持以下数据格式：</p>
+                    <ul>
+                        <li><strong>数值输入</strong>：直接输入数值，支持小数</li>
+                        <li><strong>地图选择</strong>：通过交互式地图选择位置</li>
+                        <li><strong>坐标输入</strong>：手动输入经纬度坐标</li>
+                        <li><strong>文件上传</strong>：支持CSV、Excel格式的数据文件（即将推出）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>如何理解计算结果中的不确定性分析？</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>不确定性分析通过蒙特卡洛模拟评估计算结果的可靠性：</p>
+                    <ul>
+                        <li><strong>概率分布图</strong>：显示总排放量的可能范围</li>
+                        <li><strong>置信区间</strong>：95%置信区间表示真实值有95%的概率在此范围内</li>
+                        <li><strong>统计指标</strong>：均值、中位数、标准差等关键统计量</li>
+                        <li><strong>建议</strong>：置信区间越窄，结果越可靠</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>为什么我的计算结果与预期不符？</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>可能的原因包括：</p>
+                    <ul>
+                        <li><strong>参数输入错误</strong>：检查所有输入参数的单位和数值</li>
+                        <li><strong>位置选择错误</strong>：确保水库位置和气候区域正确</li>
+                        <li><strong>水质数据不准确</strong>：水质参数对结果影响较大</li>
+                        <li><strong>方法学限制</strong>：IPCC Tier 1方法适用于一般情况，特殊条件可能需要更高级的方法</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>如何导出和分享计算结果？</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>系统提供多种导出和分享方式：</p>
+                    <ul>
+                        <li><strong>PDF报告</strong>：点击"下载报告"按钮生成完整的PDF报告</li>
+                        <li><strong>数据导出</strong>：支持CSV、Excel格式的原始数据导出</li>
+                        <li><strong>图表保存</strong>：右键点击图表可保存为图片</li>
+                        <li><strong>项目分享</strong>：通过"我的项目"页面管理项目访问权限</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>系统是否支持批量计算？</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>目前系统支持以下批量操作：</p>
+                    <ul>
+                        <li><strong>多项目管理</strong>：在"我的项目"页面查看和管理多个项目</li>
+                        <li><strong>参数模板</strong>：保存常用参数配置，快速应用到新项目</li>
+                        <li><strong>批量导出</strong>：选择多个项目进行批量导出</li>
+                        <li><strong>未来功能</strong>：批量计算功能正在开发中，敬请期待</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快速链接 -->
+        <div class="quick-links">
+            <h3 class="quick-links-title">快速链接</h3>
+            <div class="quick-links-grid">
+                <a href="/dashboard" class="quick-link">
+                    <i class="fas fa-plus-circle quick-link-icon"></i>
+                    <span>创建新项目</span>
+                </a>
+                <a href="/methodology" class="quick-link">
+                    <i class="fas fa-book quick-link-icon"></i>
+                    <span>方法学说明</span>
+                </a>
+                <a href="/projects" class="quick-link">
+                    <i class="fas fa-folder quick-link-icon"></i>
+                    <span>我的项目</span>
+                </a>
+                <a href="/results" class="quick-link">
+                    <i class="fas fa-chart-bar quick-link-icon"></i>
+                    <span>查看示例结果</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 联系支持 -->
+        <div class="support-section">
+            <h3 class="support-title">需要更多帮助？</h3>
+            <p class="support-description">如果您在使用的过程中遇到任何问题，我们的支持团队随时为您提供帮助</p>
+            
+            <div class="support-methods">
+                <div class="support-method">
+                    <i class="fas fa-envelope support-icon"></i>
+                    <div class="support-method-title">邮件支持</div>
+                    <div class="support-method-desc">support@reservoir-carbon.com</div>
+                </div>
+                
+                <div class="support-method">
+                    <i class="fas fa-phone support-icon"></i>
+                    <div class="support-method-title">电话支持</div>
+                    <div class="support-method-desc">400-123-4567</div>
+                </div>
+                
+                <div class="support-method">
+                    <i class="fas fa-comments support-icon"></i>
+                    <div class="support-method-title">在线客服</div>
+                    <div class="support-method-desc">工作日 9:00-18:00</div>
+                </div>
+                
+                <div class="support-method">
+                    <i class="fas fa-question-circle support-icon"></i>
+                    <div class="support-method-title">知识库</div>
+                    <div class="support-method-desc">查看详细文档</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // FAQ 展开/收起功能
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            const icon = element.querySelector('.faq-icon');
+            
+            if (answer.classList.contains('show')) {
+                answer.classList.remove('show');
+                icon.classList.remove('rotated');
+            } else {
+                // 关闭其他已展开的FAQ
+                document.querySelectorAll('.faq-answer.show').forEach(item => {
+                    item.classList.remove('show');
+                });
+                document.querySelectorAll('.faq-icon.rotated').forEach(item => {
+                    item.classList.remove('rotated');
+                });
+                
+                // 展开当前FAQ
+                answer.classList.add('show');
+                icon.classList.add('rotated');
+            }
+        }
+
+        // 分类卡片点击功能
+        function showCategory(category) {
+            // 这里可以添加跳转到具体分类页面的逻辑
+            console.log('显示分类:', category);
+        }
+
+        // 搜索功能
+        document.querySelector('.search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+                
+                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // 用户下拉菜单功能
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const avatar = document.querySelector('.user-avatar');
+            
+            if (!avatar.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

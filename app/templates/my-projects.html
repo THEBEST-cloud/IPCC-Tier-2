@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的项目 - Reservoir Carbon Accounting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        /* 导航栏样式 */
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+            color: white;
+            padding: 0 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #10b981, #059669);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            top: 12px;
+            left: 12px;
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 用户下拉菜单 */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .dropdown-item.active {
+            background: #e0f2fe;
+            color: #0c4a6e;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-top: 70px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .new-project-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .new-project-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+
+        /* 项目统计卡片 */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .stat-card.total .stat-icon { color: #3b82f6; }
+        .stat-card.completed .stat-icon { color: #10b981; }
+        .stat-card.draft .stat-icon { color: #f59e0b; }
+        .stat-card.recent .stat-icon { color: #8b5cf6; }
+
+        /* 项目列表 */
+        .projects-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .filter-tab.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .filter-tab:hover:not(.active) {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .projects-list {
+            padding: 0;
+        }
+
+        .project-item {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .project-item:hover {
+            background: #f8fafc;
+        }
+
+        .project-item:last-child {
+            border-bottom: none;
+        }
+
+        .project-info {
+            flex: 1;
+        }
+
+        .project-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-details {
+            display: flex;
+            gap: 2rem;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .project-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .project-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .action-btn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .action-btn.primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .action-btn.primary:hover {
+            background: #2563eb;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #64748b;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .empty-description {
+            margin-bottom: 2rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: 1rem 0;
+            }
+
+            .nav-links {
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .stats-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .project-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .project-details {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .project-status {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo"></div>
+                <h1 class="app-title">Reservoir Carbon Accounting</h1>
+            </div>
+            <nav class="nav-links">
+                <a href="/dashboard" class="nav-link">新建计算</a>
+                <a href="/projects" class="nav-link active">我的项目</a>
+                <a href="/methodology" class="nav-link">方法学说明</a>
+                <a href="/help" class="nav-link">帮助</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserDropdown()">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="/profile" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i>
+                            个人信息
+                        </a>
+                        <a href="/projects" class="dropdown-item active">
+                            <i class="fas fa-folder"></i>
+                            我的项目
+                        </a>
+                        <a href="/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            设置
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/login" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title">我的项目</h1>
+            <a href="/dashboard" class="new-project-btn">
+                <i class="fas fa-plus"></i>
+                新建项目
+            </a>
+        </div>
+
+        <!-- 项目统计 -->
+        <div class="stats-cards">
+            <div class="stat-card total">
+                <div class="stat-icon">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <div class="stat-value">12</div>
+                <div class="stat-label">总项目数</div>
+            </div>
+            <div class="stat-card completed">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-value">8</div>
+                <div class="stat-label">已完成</div>
+            </div>
+            <div class="stat-card draft">
+                <div class="stat-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="stat-value">3</div>
+                <div class="stat-label">草稿</div>
+            </div>
+            <div class="stat-card recent">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-value">1</div>
+                <div class="stat-label">进行中</div>
+            </div>
+        </div>
+
+        <!-- 项目列表 -->
+        <div class="projects-section">
+            <div class="section-header">
+                <h2 class="section-title">项目列表</h2>
+                <div class="filter-tabs">
+                    <div class="filter-tab active" onclick="filterProjects('all')">全部</div>
+                    <div class="filter-tab" onclick="filterProjects('completed')">已完成</div>
+                    <div class="filter-tab" onclick="filterProjects('draft')">草稿</div>
+                    <div class="filter-tab" onclick="filterProjects('processing')">进行中</div>
+                </div>
+            </div>
+            <div class="projects-list" id="projectsList">
+                <!-- 项目1 -->
+                <div class="project-item" data-status="completed">
+                    <div class="project-info">
+                        <div class="project-name">北京密云水库碳核算项目</div>
+                        <div class="project-details">
+                            <div class="project-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>2024-01-15</span>
+                            </div>
+                            <div class="project-detail">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>北京市密云区</span>
+                            </div>
+                            <div class="project-detail">
+                                <i class="fas fa-chart-line"></i>
+                                <span>2,280 吨 CO₂-当量/年</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-status">
+                        <span class="status-badge status-completed">已完成</span>
+                        <div class="project-actions">
+                            <a href="/results" class="action-btn">查看结果</a>
+                            <a href="#" class="action-btn">编辑</a>
+                            <a href="#" class="action-btn">下载</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 项目2 -->
+                <div class="project-item" data-status="completed">
+                    <div class="project-info">
+                        <div class="project-name">长江三峡水库温室气体评估</div>
+                        <div class="project-details">
+                            <div class="project-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>2024-01-10</span>
+                            </div>
+                            <div class="project-detail">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>湖北省宜昌市</span>
+                            </div>
+                            <div class="project-detail">
+                                <i class="fas fa-chart-line"></i>
+                                <span>15,680 吨 CO₂-当量/年</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-status">
+                        <span class="status-badge status-completed">已完成</span>
+                        <div class="project-actions">
+                            <a href="/results" class="action-btn">查看结果</a>
+                            <a href="#" class="action-btn">编辑</a>
+                            <a href="#" class="action-btn">下载</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 项目3 -->
+                <div class="project-item" data-status="draft">
+                    <div class="project-info">
+                        <div class="project-name">黄河小浪底水库碳足迹分析</div>
+                        <div class="project-details">
+                            <div class="project-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>2024-01-20</span>
+                            </div>
+                            <div class="project-detail">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>河南省洛阳市</span>
+                            </div>
+                            <div class="project-detail">
+                                <i class="fas fa-edit"></i>
+                                <span>草稿状态</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-status">
+                        <span class="status-badge status-draft">草稿</span>
+                        <div class="project-actions">
+                            <a href="/dashboard" class="action-btn primary">继续编辑</a>
+                            <a href="#" class="action-btn">删除</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 项目4 -->
+                <div class="project-item" data-status="processing">
+                    <div class="project-info">
+                        <div class="project-name">珠江流域水库群碳排放研究</div>
+                        <div class="project-details">
+                            <div class="project-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>2024-01-25</span>
+                            </div>
+                            <div class="project-detail">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>广东省广州市</span>
+                            </div>
+                            <div class="project-detail">
+                                <i class="fas fa-spinner"></i>
+                                <span>计算中...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-status">
+                        <span class="status-badge status-processing">进行中</span>
+                        <div class="project-actions">
+                            <a href="#" class="action-btn">查看进度</a>
+                            <a href="#" class="action-btn">取消</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 项目5 -->
+                <div class="project-item" data-status="draft">
+                    <div class="project-info">
+                        <div class="project-name">松花江流域水库温室气体监测</div>
+                        <div class="project-details">
+                            <div class="project-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>2024-01-18</span>
+                            </div>
+                            <div class="project-detail">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>黑龙江省哈尔滨市</span>
+                            </div>
+                            <div class="project-detail">
+                                <i class="fas fa-edit"></i>
+                                <span>草稿状态</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-status">
+                        <span class="status-badge status-draft">草稿</span>
+                        <div class="project-actions">
+                            <a href="/dashboard" class="action-btn primary">继续编辑</a>
+                            <a href="#" class="action-btn">删除</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function filterProjects(status) {
+            const projects = document.querySelectorAll('.project-item');
+            const tabs = document.querySelectorAll('.filter-tab');
+            
+            // 更新标签状态
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 过滤项目
+            projects.forEach(project => {
+                if (status === 'all' || project.dataset.status === status) {
+                    project.style.display = 'flex';
+                } else {
+                    project.style.display = 'none';
+                }
+            });
+        }
+
+        // 用户下拉菜单功能
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const avatar = document.querySelector('.user-avatar');
+            
+            if (!avatar.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
