@@ -340,6 +340,7 @@ function generateResultsHTML(result) {
             <div class="total-label">总温室气体排放量 (kg CO₂-当量/年)</div>
         </div>
         
+        ${emissions.ipcc_tier1_results ? generateIPCCResultsHTML(emissions.ipcc_tier1_results) : ''}
         ${uncertainty ? generateUncertaintyHTML(uncertainty) : ''}
         ${sensitivity ? generateSensitivityHTML(sensitivity) : ''}
         
@@ -509,6 +510,152 @@ function generateUncertaintyHTML(uncertainty) {
             </div>
         </div>
     `;
+}
+
+// 生成IPCC Tier 1详细结果HTML
+function generateIPCCResultsHTML(ipccResults) {
+    if (!ipccResults) return '';
+    
+    return `
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-calculator"></i>
+                    IPCC Tier 1 详细计算结果
+                </h2>
+                <p class="card-subtitle">严格遵循IPCC指南的Tier 1方法计算结果</p>
+            </div>
+            <div class="card-body">
+                <!-- 基本信息 -->
+                <div class="chart-container">
+                    <h3 class="chart-title">计算参数</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">气候区</span>
+                            <span class="info-value">${getClimateRegionLabel(ipccResults.climate_region)}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">营养状态</span>
+                            <span class="info-value">${getTrophicStatusLabel(ipccResults.trophic_status)}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">水库年龄</span>
+                            <span class="info-value">${ipccResults.reservoir_age} 年</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">水库面积</span>
+                            <span class="info-value">${formatNumber(ipccResults.surface_area_ha)} 公顷</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 生命周期排放总量 -->
+                <div class="chart-container">
+                    <h3 class="chart-title">水库生命周期碳排放总量</h3>
+                    <div class="emissions-grid">
+                        <div class="emission-item total">
+                            <div class="emission-label">总排放量 (E)</div>
+                            <div class="emission-value">${formatNumber(ipccResults.E_total)}</div>
+                            <div class="emission-unit">tCO₂-当量</div>
+                        </div>
+                        <div class="emission-item co2">
+                            <div class="emission-label">CO₂排放总量 (E_CO₂)</div>
+                            <div class="emission-value">${formatNumber(ipccResults.E_CO2)}</div>
+                            <div class="emission-unit">tCO₂-当量</div>
+                        </div>
+                        <div class="emission-item ch4">
+                            <div class="emission-label">CH₄排放总量 (E_CH₄)</div>
+                            <div class="emission-value">${formatNumber(ipccResults.E_CH4)}</div>
+                            <div class="emission-unit">tCO₂-当量</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 年均排放量 -->
+                <div class="chart-container">
+                    <h3 class="chart-title">年均排放量</h3>
+                    <div class="annual-emissions">
+                        <div class="annual-item">
+                            <div class="annual-label">年均CO₂排放量</div>
+                            <div class="annual-value">${formatNumber(ipccResults.annual_CO2)}</div>
+                            <div class="annual-unit">kg CO₂-当量/年</div>
+                        </div>
+                        <div class="annual-item">
+                            <div class="annual-label">≤20年CH₄年均排放量</div>
+                            <div class="annual-value">${formatNumber(ipccResults.annual_CH4_age_le_20)}</div>
+                            <div class="annual-unit">kg CO₂-当量/年</div>
+                        </div>
+                        <div class="annual-item">
+                            <div class="annual-label">>20年CH₄年均排放量</div>
+                            <div class="annual-value">${formatNumber(ipccResults.annual_CH4_age_gt_20)}</div>
+                            <div class="annual-unit">kg CO₂-当量/年</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分源CH₄排放 -->
+                <div class="chart-container">
+                    <h3 class="chart-title">甲烷分源排放分析</h3>
+                    <div class="ch4-sources">
+                        <div class="source-group">
+                            <h4>库龄≤20年阶段</h4>
+                            <div class="source-items">
+                                <div class="source-item">
+                                    <div class="source-label">水库表面CH₄排放</div>
+                                    <div class="source-value">${formatNumber(ipccResults.annual_CH4_res_surface_le_20)}</div>
+                                    <div class="source-unit">kg CO₂-当量/年</div>
+                                </div>
+                                <div class="source-item">
+                                    <div class="source-label">大坝下游CH₄排放</div>
+                                    <div class="source-value">${formatNumber(ipccResults.annual_CH4_downstream_le_20)}</div>
+                                    <div class="source-unit">kg CO₂-当量/年</div>
+                                </div>
+                            </div>
+                        </div>
+                        ${ipccResults.reservoir_age > 20 ? `
+                        <div class="source-group">
+                            <h4>库龄>20年阶段</h4>
+                            <div class="source-items">
+                                <div class="source-item">
+                                    <div class="source-label">水库表面CH₄排放</div>
+                                    <div class="source-value">${formatNumber(ipccResults.annual_CH4_res_surface_gt_20)}</div>
+                                    <div class="source-unit">kg CO₂-当量/年</div>
+                                </div>
+                                <div class="source-item">
+                                    <div class="source-label">大坝下游CH₄排放</div>
+                                    <div class="source-value">${formatNumber(ipccResults.annual_CH4_downstream_gt_20)}</div>
+                                    <div class="source-unit">kg CO₂-当量/年</div>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 获取气候区标签
+function getClimateRegionLabel(region) {
+    const labels = {
+        'Tropical_Moist': '炎热潮湿区',
+        'Warm_Dry': '温暖干燥区',
+        'Warm_Moist': '温暖湿润区',
+        'Other': '其他区域'
+    };
+    return labels[region] || region;
+}
+
+// 获取营养状态标签
+function getTrophicStatusLabel(status) {
+    const labels = {
+        'Oligotrophic': '贫营养型',
+        'Mesotrophic': '中营养型',
+        'Eutrophic': '富营养型',
+        'Hypereutrophic': '超富营养型'
+    };
+    return labels[status] || status;
 }
 
 // 生成敏感性分析HTML

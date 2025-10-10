@@ -931,6 +931,176 @@ input:checked + .slider:before {
     color: #0c4a6e;
 }
 
+/* IPCC Tier 1 结果样式 */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.emissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.emission-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.emission-item:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.emission-item.total {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.emission-item.co2 {
+    border-color: #10b981;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.emission-item.ch4 {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.emission-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.emission-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.emission-unit {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.annual-emissions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.annual-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.annual-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.annual-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.annual-unit {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.ch4-sources {
+    margin: 1.5rem 0;
+}
+
+.source-group {
+    margin-bottom: 2rem;
+}
+
+.source-group h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.source-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.source-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.source-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.source-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.source-unit {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
 /* 移动端不确定性分析样式 */
 @media (max-width: 768px) {
     .stats-grid {
@@ -957,5 +1127,30 @@ input:checked + .slider:before {
     
     .uncertainty-chart {
         height: 250px;
+    }
+    
+    /* IPCC Tier 1 移动端样式 */
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .emissions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .annual-emissions {
+        grid-template-columns: 1fr;
+    }
+    
+    .source-items {
+        grid-template-columns: 1fr;
+    }
+    
+    .emission-value {
+        font-size: 1.5rem;
+    }
+    
+    .annual-value {
+        font-size: 1.25rem;
     }
 }

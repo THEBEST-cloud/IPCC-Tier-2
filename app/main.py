@@ -19,7 +19,8 @@ from .ipcc_tier1 import (
     get_climate_region,
     assess_trophic_status,
     get_emission_factors,
-    calculate_emissions
+    calculate_emissions,
+    calculate_ipcc_tier1_emissions
 )
 from .analysis import run_full_analysis
 
@@ -89,24 +90,29 @@ async def analyze_reservoir(
             secchi_depth=wq.secchi_depth
         )
     
-    # Get emission factors
-    if reservoir_input.custom_ch4_ef and reservoir_input.custom_co2_ef and reservoir_input.custom_n2o_ef:
-        ch4_ef = reservoir_input.custom_ch4_ef
-        co2_ef = reservoir_input.custom_co2_ef
-        n2o_ef = reservoir_input.custom_n2o_ef
-    else:
-        ch4_ef, co2_ef, n2o_ef = get_emission_factors(
-            climate_region,
-            trophic_status,
-            reservoir_input.reservoir_age
-        )
+    # 使用IPCC Tier 1方法计算排放
+    # 转换面积单位：km² -> ha
+    surface_area_ha = reservoir_input.surface_area * 100
     
-    # Calculate base emissions
-    ch4_total, co2_total, n2o_total, co2_eq = calculate_emissions(
-        reservoir_input.surface_area,
-        ch4_ef,
-        co2_ef,
-        n2o_ef
+    # 执行IPCC Tier 1计算
+    ipcc_results = calculate_ipcc_tier1_emissions(
+        surface_area_ha=surface_area_ha,
+        latitude=reservoir_input.latitude,
+        trophic_status=trophic_status,
+        reservoir_age=reservoir_input.reservoir_age
+    )
+    
+    # 提取主要结果
+    ch4_total = ipcc_results["E_CH4"] * 1000  # tCO2eq -> kgCO2eq
+    co2_total = ipcc_results["E_CO2"] * 1000  # tCO2eq -> kgCO2eq
+    n2o_total = 0  # IPCC Tier 1中N2O通常忽略
+    co2_eq = ipcc_results["E_total"] * 1000  # tCO2eq -> kgCO2eq
+    
+    # 获取排放因子（用于不确定性分析）
+    ch4_ef, co2_ef, n2o_ef = get_emission_factors(
+        ipcc_results["climate_region"],
+        trophic_status,
+        reservoir_input.reservoir_age
     )
     
     # Run uncertainty and sensitivity analysis
@@ -149,7 +155,7 @@ async def analyze_reservoir(
     db.commit()
     db.refresh(db_analysis)
     
-    # Prepare response
+    # Prepare response with detailed IPCC Tier 1 results
     emission_results = schemas.EmissionResults(
         total_ch4_emissions=ch4_total,
         total_co2_emissions=co2_total,
@@ -158,8 +164,10 @@ async def analyze_reservoir(
         ch4_emission_factor=ch4_ef,
         co2_emission_factor=co2_ef,
         n2o_emission_factor=n2o_ef,
-        climate_region=climate_region,
-        trophic_status=trophic_status
+        climate_region=ipcc_results["climate_region"],
+        trophic_status=trophic_status,
+        # 添加IPCC Tier 1详细结果
+        ipcc_tier1_results=ipcc_results
     )
     
     return schemas.AnalysisResponse(

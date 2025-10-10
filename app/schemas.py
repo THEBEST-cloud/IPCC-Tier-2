@@ -46,6 +46,9 @@ class EmissionResults(BaseModel):
     
     climate_region: str
     trophic_status: Optional[str] = None
+    
+    # IPCC Tier 1 详细结果
+    ipcc_tier1_results: Optional[Dict] = Field(None, description="Detailed IPCC Tier 1 calculation results")
 
 class UncertaintyResults(BaseModel):
     """Uncertainty analysis results"""
