@@ -4,6 +4,7 @@ IPCC Tier 1 Methodology for Reservoir Greenhouse Gas Emissions
 """
 
 import numpy as np
+import math
 from typing import Tuple, Optional, Dict
 
 # IPCC Tier 1 常量定义
@@ -58,6 +59,16 @@ TROPHIC_ADJUSTMENT_FACTORS = {
     "Eutrophic": 10,        # 富营养型
     "Hypereutrophic": 25,   # 超富营养型
 }
+
+def clean_numeric_value(value):
+    """
+    清理数值，确保JSON兼容
+    """
+    if value is None:
+        return 0.0
+    if math.isnan(value) or math.isinf(value):
+        return 0.0
+    return float(value)
 
 def assess_trophic_status(
     total_phosphorus: Optional[float] = None,
@@ -273,27 +284,27 @@ def calculate_ipcc_tier1_emissions(
     
     return {
         # 主要结果
-        "E_total": E_total,  # 水库生命周期碳排放总量 (tCO2eq)
-        "E_CO2": E_CO2,  # 水库寿命内CO2排放总量 (tCO2eq)
-        "E_CH4": E_CH4,  # 水库寿命内CH4排放总量 (tCO2eq)
+        "E_total": clean_numeric_value(E_total),  # 水库生命周期碳排放总量 (tCO2eq)
+        "E_CO2": clean_numeric_value(E_CO2),  # 水库寿命内CO2排放总量 (tCO2eq)
+        "E_CH4": clean_numeric_value(E_CH4),  # 水库寿命内CH4排放总量 (tCO2eq)
         
         # 年均排放量
-        "annual_CO2": annual_CO2_kg,  # 年均CO2排放量 (kgCO2eq/yr)
-        "annual_CH4_age_le_20": annual_CH4_age_le_20_kg,  # ≤20年CH4年均排放量 (kgCO2eq/yr)
-        "annual_CH4_age_gt_20": annual_CH4_age_gt_20_kg,  # >20年CH4年均排放量 (kgCO2eq/yr)
+        "annual_CO2": clean_numeric_value(annual_CO2_kg),  # 年均CO2排放量 (kgCO2eq/yr)
+        "annual_CH4_age_le_20": clean_numeric_value(annual_CH4_age_le_20_kg),  # ≤20年CH4年均排放量 (kgCO2eq/yr)
+        "annual_CH4_age_gt_20": clean_numeric_value(annual_CH4_age_gt_20_kg),  # >20年CH4年均排放量 (kgCO2eq/yr)
         
         # 分源CH4排放
-        "annual_CH4_res_surface_le_20": annual_CH4_res_surface_le_20,  # ≤20年水库表面CH4排放 (kgCO2eq/yr)
-        "annual_CH4_res_surface_gt_20": annual_CH4_res_surface_gt_20,  # >20年水库表面CH4排放 (kgCO2eq/yr)
-        "annual_CH4_downstream_le_20": annual_CH4_downstream_le_20,  # ≤20年下游CH4排放 (kgCO2eq/yr)
-        "annual_CH4_downstream_gt_20": annual_CH4_downstream_gt_20,  # >20年下游CH4排放 (kgCO2eq/yr)
+        "annual_CH4_res_surface_le_20": clean_numeric_value(annual_CH4_res_surface_le_20),  # ≤20年水库表面CH4排放 (kgCO2eq/yr)
+        "annual_CH4_res_surface_gt_20": clean_numeric_value(annual_CH4_res_surface_gt_20),  # >20年水库表面CH4排放 (kgCO2eq/yr)
+        "annual_CH4_downstream_le_20": clean_numeric_value(annual_CH4_downstream_le_20),  # ≤20年下游CH4排放 (kgCO2eq/yr)
+        "annual_CH4_downstream_gt_20": clean_numeric_value(annual_CH4_downstream_gt_20),  # >20年下游CH4排放 (kgCO2eq/yr)
         
         # 中间计算值
         "climate_region": climate_region,
         "trophic_status": trophic_status,
-        "reservoir_age": reservoir_age,
-        "surface_area_ha": surface_area_ha,
-        "F_CO2_tot": F_CO2_tot,  # 年均CO2排放总量 (tCO2-C/yr)
+        "reservoir_age": clean_numeric_value(reservoir_age),
+        "surface_area_ha": clean_numeric_value(surface_area_ha),
+        "F_CO2_tot": clean_numeric_value(F_CO2_tot),  # 年均CO2排放总量 (tCO2-C/yr)
     }
 
 # 保持向后兼容的函数

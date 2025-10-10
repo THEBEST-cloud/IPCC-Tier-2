@@ -20,7 +20,8 @@ from .ipcc_tier1 import (
     assess_trophic_status,
     get_emission_factors,
     calculate_emissions,
-    calculate_ipcc_tier1_emissions
+    calculate_ipcc_tier1_emissions,
+    clean_numeric_value
 )
 from .analysis import run_full_analysis
 
@@ -103,10 +104,10 @@ async def analyze_reservoir(
     )
     
     # 提取主要结果
-    ch4_total = ipcc_results["E_CH4"] * 1000  # tCO2eq -> kgCO2eq
-    co2_total = ipcc_results["E_CO2"] * 1000  # tCO2eq -> kgCO2eq
+    ch4_total = clean_numeric_value(ipcc_results["E_CH4"] * 1000)  # tCO2eq -> kgCO2eq
+    co2_total = clean_numeric_value(ipcc_results["E_CO2"] * 1000)  # tCO2eq -> kgCO2eq
     n2o_total = 0  # IPCC Tier 1中N2O忽略
-    co2_eq = ipcc_results["E_total"] * 1000  # tCO2eq -> kgCO2eq
+    co2_eq = clean_numeric_value(ipcc_results["E_total"] * 1000)  # tCO2eq -> kgCO2eq
     
     # 获取排放因子（用于不确定性分析）
     ch4_ef, co2_ef, n2o_ef = get_emission_factors(

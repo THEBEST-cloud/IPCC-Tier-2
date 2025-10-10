@@ -3,6 +3,7 @@ Uncertainty and Sensitivity Analysis for Reservoir Emissions
 """
 
 import numpy as np
+import math
 from scipy import stats
 from typing import Dict, List, Tuple
 from .ipcc_tier1 import calculate_emissions, UNCERTAINTY_RANGES
@@ -10,6 +11,16 @@ from .ipcc_tier1 import calculate_emissions, UNCERTAINTY_RANGES
 # 定义GWP常量
 GWP_CH4 = 28  # IPCC AR5
 GWP_N2O = 265  # IPCC AR5
+
+def clean_numeric_value(value):
+    """
+    清理数值，确保JSON兼容
+    """
+    if value is None:
+        return 0.0
+    if math.isnan(value) or math.isinf(value):
+        return 0.0
+    return float(value)
 
 class UncertaintyAnalysis:
     """Monte Carlo uncertainty analysis"""
@@ -101,15 +112,15 @@ class UncertaintyAnalysis:
     def _calculate_statistics(self, data: np.ndarray) -> Dict[str, float]:
         """Calculate statistical measures from sample data"""
         return {
-            "mean": float(np.mean(data)),
-            "std": float(np.std(data)),
-            "ci_lower": float(np.percentile(data, 2.5)),
-            "ci_upper": float(np.percentile(data, 97.5)),
-            "percentile_5": float(np.percentile(data, 5)),
-            "percentile_25": float(np.percentile(data, 25)),
-            "percentile_50": float(np.percentile(data, 50)),
-            "percentile_75": float(np.percentile(data, 75)),
-            "percentile_95": float(np.percentile(data, 95)),
+            "mean": clean_numeric_value(np.mean(data)),
+            "std": clean_numeric_value(np.std(data)),
+            "ci_lower": clean_numeric_value(np.percentile(data, 2.5)),
+            "ci_upper": clean_numeric_value(np.percentile(data, 97.5)),
+            "percentile_5": clean_numeric_value(np.percentile(data, 5)),
+            "percentile_25": clean_numeric_value(np.percentile(data, 25)),
+            "percentile_50": clean_numeric_value(np.percentile(data, 50)),
+            "percentile_75": clean_numeric_value(np.percentile(data, 75)),
+            "percentile_95": clean_numeric_value(np.percentile(data, 95)),
         }
 
 
@@ -201,8 +212,8 @@ class SensitivityAnalysis:
             
             results.append({
                 "parameter": param_name,
-                "correlation": float(pearson_corr),
-                "rank_correlation": float(spearman_corr),
+                "correlation": clean_numeric_value(pearson_corr),
+                "rank_correlation": clean_numeric_value(spearman_corr),
             })
         
         # Sort by absolute correlation (most influential first)
