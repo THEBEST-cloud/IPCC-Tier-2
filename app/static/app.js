@@ -107,7 +107,7 @@ async function updateClimateRegion() {
     }
     
     try {
-        const response = await fetch(`/api/climate-region/${latitude}`);
+        const response = await fetch(`/api/climate-region/${latitude}/${longitude}`);
         const data = await response.json();
         
         document.getElementById('climateRegion').value = data.climate_region;
