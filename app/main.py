@@ -78,7 +78,7 @@ async def analyze_reservoir(
     Analyze reservoir emissions using IPCC Tier 1 methodology
     """
     # Determine climate region
-    climate_region = get_climate_region(reservoir_input.latitude)
+    climate_region = get_climate_region(reservoir_input.latitude, reservoir_input.longitude)
     
     # Assess trophic status
     trophic_status = None
@@ -259,13 +259,13 @@ async def delete_analysis(analysis_id: int, db: Session = Depends(get_db)):
     return {"message": "Analysis deleted successfully"}
 
 
-@app.get("/api/climate-region/{latitude}")
-async def get_climate_info(latitude: float):
+@app.get("/api/climate-region/{latitude}/{longitude}")
+async def get_climate_info(latitude: float, longitude: float):
     """
-    Get climate region for a given latitude
+    Get climate region for given latitude and longitude
     """
-    climate_region = get_climate_region(latitude)
-    return {"latitude": latitude, "climate_region": climate_region}
+    climate_region = get_climate_region(latitude, longitude)
+    return {"latitude": latitude, "longitude": longitude, "climate_region": climate_region}
 
 
 # User Authentication Routes
