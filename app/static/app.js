@@ -1,5 +1,7 @@
 // 全局变量
 let currentAnalysis = null;
+let map = null;
+let marker = null;
 
 // DOM加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
@@ -12,6 +14,7 @@ function initializeApp() {
     setupToggleSwitches();
     setupAnalysisOptions();
     setupCoordinateInputs();
+    initializeMap();
 }
 
 // 设置事件监听器
@@ -23,8 +26,14 @@ function setupEventListeners() {
     document.getElementById('saveDraftBtn').addEventListener('click', handleSaveDraft);
     
     // 表单输入变化
-    document.getElementById('latitude').addEventListener('input', updateClimateRegion);
-    document.getElementById('longitude').addEventListener('input', updateClimateRegion);
+    document.getElementById('latitude').addEventListener('input', function() {
+        updateClimateRegion();
+        updateMapFromCoordinates();
+    });
+    document.getElementById('longitude').addEventListener('input', function() {
+        updateClimateRegion();
+        updateMapFromCoordinates();
+    });
     
     // 水质参数变化
     document.getElementById('totalPhosphorus').addEventListener('input', updateTrophicStatus);
@@ -523,3 +532,69 @@ document.addEventListener('click', function(event) {
         dropdown.classList.remove('show');
     }
 });
+
+// 初始化交互式地图
+function initializeMap() {
+    // 检查Leaflet是否已加载
+    if (typeof L === 'undefined') {
+        console.error('Leaflet library not loaded');
+        return;
+    }
+    
+    // 创建地图实例，默认显示中国
+    map = L.map('map').setView([35.0, 105.0], 4);
+    
+    // 添加地图图层
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18
+    }).addTo(map);
+    
+    // 地图点击事件
+    map.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+        
+        // 更新坐标输入框
+        document.getElementById('latitude').value = lat.toFixed(4);
+        document.getElementById('longitude').value = lng.toFixed(4);
+        
+        // 更新标记
+        if (marker) {
+            map.removeLayer(marker);
+        }
+        
+        marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup(`位置: ${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
+        
+        // 更新气候区域
+        updateClimateRegion();
+    });
+    
+    // 添加默认标记（北京）
+    marker = L.marker([39.9042, 116.4074]).addTo(map);
+    marker.bindPopup('默认位置: 北京').openPopup();
+    
+    // 设置初始坐标
+    document.getElementById('latitude').value = '39.9042';
+    document.getElementById('longitude').value = '116.4074';
+}
+
+// 从坐标输入框更新地图标记
+function updateMapFromCoordinates() {
+    const lat = parseFloat(document.getElementById('latitude').value);
+    const lng = parseFloat(document.getElementById('longitude').value);
+    
+    if (!isNaN(lat) && !isNaN(lng) && map) {
+        // 更新地图视图
+        map.setView([lat, lng], 10);
+        
+        // 更新标记
+        if (marker) {
+            map.removeLayer(marker);
+        }
+        
+        marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup(`位置: ${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
+    }
+}

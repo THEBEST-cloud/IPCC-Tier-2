@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
     <!-- 导航栏 -->
@@ -68,9 +70,10 @@
                 </div>
 
                 <div class="map-container">
-                    <div class="map-placeholder">
-                        <i class="fas fa-map-marked-alt" style="font-size: 2rem; margin-right: 1rem;"></i>
-                        交互式地图 - 点击选择位置
+                    <div id="map" class="interactive-map"></div>
+                    <div class="map-instructions">
+                        <i class="fas fa-map-marked-alt"></i>
+                        点击地图选择水库位置
                     </div>
                     <div class="coordinates-input">
                         <div class="form-group">
@@ -250,6 +253,8 @@
         </div>
     </main>
 
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/static/app.js"></script>
 </body>
 </html>
