@@ -280,6 +280,13 @@ function displayResults(result) {
     container.innerHTML = generateResultsHTML(result);
     container.style.display = 'block';
     
+    // 绘制图表
+    setTimeout(() => {
+        if (result.uncertainty) {
+            drawUncertaintyChart(result.uncertainty);
+        }
+    }, 100);
+    
     // 滚动到结果区域
     container.scrollIntoView({ behavior: 'smooth' });
 }
@@ -351,56 +358,150 @@ function generateResultsHTML(result) {
 
 // 生成不确定性分析HTML
 function generateUncertaintyHTML(uncertainty) {
-    if (!uncertainty || !uncertainty.co2_equivalent) return '';
+    if (!uncertainty || !uncertainty.CO2_equivalent) return '';
     
-    const stats = uncertainty.co2_equivalent;
+    const stats = uncertainty.CO2_equivalent;
     
     return `
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">不确定性分析结果</h2>
+                <h2 class="card-title">
+                    <i class="fas fa-chart-line"></i>
+                    不确定性分析结果
+                </h2>
+                <p class="card-subtitle">基于蒙特卡洛模拟的概率分布分析</p>
             </div>
             <div class="card-body">
+                <!-- 概率分布图 -->
                 <div class="chart-container">
-                    <h3 class="chart-title">总排放量概率分布</h3>
-                    <div id="uncertaintyChart" style="height: 300px;"></div>
+                    <h3 class="chart-title">总排放量概率分布图</h3>
+                    <div class="chart-description">
+                        <p>下图显示了基于蒙特卡洛模拟的总排放量概率分布，阴影区域表示95%置信区间</p>
+                    </div>
+                    <div id="uncertaintyChart" class="uncertainty-chart"></div>
                 </div>
                 
+                <!-- 置信区间可视化 -->
                 <div class="chart-container">
-                    <h3 class="chart-title">关键统计数据</h3>
+                    <h3 class="chart-title">95%置信区间可视化</h3>
+                    <div class="confidence-interval">
+                        <div class="ci-bar">
+                            <div class="ci-label">95% 置信区间</div>
+                            <div class="ci-range">
+                                <div class="ci-line">
+                                    <div class="ci-point ci-lower">${formatNumber(stats.ci_lower)}</div>
+                                    <div class="ci-line-segment"></div>
+                                    <div class="ci-point ci-mean">${formatNumber(stats.mean)}</div>
+                                    <div class="ci-line-segment"></div>
+                                    <div class="ci-point ci-upper">${formatNumber(stats.ci_upper)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ci-stats">
+                            <div class="ci-stat">
+                                <span class="ci-stat-label">区间范围</span>
+                                <span class="ci-stat-value">${formatNumber(stats.ci_upper - stats.ci_lower)} kg CO₂-当量/年</span>
+                            </div>
+                            <div class="ci-stat">
+                                <span class="ci-stat-label">相对不确定性</span>
+                                <span class="ci-stat-value">${(((stats.ci_upper - stats.ci_lower) / stats.mean) * 100).toFixed(1)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 统计摘要表格 -->
+                <div class="chart-container">
+                    <h3 class="chart-title">统计摘要</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">均值</div>
+                                <div class="stat-value">${formatNumber(stats.mean)}</div>
+                                <div class="stat-unit">kg CO₂-当量/年</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">中位数</div>
+                                <div class="stat-value">${formatNumber(stats.percentile_50)}</div>
+                                <div class="stat-unit">kg CO₂-当量/年</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-ruler"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">标准差</div>
+                                <div class="stat-value">${formatNumber(stats.std)}</div>
+                                <div class="stat-unit">kg CO₂-当量/年</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">变异系数</div>
+                                <div class="stat-value">${((stats.std / stats.mean) * 100).toFixed(1)}%</div>
+                                <div class="stat-unit">相对变异性</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分位数表 -->
+                <div class="chart-container">
+                    <h3 class="chart-title">分位数分析</h3>
                     <table class="stats-table">
                         <thead>
                             <tr>
-                                <th>统计指标</th>
+                                <th>分位数</th>
                                 <th>数值</th>
-                                <th>单位</th>
+                                <th>累积概率</th>
+                                <th>解释</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>均值</td>
-                                <td>${formatNumber(stats.mean)}</td>
-                                <td>kg CO₂-当量/年</td>
+                                <td>P5</td>
+                                <td>${formatNumber(stats.percentile_5)}</td>
+                                <td>5%</td>
+                                <td>5%概率低于此值</td>
                             </tr>
                             <tr>
-                                <td>中位数</td>
+                                <td>P25</td>
+                                <td>${formatNumber(stats.percentile_25)}</td>
+                                <td>25%</td>
+                                <td>第一四分位数</td>
+                            </tr>
+                            <tr>
+                                <td>P50</td>
                                 <td>${formatNumber(stats.percentile_50)}</td>
-                                <td>kg CO₂-当量/年</td>
+                                <td>50%</td>
+                                <td>中位数</td>
                             </tr>
                             <tr>
-                                <td>标准差</td>
-                                <td>${formatNumber(stats.std)}</td>
-                                <td>kg CO₂-当量/年</td>
+                                <td>P75</td>
+                                <td>${formatNumber(stats.percentile_75)}</td>
+                                <td>75%</td>
+                                <td>第三四分位数</td>
                             </tr>
                             <tr>
-                                <td>95% 置信区间下限</td>
-                                <td>${formatNumber(stats.ci_lower)}</td>
-                                <td>kg CO₂-当量/年</td>
-                            </tr>
-                            <tr>
-                                <td>95% 置信区间上限</td>
-                                <td>${formatNumber(stats.ci_upper)}</td>
-                                <td>kg CO₂-当量/年</td>
+                                <td>P95</td>
+                                <td>${formatNumber(stats.percentile_95)}</td>
+                                <td>95%</td>
+                                <td>95%概率低于此值</td>
                             </tr>
                         </tbody>
                     </table>
@@ -637,4 +738,208 @@ function updateMapFromCoordinates() {
         marker = L.marker([lat, lng]).addTo(map);
         marker.bindPopup(`位置: ${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
     }
+}
+
+// 绘制不确定性分析图表
+function drawUncertaintyChart(uncertainty) {
+    if (!uncertainty || !uncertainty.CO2_equivalent) return;
+    
+    const stats = uncertainty.CO2_equivalent;
+    const chartContainer = document.getElementById('uncertaintyChart');
+    if (!chartContainer) return;
+    
+    // 生成模拟数据用于绘制分布图
+    const mean = stats.mean;
+    const std = stats.std;
+    const ci_lower = stats.ci_lower;
+    const ci_upper = stats.ci_upper;
+    
+    // 生成正态分布数据点
+    const xMin = Math.max(0, mean - 4 * std);
+    const xMax = mean + 4 * std;
+    const xPoints = [];
+    const yPoints = [];
+    
+    for (let i = 0; i <= 100; i++) {
+        const x = xMin + (xMax - xMin) * i / 100;
+        const y = Math.exp(-0.5 * Math.pow((x - mean) / std, 2)) / (std * Math.sqrt(2 * Math.PI));
+        xPoints.push(x);
+        yPoints.push(y);
+    }
+    
+    // 创建SVG图表
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '300');
+    svg.setAttribute('viewBox', '0 0 800 300');
+    svg.style.border = '1px solid #e2e8f0';
+    svg.style.borderRadius = '8px';
+    svg.style.backgroundColor = '#fafafa';
+    
+    // 绘制坐标轴
+    const margin = { top: 20, right: 20, bottom: 40, left: 60 };
+    const width = 800 - margin.left - margin.right;
+    const height = 300 - margin.top - margin.bottom;
+    
+    // X轴
+    const xScale = (x) => margin.left + ((x - xMin) / (xMax - xMin)) * width;
+    const yScale = (y) => margin.top + height - (y / Math.max(...yPoints)) * height;
+    
+    // 绘制分布曲线
+    const pathData = xPoints.map((x, i) => {
+        const xPos = xScale(x);
+        const yPos = yScale(yPoints[i]);
+        return `${i === 0 ? 'M' : 'L'} ${xPos} ${yPos}`;
+    }).join(' ');
+    
+    const curve = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    curve.setAttribute('d', pathData);
+    curve.setAttribute('fill', 'none');
+    curve.setAttribute('stroke', '#3b82f6');
+    curve.setAttribute('stroke-width', '2');
+    svg.appendChild(curve);
+    
+    // 绘制95%置信区间阴影
+    const ciStart = xPoints.findIndex(x => x >= ci_lower);
+    const ciEnd = xPoints.findIndex(x => x >= ci_upper);
+    
+    if (ciStart >= 0 && ciEnd >= 0) {
+        const ciPath = `M ${xScale(xPoints[ciStart])} ${yScale(yPoints[ciStart])} ` +
+                      xPoints.slice(ciStart, ciEnd + 1).map((x, i) => 
+                          `L ${xScale(x)} ${yScale(yPoints[ciStart + i])}`
+                      ).join(' ') +
+                      ` L ${xScale(xPoints[ciEnd])} ${margin.top + height} ` +
+                      `L ${xScale(xPoints[ciStart])} ${margin.top + height} Z`;
+        
+        const ciArea = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        ciArea.setAttribute('d', ciPath);
+        ciArea.setAttribute('fill', 'rgba(59, 130, 246, 0.2)');
+        ciArea.setAttribute('stroke', 'none');
+        svg.insertBefore(ciArea, curve);
+    }
+    
+    // 绘制均值线
+    const meanLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    meanLine.setAttribute('x1', xScale(mean));
+    meanLine.setAttribute('y1', margin.top);
+    meanLine.setAttribute('x2', xScale(mean));
+    meanLine.setAttribute('y2', margin.top + height);
+    meanLine.setAttribute('stroke', '#ef4444');
+    meanLine.setAttribute('stroke-width', '2');
+    meanLine.setAttribute('stroke-dasharray', '5,5');
+    svg.appendChild(meanLine);
+    
+    // 绘制置信区间边界线
+    const ciLowerLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    ciLowerLine.setAttribute('x1', xScale(ci_lower));
+    ciLowerLine.setAttribute('y1', margin.top);
+    ciLowerLine.setAttribute('x2', xScale(ci_lower));
+    ciLowerLine.setAttribute('y2', margin.top + height);
+    ciLowerLine.setAttribute('stroke', '#10b981');
+    ciLowerLine.setAttribute('stroke-width', '1');
+    ciLowerLine.setAttribute('stroke-dasharray', '3,3');
+    svg.appendChild(ciLowerLine);
+    
+    const ciUpperLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    ciUpperLine.setAttribute('x1', xScale(ci_upper));
+    ciUpperLine.setAttribute('y1', margin.top);
+    ciUpperLine.setAttribute('x2', xScale(ci_upper));
+    ciUpperLine.setAttribute('y2', margin.top + height);
+    ciUpperLine.setAttribute('stroke', '#10b981');
+    ciUpperLine.setAttribute('stroke-width', '1');
+    ciUpperLine.setAttribute('stroke-dasharray', '3,3');
+    svg.appendChild(ciUpperLine);
+    
+    // 添加坐标轴
+    const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    xAxis.setAttribute('x1', margin.left);
+    xAxis.setAttribute('y1', margin.top + height);
+    xAxis.setAttribute('x2', margin.left + width);
+    xAxis.setAttribute('y2', margin.top + height);
+    xAxis.setAttribute('stroke', '#374151');
+    xAxis.setAttribute('stroke-width', '1');
+    svg.appendChild(xAxis);
+    
+    const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    yAxis.setAttribute('x1', margin.left);
+    yAxis.setAttribute('y1', margin.top);
+    yAxis.setAttribute('x2', margin.left);
+    yAxis.setAttribute('y2', margin.top + height);
+    yAxis.setAttribute('stroke', '#374151');
+    yAxis.setAttribute('stroke-width', '1');
+    svg.appendChild(yAxis);
+    
+    // 添加标签
+    const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    xLabel.setAttribute('x', margin.left + width / 2);
+    xLabel.setAttribute('y', margin.top + height + 30);
+    xLabel.setAttribute('text-anchor', 'middle');
+    xLabel.setAttribute('font-size', '12');
+    xLabel.setAttribute('fill', '#374151');
+    xLabel.textContent = '总排放量 (kg CO₂-当量/年)';
+    svg.appendChild(xLabel);
+    
+    const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    yLabel.setAttribute('x', 10);
+    yLabel.setAttribute('y', margin.top + height / 2);
+    yLabel.setAttribute('text-anchor', 'middle');
+    yLabel.setAttribute('font-size', '12');
+    yLabel.setAttribute('fill', '#374151');
+    yLabel.setAttribute('transform', 'rotate(-90, 10, ' + (margin.top + height / 2) + ')');
+    yLabel.textContent = '概率密度';
+    svg.appendChild(yLabel);
+    
+    // 添加图例
+    const legend = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    legend.setAttribute('transform', 'translate(' + (margin.left + width - 200) + ', ' + (margin.top + 20) + ')');
+    
+    // 均值线图例
+    const meanLegend = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const meanLegendLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    meanLegendLine.setAttribute('x1', 0);
+    meanLegendLine.setAttribute('y1', 0);
+    meanLegendLine.setAttribute('x2', 20);
+    meanLegendLine.setAttribute('y2', 0);
+    meanLegendLine.setAttribute('stroke', '#ef4444');
+    meanLegendLine.setAttribute('stroke-width', '2');
+    meanLegendLine.setAttribute('stroke-dasharray', '5,5');
+    meanLegend.appendChild(meanLegendLine);
+    
+    const meanLegendText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    meanLegendText.setAttribute('x', 25);
+    meanLegendText.setAttribute('y', 5);
+    meanLegendText.setAttribute('font-size', '12');
+    meanLegendText.setAttribute('fill', '#374151');
+    meanLegendText.textContent = '均值';
+    meanLegend.appendChild(meanLegendText);
+    legend.appendChild(meanLegend);
+    
+    // 置信区间图例
+    const ciLegend = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    ciLegend.setAttribute('transform', 'translate(0, 20)');
+    
+    const ciLegendRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    ciLegendRect.setAttribute('x', 0);
+    ciLegendRect.setAttribute('y', -5);
+    ciLegendRect.setAttribute('width', 20);
+    ciLegendRect.setAttribute('height', 10);
+    ciLegendRect.setAttribute('fill', 'rgba(59, 130, 246, 0.2)');
+    ciLegendRect.setAttribute('stroke', '#3b82f6');
+    ciLegendRect.setAttribute('stroke-width', '1');
+    ciLegend.appendChild(ciLegendRect);
+    
+    const ciLegendText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    ciLegendText.setAttribute('x', 25);
+    ciLegendText.setAttribute('y', 5);
+    ciLegendText.setAttribute('font-size', '12');
+    ciLegendText.setAttribute('fill', '#374151');
+    ciLegendText.textContent = '95% 置信区间';
+    ciLegend.appendChild(ciLegendText);
+    legend.appendChild(ciLegend);
+    
+    svg.appendChild(legend);
+    
+    // 清空容器并添加SVG
+    chartContainer.innerHTML = '';
+    chartContainer.appendChild(svg);
 }
