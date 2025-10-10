@@ -263,10 +263,13 @@ body {
 
 .interactive-map {
     height: 300px;
+    width: 100%;
     border-radius: 8px;
     border: 2px solid #e2e8f0;
     overflow: hidden;
     position: relative;
+    background-color: #f8fafc;
+    min-height: 300px;
 }
 
 .map-instructions {

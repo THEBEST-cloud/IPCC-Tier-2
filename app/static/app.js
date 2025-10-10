@@ -14,7 +14,9 @@ function initializeApp() {
     setupToggleSwitches();
     setupAnalysisOptions();
     setupCoordinateInputs();
-    initializeMap();
+    
+    // 延迟初始化地图，确保DOM完全加载
+    setTimeout(initializeMap, 500);
 }
 
 // 设置事件监听器
@@ -535,49 +537,80 @@ document.addEventListener('click', function(event) {
 
 // 初始化交互式地图
 function initializeMap() {
-    // 检查Leaflet是否已加载
-    if (typeof L === 'undefined') {
-        console.error('Leaflet library not loaded');
+    console.log('Initializing map...');
+    
+    // 检查地图容器是否存在
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) {
+        console.error('Map container not found');
         return;
     }
     
-    // 创建地图实例，默认显示中国
-    map = L.map('map').setView([35.0, 105.0], 4);
+    // 检查Leaflet是否已加载
+    if (typeof L === 'undefined') {
+        console.error('Leaflet library not loaded, retrying in 1 second...');
+        setTimeout(initializeMap, 1000);
+        return;
+    }
     
-    // 添加地图图层
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 18
-    }).addTo(map);
+    console.log('Leaflet loaded, creating map...');
     
-    // 地图点击事件
-    map.on('click', function(e) {
-        const lat = e.latlng.lat;
-        const lng = e.latlng.lng;
+    try {
+        // 创建地图实例，默认显示中国
+        map = L.map('map', {
+            center: [35.0, 105.0],
+            zoom: 4,
+            zoomControl: true
+        });
         
-        // 更新坐标输入框
-        document.getElementById('latitude').value = lat.toFixed(4);
-        document.getElementById('longitude').value = lng.toFixed(4);
+        console.log('Map created successfully');
         
-        // 更新标记
-        if (marker) {
-            map.removeLayer(marker);
-        }
+        // 添加地图图层
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(map);
         
-        marker = L.marker([lat, lng]).addTo(map);
-        marker.bindPopup(`位置: ${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
+        console.log('Tile layer added');
         
-        // 更新气候区域
-        updateClimateRegion();
-    });
-    
-    // 添加默认标记（北京）
-    marker = L.marker([39.9042, 116.4074]).addTo(map);
-    marker.bindPopup('默认位置: 北京').openPopup();
-    
-    // 设置初始坐标
-    document.getElementById('latitude').value = '39.9042';
-    document.getElementById('longitude').value = '116.4074';
+        // 地图点击事件
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            console.log('Map clicked:', lat, lng);
+            
+            // 更新坐标输入框
+            document.getElementById('latitude').value = lat.toFixed(4);
+            document.getElementById('longitude').value = lng.toFixed(4);
+            
+            // 更新标记
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            
+            marker = L.marker([lat, lng]).addTo(map);
+            marker.bindPopup(`位置: ${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
+            
+            // 更新气候区域
+            updateClimateRegion();
+        });
+        
+        // 添加默认标记（北京）
+        marker = L.marker([39.9042, 116.4074]).addTo(map);
+        marker.bindPopup('默认位置: 北京').openPopup();
+        
+        // 设置初始坐标
+        document.getElementById('latitude').value = '39.9042';
+        document.getElementById('longitude').value = '116.4074';
+        
+        console.log('Map initialized successfully');
+        
+    } catch (error) {
+        console.error('Error initializing map:', error);
+        // 显示错误信息
+        mapContainer.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 14px;"><i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>地图加载失败，请刷新页面重试</div>';
+    }
 }
 
 // 从坐标输入框更新地图标记
