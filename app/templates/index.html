@@ -121,6 +121,19 @@
                     <input type="number" id="chlorophyllA" class="form-input" placeholder="例如: 8.3" step="0.1">
                 </div>
                 
+                <div class="form-group">
+                    <label for="trophicStatusSelect" class="form-label">
+                        营养状态 <i class="fas fa-info-circle info-icon" title="选择营养状态或通过水质参数自动评估"></i>
+                    </label>
+                    <select id="trophicStatusSelect" class="form-input">
+                        <option value="">通过水质参数自动评估</option>
+                        <option value="Oligotrophic">贫营养型 (Oligotrophic)</option>
+                        <option value="Mesotrophic">中营养型 (Mesotrophic)</option>
+                        <option value="Eutrophic">富营养型 (Eutrophic)</option>
+                        <option value="Hypereutrophic">超富营养型 (Hypereutrophic)</option>
+                    </select>
+                </div>
+                
                 <div class="trophic-status trophic-eutrophic" id="trophicStatus" style="display: none;">
                     评估的营养状态：<span id="trophicStatusText">富营养 (Eutrophic)</span>
                 </div>

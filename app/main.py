@@ -80,9 +80,13 @@ async def analyze_reservoir(
     # Determine climate region
     climate_region = get_climate_region(reservoir_input.latitude)
     
-    # Assess trophic status if water quality data provided
+    # Assess trophic status
     trophic_status = None
-    if reservoir_input.water_quality:
+    if reservoir_input.trophic_status:
+        # 用户直接选择了营养状态
+        trophic_status = reservoir_input.trophic_status
+    elif reservoir_input.water_quality:
+        # 通过水质参数自动评估
         wq = reservoir_input.water_quality
         trophic_status = assess_trophic_status(
             total_phosphorus=wq.total_phosphorus,

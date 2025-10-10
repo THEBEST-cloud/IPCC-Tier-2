@@ -41,6 +41,9 @@ function setupEventListeners() {
     document.getElementById('totalPhosphorus').addEventListener('input', updateTrophicStatus);
     document.getElementById('totalNitrogen').addEventListener('input', updateTrophicStatus);
     document.getElementById('chlorophyllA').addEventListener('input', updateTrophicStatus);
+    
+    // 营养状态选择变化
+    document.getElementById('trophicStatusSelect').addEventListener('change', updateTrophicStatus);
 }
 
 // 设置切换开关
@@ -146,6 +149,22 @@ function setDefaultValue(inputId) {
 
 // 更新营养状态
 function updateTrophicStatus() {
+    const trophicSelect = document.getElementById('trophicStatusSelect');
+    const selectedStatus = trophicSelect.value;
+    
+    // 如果用户选择了具体的营养状态，直接使用
+    if (selectedStatus) {
+        const statusText = trophicSelect.options[trophicSelect.selectedIndex].text;
+        const statusDiv = document.getElementById('trophicStatus');
+        const statusTextSpan = document.getElementById('trophicStatusText');
+        
+        statusDiv.className = `trophic-status trophic-${selectedStatus.toLowerCase()}`;
+        statusTextSpan.textContent = statusText;
+        statusDiv.style.display = 'inline-block';
+        return;
+    }
+    
+    // 否则通过水质参数自动评估
     const tp = parseFloat(document.getElementById('totalPhosphorus').value);
     const tn = parseFloat(document.getElementById('totalNitrogen').value);
     const chla = parseFloat(document.getElementById('chlorophyllA').value);
@@ -157,14 +176,14 @@ function updateTrophicStatus() {
     
     // 简单的营养状态评估
     let status = 'Oligotrophic';
-    let statusText = '贫营养 (Oligotrophic)';
+    let statusText = '贫营养型 (Oligotrophic)';
     
     if (tp > 30 || tn > 1.5 || chla > 10) {
         status = 'Eutrophic';
-        statusText = '富营养 (Eutrophic)';
+        statusText = '富营养型 (Eutrophic)';
     } else if (tp > 15 || tn > 1.0 || chla > 5) {
         status = 'Mesotrophic';
-        statusText = '中营养 (Mesotrophic)';
+        statusText = '中营养型 (Mesotrophic)';
     }
     
     const statusDiv = document.getElementById('trophicStatus');
@@ -266,6 +285,7 @@ function collectFormData() {
             chlorophyll_a: parseFloat(document.getElementById('chlorophyllA').value) || null,
             secchi_depth: null
         },
+        trophic_status: document.getElementById('trophicStatusSelect').value || null,
         run_uncertainty: document.getElementById('enableUncertainty').checked,
         run_sensitivity: document.getElementById('enableSensitivity').checked,
         uncertainty_iterations: parseInt(document.getElementById('monteCarloRuns').value)

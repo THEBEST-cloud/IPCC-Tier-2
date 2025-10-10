@@ -29,7 +29,9 @@ def get_climate_region(latitude: float) -> str:
     if abs_lat <= 25:
         return "炎热潮湿区"  # Tropical_Moist
     elif abs_lat <= 50:
-        return "温暖区"  # Warm_Temperate（需要进一步确认湿润/干燥）
+        # 对于25-50度纬度，需要进一步确认湿润/干燥
+        # 这里默认返回温暖湿润区，实际应用中需要用户选择
+        return "温暖湿润区"  # 默认温暖湿润区
     else:
         return "其他区域"  # Other
 

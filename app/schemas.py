@@ -17,6 +17,7 @@ class ReservoirInput(BaseModel):
     
     # Water quality
     water_quality: Optional[WaterQualityInput] = None
+    trophic_status: Optional[str] = Field(None, description="Trophic status (Oligotrophic, Mesotrophic, Eutrophic, Hypereutrophic)")
     
     # Reservoir characteristics
     surface_area: float = Field(..., gt=0, description="Surface area (km²)")
