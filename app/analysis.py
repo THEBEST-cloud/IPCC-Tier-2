@@ -5,7 +5,11 @@ Uncertainty and Sensitivity Analysis for Reservoir Emissions
 import numpy as np
 from scipy import stats
 from typing import Dict, List, Tuple
-from .ipcc_tier1 import calculate_emissions, GWP_CH4, GWP_N2O, UNCERTAINTY_RANGES
+from .ipcc_tier1 import calculate_emissions, UNCERTAINTY_RANGES
+
+# 定义GWP常量
+GWP_CH4 = 28  # IPCC AR5
+GWP_N2O = 265  # IPCC AR5
 
 class UncertaintyAnalysis:
     """Monte Carlo uncertainty analysis"""
