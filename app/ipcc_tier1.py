@@ -175,8 +175,8 @@ def get_emission_factors(
     # 转换单位：kgCH4/(ha·yr) -> kgCH4/(km²/yr)
     ch4_ef = ch4_ef * 100  # 100 ha/km²
     
-    # N2O排放因子（简化处理）
-    n2o_ef = 0  # IPCC Tier 1方法中N2O排放通常很小，可忽略
+    # N2O排放因子（IPCC Tier 1方法中通常忽略）
+    n2o_ef = 0
     
     return ch4_ef, co2_ef, n2o_ef
 

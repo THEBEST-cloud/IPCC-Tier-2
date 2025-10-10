@@ -135,8 +135,7 @@ function updateDefaultValues(climateRegion) {
 function setDefaultValue(inputId) {
     const defaults = {
         'surfaceArea': 10.0,
-        'reservoirAge': 20.0,
-        'meanDepth': 20.0
+        'reservoirAge': 20.0
     };
     
     const input = document.getElementById(inputId);
@@ -261,7 +260,6 @@ function collectFormData() {
         longitude: parseFloat(document.getElementById('longitude').value),
         surface_area: parseFloat(document.getElementById('surfaceArea').value),
         reservoir_age: parseFloat(document.getElementById('reservoirAge').value) || null,
-        mean_depth: parseFloat(document.getElementById('meanDepth').value) || null,
         water_quality: {
             total_phosphorus: parseFloat(document.getElementById('totalPhosphorus').value) || null,
             total_nitrogen: parseFloat(document.getElementById('totalNitrogen').value) || null,
@@ -323,14 +321,6 @@ function generateResultsHTML(result) {
                 </div>
                 <div class="emission-label">二氧化碳 (CO₂)</div>
                 <div class="emission-value">${formatNumber(emissions.total_co2_emissions)}</div>
-                <div class="emission-unit">kg/年</div>
-            </div>
-            <div class="emission-card n2o">
-                <div class="emission-icon">
-                    <i class="fas fa-wind"></i>
-                </div>
-                <div class="emission-label">氧化亚氮 (N₂O)</div>
-                <div class="emission-value">${formatNumber(emissions.total_n2o_emissions)}</div>
                 <div class="emission-unit">kg/年</div>
             </div>
         </div>
@@ -695,10 +685,8 @@ function getParameterLabel(param) {
         'Surface Area': '水库面积',
         'CH4 Emission Factor': '甲烷排放因子',
         'CO2 Emission Factor': '二氧化碳排放因子',
-        'N2O Emission Factor': '氧化亚氮排放因子',
         'surface_area': '水库面积',
         'reservoir_age': '水库年龄',
-        'mean_depth': '平均水深',
         'total_phosphorus': '总磷浓度',
         'total_nitrogen': '总氮浓度',
         'chlorophyll_a': '叶绿素a'

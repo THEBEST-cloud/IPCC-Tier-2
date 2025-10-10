@@ -105,7 +105,7 @@ async def analyze_reservoir(
     # 提取主要结果
     ch4_total = ipcc_results["E_CH4"] * 1000  # tCO2eq -> kgCO2eq
     co2_total = ipcc_results["E_CO2"] * 1000  # tCO2eq -> kgCO2eq
-    n2o_total = 0  # IPCC Tier 1中N2O通常忽略
+    n2o_total = 0  # IPCC Tier 1中N2O忽略
     co2_eq = ipcc_results["E_total"] * 1000  # tCO2eq -> kgCO2eq
     
     # 获取排放因子（用于不确定性分析）
@@ -138,13 +138,10 @@ async def analyze_reservoir(
         trophic_status=trophic_status,
         surface_area=reservoir_input.surface_area,
         reservoir_age=reservoir_input.reservoir_age,
-        mean_depth=reservoir_input.mean_depth,
         ch4_emission_factor=ch4_ef,
         co2_emission_factor=co2_ef,
-        n2o_emission_factor=n2o_ef,
         total_ch4_emissions=ch4_total,
         total_co2_emissions=co2_total,
-        total_n2o_emissions=n2o_total,
         co2_equivalent=co2_eq,
         uncertainty_analysis=uncertainty_results,
         sensitivity_analysis=sensitivity_results,

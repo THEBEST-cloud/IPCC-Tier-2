@@ -21,12 +21,10 @@ class ReservoirInput(BaseModel):
     # Reservoir characteristics
     surface_area: float = Field(..., gt=0, description="Surface area (km²)")
     reservoir_age: Optional[float] = Field(None, ge=0, description="Reservoir age (years)")
-    mean_depth: Optional[float] = Field(None, gt=0, description="Mean depth (m)")
     
     # Custom emission factors (optional)
     custom_ch4_ef: Optional[float] = Field(None, description="Custom CH4 emission factor (kg/km²/yr)")
     custom_co2_ef: Optional[float] = Field(None, description="Custom CO2 emission factor (kg/km²/yr)")
-    custom_n2o_ef: Optional[float] = Field(None, description="Custom N2O emission factor (kg/km²/yr)")
     
     # Analysis options
     run_uncertainty: bool = Field(True, description="Run uncertainty analysis")
@@ -37,12 +35,10 @@ class EmissionResults(BaseModel):
     """Emission calculation results"""
     total_ch4_emissions: float = Field(..., description="Total CH4 emissions (kg/yr)")
     total_co2_emissions: float = Field(..., description="Total CO2 emissions (kg/yr)")
-    total_n2o_emissions: float = Field(..., description="Total N2O emissions (kg/yr)")
     co2_equivalent: float = Field(..., description="Total CO2 equivalent (kg CO2-eq/yr)")
     
     ch4_emission_factor: float
     co2_emission_factor: float
-    n2o_emission_factor: float
     
     climate_region: str
     trophic_status: Optional[str] = None
