@@ -36,20 +36,36 @@ def get_ipcc_aggregated_zone_in_chinese(lat: float, lon: float, geotiff_path: st
 
     # 内部辅助函数：将柯本代码映射到IPCC气候区
     def _map_koppen_code_to_ipcc_zone(koppen_code: int) -> Tuple[str, str, int]:
-        # 柯本代码到IPCC标准气候区的映射
+        # 柯本代码到IPCC标准气候区的映射（基于Beck-Köppen-Geiger分类）
         koppen_to_standard_ipcc = {
-            23: "Boreal moist", 24: "Boreal moist", 27: "Boreal moist", 28: "Boreal moist", 
-            29: "Polar moist", 30: "Polar moist",
-            9: "Cool temperate moist", 10: "Cool temperate moist", 12: "Cool temperate moist", 
-            13: "Cool temperate moist", 15: "Cool temperate moist", 16: "Cool temperate moist", 
-            18: "Cool temperate moist", 19: "Cool temperate moist", 20: "Cool temperate moist", 
-            22: "Cool temperate moist", 26: "Cool temperate moist",
+            # 热带气候 (A)
+            1: "Tropical moist", 2: "Tropical moist", 3: "Tropical dry",
+            
+            # 干旱气候 (B)
             4: "Warm temperate dry", 5: "Warm temperate dry", 6: "Warm temperate dry", 
             7: "Warm temperate dry", 8: "Warm temperate dry",
-            11: "Warm temperate moist", 14: "Warm temperate moist", 17: "Warm temperate moist", 
-            21: "Warm temperate moist", 25: "Warm temperate moist",
-            3: "Tropical dry",
-            1: "Tropical moist", 2: "Tropical moist"
+            
+            # 温带气候 (C)
+            9: "Cool temperate moist", 10: "Cool temperate moist", 11: "Warm temperate moist", 
+            12: "Cool temperate moist", 13: "Cool temperate moist", 14: "Warm temperate moist", 
+            15: "Cool temperate moist", 16: "Cool temperate moist", 17: "Warm temperate moist", 
+            18: "Cool temperate moist", 19: "Cool temperate moist", 20: "Cool temperate moist", 
+            21: "Warm temperate moist", 22: "Cool temperate moist", 25: "Warm temperate moist", 
+            26: "Cool temperate moist",
+            
+            # 大陆性气候 (D)
+            23: "Boreal moist", 24: "Boreal moist", 27: "Boreal moist", 28: "Boreal moist", 
+            29: "Polar moist", 30: "Polar moist",
+            
+            # 极地气候 (E)
+            31: "Boreal", 32: "Boreal", 33: "Boreal", 34: "Boreal", 35: "Boreal", 36: "Boreal",
+            
+            # 高原气候和其他特殊情况
+            37: "Tropical dry/montane", 38: "Tropical dry/montane", 39: "Tropical dry/montane",
+            40: "Tropical dry/montane", 41: "Tropical dry/montane", 42: "Tropical dry/montane",
+            43: "Tropical dry/montane", 44: "Tropical dry/montane", 45: "Tropical dry/montane",
+            46: "Tropical dry/montane", 47: "Tropical dry/montane", 48: "Tropical dry/montane",
+            49: "Tropical dry/montane", 50: "Tropical dry/montane"
         }
         
         # IPCC标准气候区到聚合气候区的映射
