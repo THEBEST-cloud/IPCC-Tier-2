@@ -3,6 +3,28 @@ let currentAnalysis = null;
 let map = null;
 let marker = null;
 
+// 坐标标准化函数
+function normalizeCoordinates(lat, lng) {
+    // 标准化纬度到-90到90范围
+    let normalizedLat = lat;
+    if (normalizedLat > 90) {
+        normalizedLat = 90 - (normalizedLat - 90);
+    } else if (normalizedLat < -90) {
+        normalizedLat = -90 + (-90 - normalizedLat);
+    }
+    
+    // 标准化经度到-180到180范围
+    let normalizedLng = lng;
+    while (normalizedLng > 180) {
+        normalizedLng -= 360;
+    }
+    while (normalizedLng < -180) {
+        normalizedLng += 360;
+    }
+    
+    return { lat: normalizedLat, lng: normalizedLng };
+}
+
 // DOM加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -948,19 +970,22 @@ function initializeMap() {
             const lat = e.latlng.lat;
             const lng = e.latlng.lng;
             
-            console.log('Map clicked:', lat, lng);
+            // 标准化坐标
+            const normalized = normalizeCoordinates(lat, lng);
+            
+            console.log('Map clicked:', lat, lng, '-> normalized:', normalized);
             
             // 更新坐标输入框
-            document.getElementById('latitude').value = lat.toFixed(4);
-            document.getElementById('longitude').value = lng.toFixed(4);
+            document.getElementById('latitude').value = normalized.lat.toFixed(4);
+            document.getElementById('longitude').value = normalized.lng.toFixed(4);
             
             // 更新标记
             if (marker) {
                 map.removeLayer(marker);
             }
             
-            marker = L.marker([lat, lng]).addTo(map);
-            marker.bindPopup(`位置: ${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
+            marker = L.marker([normalized.lat, normalized.lng]).addTo(map);
+            marker.bindPopup(`位置: ${normalized.lat.toFixed(4)}, ${normalized.lng.toFixed(4)}`).openPopup();
             
             // 更新气候区域
             updateClimateRegion();
@@ -989,16 +1014,25 @@ function updateMapFromCoordinates() {
     const lng = parseFloat(document.getElementById('longitude').value);
     
     if (!isNaN(lat) && !isNaN(lng) && map) {
+        // 标准化坐标
+        const normalized = normalizeCoordinates(lat, lng);
+        
+        // 如果坐标被标准化了，更新输入框
+        if (normalized.lat !== lat || normalized.lng !== lng) {
+            document.getElementById('latitude').value = normalized.lat.toFixed(4);
+            document.getElementById('longitude').value = normalized.lng.toFixed(4);
+        }
+        
         // 更新地图视图
-        map.setView([lat, lng], 10);
+        map.setView([normalized.lat, normalized.lng], 10);
         
         // 更新标记
         if (marker) {
             map.removeLayer(marker);
         }
         
-        marker = L.marker([lat, lng]).addTo(map);
-        marker.bindPopup(`位置: ${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
+        marker = L.marker([normalized.lat, normalized.lng]).addTo(map);
+        marker.bindPopup(`位置: ${normalized.lat.toFixed(4)}, ${normalized.lng.toFixed(4)}`).openPopup();
     }
 }
 
