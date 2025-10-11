@@ -4,6 +4,7 @@
 """
 
 import rasterio
+import numpy as np
 from typing import Optional, Tuple, Dict
 import os
 
@@ -26,9 +27,18 @@ def get_ipcc_aggregated_zone_in_chinese(lat: float, lon: float, geotiff_path: st
     
     # 内部辅助函数：从本地文件获取气候代码
     def _get_climate_code_from_local_file(lat: float, lon: float, path: str) -> Optional[int]:
+        # 检查坐标是否在有效范围内
+        if lat < -90 or lat > 90 or lon < -180 or lon > 180:
+            print(f"坐标超出范围: ({lat}, {lon})")
+            return None
+            
         try:
             with rasterio.open(path) as src:
                 value = next(src.sample([(lon, lat)]))[0]
+                # 检查值是否有效
+                if value is None or np.isnan(value) or value == 0:
+                    print(f"无效的气候代码: {value} at ({lat}, {lon})")
+                    return None
                 return int(value)
         except Exception as e:
             print(f"读取文件 '{path}' 时出错: {e}")
@@ -38,6 +48,9 @@ def get_ipcc_aggregated_zone_in_chinese(lat: float, lon: float, geotiff_path: st
     def _map_koppen_code_to_ipcc_zone(koppen_code: int) -> Tuple[str, str, int]:
         # 柯本代码到IPCC标准气候区的映射（基于Beck-Köppen-Geiger分类）
         koppen_to_standard_ipcc = {
+            # 无效或海洋区域
+            0: "Tropical moist",  # 默认处理为热带湿润
+            
             # 热带气候 (A)
             1: "Tropical moist", 2: "Tropical moist", 3: "Tropical dry",
             
