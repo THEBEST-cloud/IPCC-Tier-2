@@ -109,8 +109,8 @@ async def analyze_reservoir(
     )
     
     # 提取主要结果
-    ch4_total = clean_numeric_value(ipcc_results["E_CH4"] * 1000)  # tCO2eq -> kgCO2eq
-    co2_total = clean_numeric_value(ipcc_results["E_CO2"] * 1000)  # tCO2eq -> kgCO2eq
+    ch4_total = clean_numeric_value(ipcc_results["E_CH4_total"] * 1000)  # tCO2eq -> kgCO2eq
+    co2_total = clean_numeric_value(ipcc_results["E_CO2_total"] * 1000)  # tCO2eq -> kgCO2eq
     n2o_total = 0  # IPCC Tier 1中N2O忽略
     co2_eq = clean_numeric_value(ipcc_results["E_total"] * 1000)  # tCO2eq -> kgCO2eq
     
