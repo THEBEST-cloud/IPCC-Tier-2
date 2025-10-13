@@ -592,12 +592,12 @@ function generateIPCCResultsHTML(ipccResults) {
                         </div>
                         <div class="emission-item co2">
                             <div class="emission-label">CO₂排放总量 (E_CO₂)</div>
-                            <div class="emission-value">${formatNumber(ipccResults.E_CO2)}</div>
+                            <div class="emission-value">${formatNumber(ipccResults.E_CO2_total)}</div>
                             <div class="emission-unit">tCO₂-当量</div>
                         </div>
                         <div class="emission-item ch4">
                             <div class="emission-label">CH₄排放总量 (E_CH₄)</div>
-                            <div class="emission-value">${formatNumber(ipccResults.E_CH4)}</div>
+                            <div class="emission-value">${formatNumber(ipccResults.E_CH4_total)}</div>
                             <div class="emission-unit">tCO₂-当量</div>
                         </div>
                     </div>
@@ -614,12 +614,12 @@ function generateIPCCResultsHTML(ipccResults) {
                         </div>
                         <div class="annual-item">
                             <div class="annual-label">≤20年CH₄年均排放量</div>
-                            <div class="annual-value">${formatNumber(ipccResults.annual_CH4_age_le_20)}</div>
+                            <div class="annual-value">${formatNumber(ipccResults.annual_CH4_le_20)}</div>
                             <div class="annual-unit">kg CO₂-当量/年</div>
                         </div>
                         <div class="annual-item">
                             <div class="annual-label">>20年CH₄年均排放量</div>
-                            <div class="annual-value">${formatNumber(ipccResults.annual_CH4_age_gt_20)}</div>
+                            <div class="annual-value">${formatNumber(ipccResults.annual_CH4_gt_20)}</div>
                             <div class="annual-unit">kg CO₂-当量/年</div>
                         </div>
                     </div>
@@ -717,23 +717,23 @@ function generateIPCCResultsHTML(ipccResults) {
                             <div class="detail-grid">
                                 <div class="detail-item">
                                     <span class="detail-label">年均CO₂排放总量</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.F_CO2_tot)} tCO₂-C/yr</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CO2_annual)} tCO₂-C/yr</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">≤20年水库表面CH₄排放</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_res_age_le_20)} kgCH₄/yr</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_res_le_20_annual)} tCH₄/yr</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">≤20年下游CH₄排放</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_downstream_age_le_20)} kgCH₄/yr</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_downstream_le_20_annual)} tCH₄/yr</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">>20年水库表面CH₄排放</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_res_age_gt_20)} kgCH₄/yr</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_res_gt_20_annual)} tCH₄/yr</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">>20年下游CH₄排放</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_downstream_age_gt_20)} kgCH₄/yr</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_downstream_gt_20_annual)} tCH₄/yr</span>
                                 </div>
                             </div>
                         </div>
@@ -743,11 +743,11 @@ function generateIPCCResultsHTML(ipccResults) {
                             <div class="detail-grid">
                                 <div class="detail-item">
                                     <span class="detail-label">≤20年CH₄排放总量</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.E_CH4_age_le_20)} tCO₂-当量</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.E_CH4_le_20_total)} tCO₂-当量</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">>20年CH₄排放总量</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.E_CH4_age_gt_20)} tCO₂-当量</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.E_CH4_gt_20_total)} tCO₂-当量</span>
                                 </div>
                             </div>
                         </div>
