@@ -244,7 +244,8 @@ def calculate_ipcc_tier1_emissions(
         E_CH4_age_gt_20 = 0
     
     # 水库寿命内CO2排放总量
-    E_CO2 = F_CO2_tot * (M_CO2 / M_C) * reservoir_age
+    # 注意：CO2排放只在前20年发生，不能乘以整个水库寿命
+    E_CO2 = F_CO2_tot * (M_CO2 / M_C) * min(20, reservoir_age)
     
     # 水库寿命内CH4排放总量
     E_CH4 = E_CH4_age_le_20 + E_CH4_age_gt_20
@@ -253,7 +254,12 @@ def calculate_ipcc_tier1_emissions(
     E_total = E_CO2 + E_CH4
     
     # 计算年均排放量
-    annual_CO2_kg = F_CO2_tot * (M_CO2 / M_C) * 1000  # kgCO2eq/yr
+    # CO2排放只在前20年发生，所以年均排放量需要根据实际排放年限计算
+    if reservoir_age <= 20:
+        annual_CO2_kg = F_CO2_tot * (M_CO2 / M_C) * 1000  # kgCO2eq/yr
+    else:
+        # 如果水库年龄>20年，CO2排放已经停止，年均排放量为0
+        annual_CO2_kg = 0
     
     # 分阶段年均CH4排放量
     if reservoir_age <= 20:
