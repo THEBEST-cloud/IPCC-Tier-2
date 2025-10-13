@@ -59,16 +59,30 @@ def get_ipcc_aggregated_zone_in_chinese(lat: float, lon: float, geotiff_path: st
             7: "Warm temperate dry", 8: "Warm temperate dry",
             
             # 温带气候 (C)
-            9: "Cool temperate moist", 10: "Cool temperate moist", 11: "Warm temperate moist", 
-            12: "Cool temperate moist", 13: "Cool temperate moist", 14: "Warm temperate moist", 
-            15: "Cool temperate moist", 16: "Cool temperate moist", 17: "Warm temperate moist", 
-            18: "Cool temperate moist", 19: "Cool temperate moist", 20: "Cool temperate moist", 
-            21: "Warm temperate moist", 22: "Cool temperate moist", 25: "Warm temperate moist", 
-            26: "Cool temperate moist",
+            9: "Warm temperate moist",   # Cfa - 温暖湿润气候
+            10: "Cool temperate moist",  # Cfb - 海洋性气候
+            11: "Cool temperate moist",  # Cfc - 亚极地海洋性气候
+            12: "Warm temperate moist",  # Csa - 地中海气候
+            13: "Warm temperate moist",  # Csb - 地中海气候
+            14: "Warm temperate moist",  # Csc - 地中海气候
+            15: "Warm temperate moist",  # Cwa - 温暖湿润气候
+            16: "Cool temperate moist",  # Cwb - 海洋性气候
+            17: "Cool temperate moist",  # Cwc - 亚极地海洋性气候
+            18: "Warm temperate moist",  # Cfa - 温暖湿润气候
+            19: "Cool temperate moist",  # Cfb - 海洋性气候
+            20: "Cool temperate moist",  # Cfc - 亚极地海洋性气候
+            21: "Warm temperate moist",  # Csa - 地中海气候
+            22: "Warm temperate moist",  # Csb - 地中海气候
+            23: "Warm temperate moist",  # Csc - 地中海气候
+            24: "Warm temperate moist",  # Cwa - 温暖湿润气候
+            25: "Cool temperate moist",  # Cwb - 海洋性气候
+            26: "Cool temperate moist",  # Cwc - 亚极地海洋性气候
             
             # 大陆性气候 (D)
-            23: "Boreal moist", 24: "Boreal moist", 27: "Boreal moist", 28: "Boreal moist", 
-            29: "Polar moist", 30: "Polar moist",
+            27: "Cool temperate moist",  # Dfa - 温暖大陆性气候
+            28: "Cool temperate moist",  # Dfb - 冷大陆性气候
+            29: "Boreal moist",          # Dfc - 亚极地气候
+            30: "Boreal moist",          # Dfd - 极地气候
             
             # 极地气候 (E)
             31: "Boreal", 32: "Boreal", 33: "Boreal", 34: "Boreal", 35: "Boreal", 36: "Boreal",
