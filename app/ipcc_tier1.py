@@ -170,7 +170,7 @@ def get_emission_factors(
     trophic_factor = TROPHIC_ADJUSTMENT_FACTORS.get(trophic_status, 3)
     ch4_ef *= trophic_factor
     
-    # 转换单位：tCO2-C/(ha·yr) -> kgCO2/(km²/yr)
+    # 转换单位：tCO2-C/(ha·yr) -> kgCO2/(km²/yr) 碳转二氧化碳
     co2_ef = co2_ef * 100 * (M_CO2 / M_C)  # 100 ha/km² * 分子量转换
     
     # 转换单位：kgCH4/(ha·yr) -> kgCH4/(km²/yr)
@@ -216,11 +216,11 @@ def calculate_ipcc_tier1_emissions(
     
     # 第3步：CO2排放计算 (< 20年)
     # 从排放因子开始计算
-    EF_CO2 = co2_ef  # 排放因子EF (tCO₂-C ha⁻¹ y⁻¹)
-    F_CO2_annual = surface_area_ha * (EF_CO2 / 100)  # 年均排放量 (tCO₂-C y⁻¹)
-    E_CO2_20yr = F_CO2_annual * min(20, reservoir_age)  # 20年CO2总排放量 (tCO₂-C)
-    E_CO2_total = E_CO2_20yr * (M_CO2 / M_C)  # 转换为tCO₂
-    
+    factors = EMISSION_FACTORS.get(climate_region, EMISSION_FACTORS["暖温带湿润"])
+    EF_CO2_original = factors["EF_CO2_age_le_20"]  # 1.46 tCO₂-C/(ha·yr)
+    F_CO2_annual = surface_area_ha * EF_CO2_original / 1000
+    E_CO2_total =  F_CO2_annual * min(20, reservoir_age)  # 20年CO2总排放量 (tCO₂-C)
+    E_CO2_total = E_CO2_total * (M_CO2 / M_C)  # 转换为二氧化碳 (tCO₂)
     # 第4步：CH4排放计算 (贯穿两个阶段)
     # 获取不同年龄段的CH4排放因子
     factors = EMISSION_FACTORS.get(climate_region, EMISSION_FACTORS["暖温带湿润"])
@@ -230,8 +230,8 @@ def calculate_ipcc_tier1_emissions(
     EF_CH4_le_20 = factors["EF_CH4_age_le_20"]  # ≤20年排放因子EF (kgCH₄ ha⁻¹ y⁻¹)
     EF_CH4_gt_20 = factors["EF_CH4_age_gt_20"]  # >20年排放因子EF (kgCH₄ ha⁻¹ y⁻¹)
     
-    F_CH4_res_le_20_annual = trophic_factor * (EF_CH4_le_20 * surface_area_ha)  # ≤20年年均排放量 (tCH₄ y⁻¹)
-    F_CH4_res_gt_20_annual = trophic_factor * (EF_CH4_gt_20 * surface_area_ha)  # >20年年均排放量 (tCH₄ y⁻¹)
+    F_CH4_res_le_20_annual = trophic_factor * (EF_CH4_le_20 * surface_area_ha) / 1000  # ≤20年年均排放量 (tCH₄ y⁻¹)
+    F_CH4_res_gt_20_annual = trophic_factor * (EF_CH4_gt_20 * surface_area_ha) / 1000 # >20年年均排放量 (tCH₄ y⁻¹)
     
     E_CH4_res_le_20 = F_CH4_res_le_20_annual * min(20, reservoir_age)  # <20年总排放量 (tCH₄)
     E_CH4_res_gt_20 = F_CH4_res_gt_20_annual * max(0, reservoir_age - 20) if reservoir_age > 20 else 0  # >20年总排放量 (tCH₄)
@@ -260,20 +260,20 @@ def calculate_ipcc_tier1_emissions(
     # 计算年均排放量
     if reservoir_age <= 20:
         annual_CO2_kg = F_CO2_annual * (M_CO2 / M_C) * 1000  # kgCO2eq/yr
-        annual_CH4_le_20_kg = (E_CH4_le_20_total / reservoir_age) * 1000  # kgCO2eq/yr
+        annual_CH4_le_20_kg = F_CH4_res_le_20_annual * 1000 + F_CH4_downstream_le_20_annual * 1000  # kgCH₄ y⁻¹
         annual_CH4_gt_20_kg = 0
     else:
-        annual_CO2_kg = 0  # CO2排放已停止
-        annual_CH4_le_20_kg = (E_CH4_le_20_total / 20) * 1000  # kgCO2eq/yr
-        annual_CH4_gt_20_kg = (E_CH4_gt_20_total / (reservoir_age - 20)) * 1000  # kgCO2eq/yr
+        annual_CO2_kg = F_CO2_annual * (M_CO2 / M_C) * 1000  # CO2排放已停止
+        annual_CH4_le_20_kg = F_CH4_res_le_20_annual * 1000 + F_CH4_downstream_le_20_annual * 1000  # kgCH₄ y⁻¹
+        annual_CH4_gt_20_kg = F_CH4_res_gt_20_annual * 1000 + F_CH4_downstream_gt_20_annual * 1000  # kgCH₄ y⁻¹
     
     # 水库表面和下游CH4排放的年均排放量
-    annual_CH4_res_surface_le_20 = F_CH4_res_le_20_annual * GWP_100yr_CH4  # kgCO2eq/yr
-    annual_CH4_downstream_le_20 = F_CH4_downstream_le_20_annual * GWP_100yr_CH4  # kgCO2eq/yr
+    annual_CH4_res_surface_le_20 = F_CH4_res_le_20_annual * 1000 # kgCH₄ y⁻¹
+    annual_CH4_downstream_le_20 = F_CH4_downstream_le_20_annual * 1000  # kgCH₄ y⁻¹
     
     if reservoir_age > 20:
-        annual_CH4_res_surface_gt_20 = F_CH4_res_gt_20_annual * GWP_100yr_CH4  # kgCO2eq/yr
-        annual_CH4_downstream_gt_20 = F_CH4_downstream_gt_20_annual * GWP_100yr_CH4  # kgCO2eq/yr
+        annual_CH4_res_surface_gt_20 = F_CH4_res_gt_20_annual  * 1000  # kgCH₄ y⁻¹
+        annual_CH4_downstream_gt_20 = F_CH4_downstream_gt_20_annual  * 1000  # kgCH₄ y⁻¹
     else:
         annual_CH4_res_surface_gt_20 = 0
         annual_CH4_downstream_gt_20 = 0
@@ -285,9 +285,9 @@ def calculate_ipcc_tier1_emissions(
         "E_gt_20_total": clean_numeric_value(E_gt_20_total),  # >20年总排放量 (tCO2eq)
         
         # CO2排放计算 (< 20年)
-        "EF_CO2": clean_numeric_value(EF_CO2),  # 排放因子EF (tCO₂-C ha⁻¹ y⁻¹)
+        "EF_CO2": clean_numeric_value(EF_CO2_original),  # 排放因子EF (tCO₂-C ha⁻¹ y⁻¹)
         "F_CO2_annual": clean_numeric_value(F_CO2_annual),  # 年均排放量 (tCO₂-C y⁻¹)
-        "E_CO2_20yr": clean_numeric_value(E_CO2_20yr),  # 20年CO2总排放量 (tCO₂-C)
+        "E_CO2_20yr": clean_numeric_value(E_CO2_total),  # 20年CO2总排放量 (tCO₂-C)
         "E_CO2_total": clean_numeric_value(E_CO2_total),  # CO2总排放量 (tCO₂)
         
         # CH4排放计算 (贯穿两个阶段)

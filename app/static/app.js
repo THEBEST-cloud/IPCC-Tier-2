@@ -355,7 +355,7 @@ function generateResultsHTML(result) {
                 </div>
                 <div class="emission-label">甲烷 (CH₄)</div>
                 <div class="emission-value">${formatNumber(emissions.total_ch4_emissions)}</div>
-                <div class="emission-unit">kg/年</div>
+                <div class="emission-unit">t CO₂-当量</div>
             </div>
             <div class="emission-card co2">
                 <div class="emission-icon">
@@ -363,13 +363,13 @@ function generateResultsHTML(result) {
                 </div>
                 <div class="emission-label">二氧化碳 (CO₂)</div>
                 <div class="emission-value">${formatNumber(emissions.total_co2_emissions)}</div>
-                <div class="emission-unit">kg/年</div>
+                <div class="emission-unit">t CO₂-当量</div>
             </div>
         </div>
         
         <div class="total-emissions">
             <div class="total-value">${formatNumber(emissions.co2_equivalent)}</div>
-            <div class="total-label">总温室气体排放量 (kg CO₂-当量/年)</div>
+            <div class="total-label">总温室气体排放量 (t CO₂-当量)</div>
         </div>
         
         ${emissions.ipcc_tier1_results ? generateIPCCResultsHTML(emissions.ipcc_tier1_results) : ''}
@@ -608,19 +608,19 @@ function generateIPCCResultsHTML(ipccResults) {
                     <h3 class="chart-title">年均排放量</h3>
                     <div class="annual-emissions">
                         <div class="annual-item">
-                            <div class="annual-label">年均CO₂排放量</div>
+                            <div class="annual-label">≤20年CO₂年均CO₂排放量</div>
                             <div class="annual-value">${formatNumber(ipccResults.annual_CO2)}</div>
                             <div class="annual-unit">kg CO₂-当量/年</div>
                         </div>
                         <div class="annual-item">
                             <div class="annual-label">≤20年CH₄年均排放量</div>
                             <div class="annual-value">${formatNumber(ipccResults.annual_CH4_le_20)}</div>
-                            <div class="annual-unit">kg CO₂-当量/年</div>
+                            <div class="annual-unit">kg CH₄/年</div>
                         </div>
                         <div class="annual-item">
                             <div class="annual-label">>20年CH₄年均排放量</div>
                             <div class="annual-value">${formatNumber(ipccResults.annual_CH4_gt_20)}</div>
-                            <div class="annual-unit">kg CO₂-当量/年</div>
+                            <div class="annual-unit">kg CH₄/年</div>
                         </div>
                     </div>
                 </div>
@@ -635,12 +635,12 @@ function generateIPCCResultsHTML(ipccResults) {
                                 <div class="source-item">
                                     <div class="source-label">水库表面CH₄排放</div>
                                     <div class="source-value">${formatNumber(ipccResults.annual_CH4_res_surface_le_20)}</div>
-                                    <div class="source-unit">kg CO₂-当量/年</div>
+                                    <div class="source-unit">kg CH₄/年</div>
                                 </div>
                                 <div class="source-item">
                                     <div class="source-label">大坝下游CH₄排放</div>
                                     <div class="source-value">${formatNumber(ipccResults.annual_CH4_downstream_le_20)}</div>
-                                    <div class="source-unit">kg CO₂-当量/年</div>
+                                    <div class="source-unit">kg CH₄/年</div>
                                 </div>
                             </div>
                         </div>
@@ -721,19 +721,19 @@ function generateIPCCResultsHTML(ipccResults) {
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">≤20年水库表面CH₄排放</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_res_le_20_annual)} tCH₄/yr</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_res_le_20_annual)} kg CH₄/年</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">≤20年下游CH₄排放</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_downstream_le_20_annual)} tCH₄/yr</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_downstream_le_20_annual)} kg CH₄/年</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">>20年水库表面CH₄排放</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_res_gt_20_annual)} tCH₄/yr</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_res_gt_20_annual)} kg CH₄/年</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">>20年下游CH₄排放</span>
-                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_downstream_gt_20_annual)} tCH₄/yr</span>
+                                    <span class="detail-value">${formatNumber(ipccResults.F_CH4_downstream_gt_20_annual)} kg CH₄/年</span>
                                 </div>
                             </div>
                         </div>
@@ -846,11 +846,11 @@ function getParameterLabel(param) {
 // 格式化数字
 function formatNumber(num) {
     if (num >= 1000000) {
-        return (num / 1000000).toFixed(1) + 'M';
+        return (num / 1000000).toFixed(2) + 'M';
     } else if (num >= 1000) {
-        return (num / 1000).toFixed(1) + 'K';
+        return (num / 1000).toFixed(2) + 'K';
     } else {
-        return num.toFixed(1);
+        return num.toFixed(2);
     }
 }
 
