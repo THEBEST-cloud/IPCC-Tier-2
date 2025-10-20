@@ -18,7 +18,6 @@ from .database import engine, get_db
 from .ipcc_tier1 import (
     get_climate_region,
     assess_trophic_status,
-    get_emission_factors,
     calculate_emissions,
     calculate_ipcc_tier1_emissions,
     clean_numeric_value
@@ -78,7 +77,7 @@ async def analyze_reservoir(
     Analyze reservoir emissions using IPCC Tier 1 methodology
     """
     # Determine climate region
-    climate_region = get_climate_region(reservoir_input.latitude)
+    climate_region = get_climate_region(reservoir_input.latitude, reservoir_input.longitude)
     
     # Assess trophic status
     trophic_status = None
@@ -103,29 +102,27 @@ async def analyze_reservoir(
     ipcc_results = calculate_ipcc_tier1_emissions(
         surface_area_ha=surface_area_ha,
         latitude=reservoir_input.latitude,
+        longitude=reservoir_input.longitude,
         trophic_status=trophic_status,
         reservoir_age=reservoir_input.reservoir_age
     )
     
     # 提取主要结果
-    ch4_total = clean_numeric_value(ipcc_results["E_CH4"] * 1000)  # tCO2eq -> kgCO2eq
-    co2_total = clean_numeric_value(ipcc_results["E_CO2"] * 1000)  # tCO2eq -> kgCO2eq
+    ch4_total = clean_numeric_value(ipcc_results["E_CH4_total"])  # tCO2eq
+    co2_total = clean_numeric_value(ipcc_results["E_CO2_total"])  # tCO2eq
     n2o_total = 0  # IPCC Tier 1中N2O忽略
-    co2_eq = clean_numeric_value(ipcc_results["E_total"] * 1000)  # tCO2eq -> kgCO2eq
-    
-    # 获取排放因子（用于不确定性分析）
-    ch4_ef, co2_ef, n2o_ef = get_emission_factors(
-        ipcc_results["climate_region"],
-        trophic_status,
-        reservoir_input.reservoir_age
-    )
+    co2_eq = clean_numeric_value(ipcc_results["E_total"])  # tCO2eq
+    print(f"co2_eq: {co2_eq}")
+
     
     # Run uncertainty and sensitivity analysis
     uncertainty_results, sensitivity_results = run_full_analysis(
-        surface_area=reservoir_input.surface_area,
-        ch4_ef=ch4_ef,
-        co2_ef=co2_ef,
-        n2o_ef=n2o_ef,
+        surface_area_ha=surface_area_ha,  # 使用公顷为单位
+        latitude=reservoir_input.latitude,
+        longitude=reservoir_input.longitude,
+        trophic_status=trophic_status,
+        reservoir_age=reservoir_input.reservoir_age or 100,  # 默认100年
+        climate_region_override=climate_region,
         run_uncertainty=reservoir_input.run_uncertainty,
         run_sensitivity=reservoir_input.run_sensitivity,
         iterations=reservoir_input.uncertainty_iterations
@@ -143,8 +140,8 @@ async def analyze_reservoir(
         trophic_status=trophic_status,
         surface_area=reservoir_input.surface_area,
         reservoir_age=reservoir_input.reservoir_age,
-        ch4_emission_factor=ch4_ef,
-        co2_emission_factor=co2_ef,
+        ch4_emission_factor=clean_numeric_value(ipcc_results["EF_CH4_age_le_20"]),
+        co2_emission_factor=clean_numeric_value(ipcc_results["EF_CO2_age_le_20"]),
         total_ch4_emissions=ch4_total,
         total_co2_emissions=co2_total,
         co2_equivalent=co2_eq,
@@ -163,9 +160,9 @@ async def analyze_reservoir(
         total_co2_emissions=co2_total,
         total_n2o_emissions=n2o_total,
         co2_equivalent=co2_eq,
-        ch4_emission_factor=ch4_ef,
-        co2_emission_factor=co2_ef,
-        n2o_emission_factor=n2o_ef,
+        ch4_emission_factor=clean_numeric_value(ipcc_results["EF_CH4_age_le_20"]),
+        co2_emission_factor=clean_numeric_value(ipcc_results["EF_CO2_age_le_20"]),
+        n2o_emission_factor=0.0,  # IPCC Tier 1中N2O忽略
         climate_region=ipcc_results["climate_region"],
         trophic_status=trophic_status,
         # 添加IPCC Tier 1详细结果
@@ -258,13 +255,13 @@ async def delete_analysis(analysis_id: int, db: Session = Depends(get_db)):
     return {"message": "Analysis deleted successfully"}
 
 
-@app.get("/api/climate-region/{latitude}")
-async def get_climate_info(latitude: float):
+@app.get("/api/climate-region/{latitude}/{longitude}")
+async def get_climate_info(latitude: float, longitude: float):
     """
-    Get climate region for a given latitude
+    Get climate region for given latitude and longitude
     """
-    climate_region = get_climate_region(latitude)
-    return {"latitude": latitude, "climate_region": climate_region}
+    climate_region = get_climate_region(latitude, longitude)
+    return {"latitude": latitude, "longitude": longitude, "climate_region": climate_region}
 
 
 # User Authentication Routes
