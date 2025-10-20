@@ -209,16 +209,16 @@ def calculate_ipcc_tier1_emissions(
     else:
         climate_region = get_climate_region(latitude, longitude)
     
-    # 第2步：获取排放因子
-    ch4_ef, co2_ef, n2o_ef = get_emission_factors(
-        climate_region, trophic_status, reservoir_age
-    )
+    # # 第2步：获取排放因子
+    # ch4_ef, co2_ef, n2o_ef = get_emission_factors(
+    #     climate_region, trophic_status, reservoir_age
+    # )
     
     # 第3步：CO2排放计算 (< 20年)
     # 从排放因子开始计算
     factors = EMISSION_FACTORS.get(climate_region, EMISSION_FACTORS["暖温带湿润"])
-    EF_CO2_original = factors["EF_CO2_age_le_20"]  # 1.46 tCO₂-C/(ha·yr)
-    F_CO2_annual = surface_area_ha * EF_CO2_original / 1000
+    EF_CO2_original = factors["EF_CO2_age_le_20"]  # 1.46 tCO₂-C/(ha·yr) 注意这是吨的单位，和甲烷kg不一样
+    F_CO2_annual = surface_area_ha * EF_CO2_original
     E_CO2_total =  F_CO2_annual * min(20, reservoir_age)  # 20年CO2总排放量 (tCO₂-C)
     E_CO2_total = E_CO2_total * (M_CO2 / M_C)  # 转换为二氧化碳 (tCO₂)
     # 第4步：CH4排放计算 (贯穿两个阶段)
@@ -232,9 +232,13 @@ def calculate_ipcc_tier1_emissions(
     
     F_CH4_res_le_20_annual = trophic_factor * (EF_CH4_le_20 * surface_area_ha) / 1000  # ≤20年年均排放量 (tCH₄ y⁻¹)
     F_CH4_res_gt_20_annual = trophic_factor * (EF_CH4_gt_20 * surface_area_ha) / 1000 # >20年年均排放量 (tCH₄ y⁻¹)
-    
-    E_CH4_res_le_20 = F_CH4_res_le_20_annual * min(20, reservoir_age)  # <20年总排放量 (tCH₄)
-    E_CH4_res_gt_20 = F_CH4_res_gt_20_annual * max(0, reservoir_age - 20) if reservoir_age > 20 else 0  # >20年总排放量 (tCH₄)
+    print(f"trophic_factor: {trophic_factor}")
+    print(f"surface_area_ha: {surface_area_ha}")
+    print(f"EF_CH4_le_20: {EF_CH4_le_20}")
+    print(f"EF_CH4_gt_20: {EF_CH4_gt_20}")
+    print(f"F_CH4_res_le_20_annual: {F_CH4_res_le_20_annual}")
+    E_CH4_res_le_20 = F_CH4_res_le_20_annual * min(20, reservoir_age)  # <20年总排放量 (t CH₄)
+    E_CH4_res_gt_20 = F_CH4_res_gt_20_annual * max(0, reservoir_age - 20) if reservoir_age > 20 else 0  # >20年总排放量 (t CH₄)
     
     # 下游排放计算
     R_d_i = 0.09  # flux CH4 downstream, R d,i
@@ -242,17 +246,19 @@ def calculate_ipcc_tier1_emissions(
     F_CH4_downstream_gt_20_annual = F_CH4_res_gt_20_annual * R_d_i  # >20年下游年均排放量 (tCH₄ y⁻¹)
     
     E_CH4_downstream_le_20 = F_CH4_downstream_le_20_annual * min(20, reservoir_age)  # 20年迁移排放量 (tCH₄)
-    E_CH4_downstream_gt_20 = F_CH4_downstream_gt_20_annual * max(0, reservoir_age - 20) if reservoir_age > 20 else 0  # 20年后总排放量 (tCH₄)
+    E_CH4_downstream_gt_20 = F_CH4_downstream_gt_20_annual * max(0, reservoir_age - 20)  if reservoir_age > 20 else 0  # 20年后总排放量 (tCH₄)
     
     # 第5步：汇总与最终结果
     # CH4总排放量转换为CO2当量
-    E_CH4_le_20_total = (E_CH4_res_le_20 + E_CH4_downstream_le_20) * GWP_100yr_CH4 / 1000  # 20年CH4总排放量 (tCO₂eq)
-    E_CH4_gt_20_total = (E_CH4_res_gt_20 + E_CH4_downstream_gt_20) * GWP_100yr_CH4 / 1000  # >20年CH4总排放量 (tCO₂eq)
+    E_CH4_le_20_total = (E_CH4_res_le_20 + E_CH4_downstream_le_20) * GWP_100yr_CH4   # 20年CH4总排放量 (tCO₂eq)
+    E_CH4_gt_20_total = (E_CH4_res_gt_20 + E_CH4_downstream_gt_20) * GWP_100yr_CH4   # >20年CH4总排放量 (tCO₂eq)
     E_CH4_total = E_CH4_le_20_total + E_CH4_gt_20_total  # CH4总排放量 (tCO₂eq)
     
     # 水库生命周期碳排放总量
     E_total = E_CO2_total + E_CH4_total  # 总排放量 (tCO₂eq)
-    
+    print(f"E_CO2_total: {E_CO2_total}")
+    print(f"E_CH4_total: {E_CH4_total}")
+    print(f"E_total: {E_total}")
     # 分阶段汇总
     E_le_20_total = E_CO2_total + E_CH4_le_20_total  # <20年总排放量 (tCO₂eq)
     E_gt_20_total = E_CH4_gt_20_total  # >20年总排放量 (tCO₂eq)

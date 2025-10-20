@@ -189,8 +189,10 @@ body {
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
     overflow: hidden;
+    position: relative;
+    z-index: 1;
 }
 
 .card-header {
@@ -594,10 +596,14 @@ input:checked + .slider:before {
 /* 图表容器 */
 .chart-container {
     background: white;
-    border-radius: 8px;
-    padding: 1.5rem;
+    border-radius: 10px;
+    padding: 2rem;
     margin: 1.5rem 0;
-    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    position: relative;
+    margin-bottom: 3.5rem;
+    overflow: visible;
+    z-index: 1;
 }
 
 .chart-title {
@@ -639,6 +645,10 @@ input:checked + .slider:before {
     background: #fafafa;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
+    position: relative;
+    z-index: 1;
+    overflow: visible; /* 允许内容溢出，确保图例和坐标轴完全显示 */
+    margin-bottom: 4rem; /* 增加底部边距，为横坐标和图例留出空间 */
 }
 
 .chart-description {
@@ -898,6 +908,15 @@ input:checked + .slider:before {
 
     .emissions-summary {
         grid-template-columns: 1fr;
+    }
+    
+    .chart-container {
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .card {
+        margin-bottom: 2.5rem;
     }
 }
 

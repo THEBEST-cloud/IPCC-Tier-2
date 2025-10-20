@@ -407,9 +407,9 @@ function generateUncertaintyHTML(uncertainty) {
             <div class="card-body">
                 <!-- 概率分布图 -->
                 <div class="chart-container">
-                    <h3 class="chart-title">总排放量概率分布图</h3>
+                    <h3 class="chart-title">总排放量概率分布图（基于真实模拟数据）</h3>
                     <div class="chart-description">
-                        <p>下图显示了基于蒙特卡洛模拟的总排放量概率分布，阴影区域表示95%置信区间</p>
+                        <p>下图显示了基于${uncertainty.CO2_equivalent.raw_data ? uncertainty.CO2_equivalent.raw_data.length : 1000}次蒙特卡洛模拟的真实数据分布，红色虚线为均值，绿色虚线为95%置信区间边界</p>
                     </div>
                     <div id="uncertaintyChart" class="uncertainty-chart"></div>
                 </div>
@@ -510,31 +510,31 @@ function generateUncertaintyHTML(uncertainty) {
                                 <td>P5</td>
                                 <td>${formatNumber(stats.percentile_5)}</td>
                                 <td>5%</td>
-                                <td>5%概率低于此值</td>
+                                <td>排放量有5%的概率不超过此值</td>
                             </tr>
                             <tr>
                                 <td>P25</td>
                                 <td>${formatNumber(stats.percentile_25)}</td>
                                 <td>25%</td>
-                                <td>第一四分位数</td>
+                                <td>第一四分位数，排放量有25%的概率不超过此值</td>
                             </tr>
                             <tr>
                                 <td>P50</td>
                                 <td>${formatNumber(stats.percentile_50)}</td>
                                 <td>50%</td>
-                                <td>中位数</td>
+                                <td>中位数，排放量有50%的概率不超过此值</td>
                             </tr>
                             <tr>
                                 <td>P75</td>
                                 <td>${formatNumber(stats.percentile_75)}</td>
                                 <td>75%</td>
-                                <td>第三四分位数</td>
+                                <td>第三四分位数，排放量有75%的概率不超过此值</td>
                             </tr>
                             <tr>
                                 <td>P95</td>
                                 <td>${formatNumber(stats.percentile_95)}</td>
                                 <td>95%</td>
-                                <td>95%概率低于此值</td>
+                                <td>排放量有95%的概率不超过此值</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1044,75 +1044,152 @@ function drawUncertaintyChart(uncertainty) {
     const chartContainer = document.getElementById('uncertaintyChart');
     if (!chartContainer) return;
     
-    // 生成模拟数据用于绘制分布图
+    // 使用真实的模拟数据绘制直方图
+    const rawData = stats.raw_data;
+    if (!rawData || rawData.length === 0) {
+        console.warn('No raw data available for uncertainty chart');
+        return;
+    }
+    
     const mean = stats.mean;
     const std = stats.std;
     const ci_lower = stats.ci_lower;
     const ci_upper = stats.ci_upper;
     
-    // 生成正态分布数据点
-    const xMin = Math.max(0, mean - 4 * std);
-    const xMax = mean + 4 * std;
-    const xPoints = [];
-    const yPoints = [];
+    // 计算直方图的分组 - 增加分组数量以更好地显示分布
+    const numBins = Math.min(80, Math.max(30, Math.floor(Math.sqrt(rawData.length) * 1.5)));
+    const dataMin = Math.min(...rawData);
+    const dataMax = Math.max(...rawData);
+    const binWidth = (dataMax - dataMin) / numBins;
     
-    for (let i = 0; i <= 100; i++) {
-        const x = xMin + (xMax - xMin) * i / 100;
-        const y = Math.exp(-0.5 * Math.pow((x - mean) / std, 2)) / (std * Math.sqrt(2 * Math.PI));
-        xPoints.push(x);
-        yPoints.push(y);
+    // 创建直方图数据
+    const bins = new Array(numBins).fill(0);
+    const binCenters = [];
+    
+    for (let i = 0; i < numBins; i++) {
+        binCenters.push(dataMin + (i + 0.5) * binWidth);
     }
     
-    // 创建SVG图表
+    // 统计每个分组的频次
+    rawData.forEach(value => {
+        const binIndex = Math.min(numBins - 1, Math.floor((value - dataMin) / binWidth));
+        bins[binIndex]++;
+    });
+    
+    // 转换为概率密度
+    const totalCount = rawData.length;
+    const probabilities = bins.map(count => count / (totalCount * binWidth));
+    
+    // 创建SVG图表 - 增加高度和改进布局
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', '100%');
-    svg.setAttribute('height', '300');
-    svg.setAttribute('viewBox', '0 0 800 300');
+    svg.setAttribute('height', '400');
+    svg.setAttribute('viewBox', '0 0 900 400');
     svg.style.border = '1px solid #e2e8f0';
-    svg.style.borderRadius = '8px';
-    svg.style.backgroundColor = '#fafafa';
+    svg.style.borderRadius = '12px';
+    svg.style.backgroundColor = '#ffffff';
+    svg.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
     
-    // 绘制坐标轴
-    const margin = { top: 20, right: 20, bottom: 40, left: 60 };
-    const width = 800 - margin.left - margin.right;
-    const height = 300 - margin.top - margin.bottom;
+    // 增加边距以防止标签重叠
+    const margin = { top: 40, right: 40, bottom: 80, left: 80 };
+    const width = 900 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
     
-    // X轴
-    const xScale = (x) => margin.left + ((x - xMin) / (xMax - xMin)) * width;
-    const yScale = (y) => margin.top + height - (y / Math.max(...yPoints)) * height;
+    // 缩放函数
+    const xScale = (x) => margin.left + ((x - dataMin) / (dataMax - dataMin)) * width;
+    const yScale = (y) => margin.top + height - (y / Math.max(...probabilities)) * height;
     
-    // 绘制分布曲线
-    const pathData = xPoints.map((x, i) => {
-        const xPos = xScale(x);
-        const yPos = yScale(yPoints[i]);
-        return `${i === 0 ? 'M' : 'L'} ${xPos} ${yPos}`;
-    }).join(' ');
+    // 创建渐变定义
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     
-    const curve = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    curve.setAttribute('d', pathData);
-    curve.setAttribute('fill', 'none');
-    curve.setAttribute('stroke', '#3b82f6');
-    curve.setAttribute('stroke-width', '2');
-    svg.appendChild(curve);
+    // 柱状图渐变
+    const barGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    barGradient.setAttribute('id', 'barGradient');
+    barGradient.setAttribute('x1', '0%');
+    barGradient.setAttribute('y1', '0%');
+    barGradient.setAttribute('x2', '0%');
+    barGradient.setAttribute('y2', '100%');
+    
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop1.setAttribute('offset', '0%');
+    stop1.setAttribute('stop-color', '#3b82f6');
+    stop1.setAttribute('stop-opacity', '0.9');
+    
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop2.setAttribute('offset', '100%');
+    stop2.setAttribute('stop-color', '#1e40af');
+    stop2.setAttribute('stop-opacity', '0.7');
+    
+    barGradient.appendChild(stop1);
+    barGradient.appendChild(stop2);
+    defs.appendChild(barGradient);
+    svg.appendChild(defs);
+    
+    // 绘制网格线
+    const maxProb = Math.max(...probabilities);
+    const numYTicks = 6;
+    for (let i = 1; i < numYTicks; i++) {
+        const y = margin.top + height - (i / numYTicks) * height;
+        const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        gridLine.setAttribute('x1', margin.left);
+        gridLine.setAttribute('y1', y);
+        gridLine.setAttribute('x2', margin.left + width);
+        gridLine.setAttribute('y2', y);
+        gridLine.setAttribute('stroke', '#f3f4f6');
+        gridLine.setAttribute('stroke-width', '1');
+        svg.appendChild(gridLine);
+    }
     
     // 绘制95%置信区间阴影
-    const ciStart = xPoints.findIndex(x => x >= ci_lower);
-    const ciEnd = xPoints.findIndex(x => x >= ci_upper);
+    const ciRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    ciRect.setAttribute('x', xScale(ci_lower));
+    ciRect.setAttribute('y', margin.top);
+    ciRect.setAttribute('width', xScale(ci_upper) - xScale(ci_lower));
+    ciRect.setAttribute('height', height);
+    ciRect.setAttribute('fill', 'rgba(16, 185, 129, 0.15)');
+    ciRect.setAttribute('stroke', 'none');
+    svg.appendChild(ciRect);
     
-    if (ciStart >= 0 && ciEnd >= 0) {
-        const ciPath = `M ${xScale(xPoints[ciStart])} ${yScale(yPoints[ciStart])} ` +
-                      xPoints.slice(ciStart, ciEnd + 1).map((x, i) => 
-                          `L ${xScale(x)} ${yScale(yPoints[ciStart + i])}`
-                      ).join(' ') +
-                      ` L ${xScale(xPoints[ciEnd])} ${margin.top + height} ` +
-                      `L ${xScale(xPoints[ciStart])} ${margin.top + height} Z`;
+    // 绘制直方图柱状图
+    binCenters.forEach((center, i) => {
+        const barWidth = (width / numBins) * 0.9; // 增加柱子宽度
+        const barHeight = height * (probabilities[i] / Math.max(...probabilities));
+        const x = xScale(center) - barWidth / 2;
+        const y = margin.top + height - barHeight;
         
-        const ciArea = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        ciArea.setAttribute('d', ciPath);
-        ciArea.setAttribute('fill', 'rgba(59, 130, 246, 0.2)');
-        ciArea.setAttribute('stroke', 'none');
-        svg.insertBefore(ciArea, curve);
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', x);
+        rect.setAttribute('y', y);
+        rect.setAttribute('width', barWidth);
+        rect.setAttribute('height', barHeight);
+        rect.setAttribute('fill', 'url(#barGradient)');
+        rect.setAttribute('stroke', '#1e40af');
+        rect.setAttribute('stroke-width', '0.5');
+        rect.setAttribute('rx', '1'); // 圆角
+        svg.appendChild(rect);
+    });
+    
+    // 计算并绘制正态分布拟合曲线
+    const normalCurve = [];
+    const numCurvePoints = 200;
+    for (let i = 0; i <= numCurvePoints; i++) {
+        const x = dataMin + (dataMax - dataMin) * i / numCurvePoints;
+        const y = (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / std, 2));
+        normalCurve.push({ x, y });
     }
+    
+    // 绘制正态分布曲线
+    const curvePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    let pathData = `M ${xScale(normalCurve[0].x)} ${yScale(normalCurve[0].y)}`;
+    for (let i = 1; i < normalCurve.length; i++) {
+        pathData += ` L ${xScale(normalCurve[i].x)} ${yScale(normalCurve[i].y)}`;
+    }
+    curvePath.setAttribute('d', pathData);
+    curvePath.setAttribute('fill', 'none');
+    curvePath.setAttribute('stroke', '#f59e0b');
+    curvePath.setAttribute('stroke-width', '3');
+    curvePath.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(curvePath);
     
     // 绘制均值线
     const meanLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1121,8 +1198,8 @@ function drawUncertaintyChart(uncertainty) {
     meanLine.setAttribute('x2', xScale(mean));
     meanLine.setAttribute('y2', margin.top + height);
     meanLine.setAttribute('stroke', '#ef4444');
-    meanLine.setAttribute('stroke-width', '2');
-    meanLine.setAttribute('stroke-dasharray', '5,5');
+    meanLine.setAttribute('stroke-width', '3');
+    meanLine.setAttribute('stroke-dasharray', '8,4');
     svg.appendChild(meanLine);
     
     // 绘制置信区间边界线
@@ -1132,8 +1209,8 @@ function drawUncertaintyChart(uncertainty) {
     ciLowerLine.setAttribute('x2', xScale(ci_lower));
     ciLowerLine.setAttribute('y2', margin.top + height);
     ciLowerLine.setAttribute('stroke', '#10b981');
-    ciLowerLine.setAttribute('stroke-width', '1');
-    ciLowerLine.setAttribute('stroke-dasharray', '3,3');
+    ciLowerLine.setAttribute('stroke-width', '2');
+    ciLowerLine.setAttribute('stroke-dasharray', '6,3');
     svg.appendChild(ciLowerLine);
     
     const ciUpperLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1142,8 +1219,8 @@ function drawUncertaintyChart(uncertainty) {
     ciUpperLine.setAttribute('x2', xScale(ci_upper));
     ciUpperLine.setAttribute('y2', margin.top + height);
     ciUpperLine.setAttribute('stroke', '#10b981');
-    ciUpperLine.setAttribute('stroke-width', '1');
-    ciUpperLine.setAttribute('stroke-dasharray', '3,3');
+    ciUpperLine.setAttribute('stroke-width', '2');
+    ciUpperLine.setAttribute('stroke-dasharray', '6,3');
     svg.appendChild(ciUpperLine);
     
     // 添加坐标轴
@@ -1153,7 +1230,7 @@ function drawUncertaintyChart(uncertainty) {
     xAxis.setAttribute('x2', margin.left + width);
     xAxis.setAttribute('y2', margin.top + height);
     xAxis.setAttribute('stroke', '#374151');
-    xAxis.setAttribute('stroke-width', '1');
+    xAxis.setAttribute('stroke-width', '2');
     svg.appendChild(xAxis);
     
     const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1162,72 +1239,200 @@ function drawUncertaintyChart(uncertainty) {
     yAxis.setAttribute('x2', margin.left);
     yAxis.setAttribute('y2', margin.top + height);
     yAxis.setAttribute('stroke', '#374151');
-    yAxis.setAttribute('stroke-width', '1');
+    yAxis.setAttribute('stroke-width', '2');
     svg.appendChild(yAxis);
     
-    // 添加标签
+    // 添加X轴刻度
+    const numXTicks = 6;
+    for (let i = 0; i <= numXTicks; i++) {
+        const value = dataMin + (dataMax - dataMin) * i / numXTicks;
+        const x = xScale(value);
+        
+        // 刻度线
+        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        tick.setAttribute('x1', x);
+        tick.setAttribute('y1', margin.top + height);
+        tick.setAttribute('x2', x);
+        tick.setAttribute('y2', margin.top + height + 8);
+        tick.setAttribute('stroke', '#374151');
+        tick.setAttribute('stroke-width', '2');
+        svg.appendChild(tick);
+        
+        // 刻度标签
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', x);
+        label.setAttribute('y', margin.top + height + 25);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('font-size', '12');
+        label.setAttribute('font-weight', '500');
+        label.setAttribute('fill', '#374151');
+        label.textContent = formatNumber(value);
+        svg.appendChild(label);
+    }
+    
+    // 添加Y轴刻度
+    for (let i = 0; i <= numYTicks; i++) {
+        const value = maxProb * i / numYTicks;
+        const y = margin.top + height - (value / maxProb) * height;
+        
+        // 刻度线
+        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        tick.setAttribute('x1', margin.left - 8);
+        tick.setAttribute('y1', y);
+        tick.setAttribute('x2', margin.left);
+        tick.setAttribute('y2', y);
+        tick.setAttribute('stroke', '#374151');
+        tick.setAttribute('stroke-width', '2');
+        svg.appendChild(tick);
+        
+        // 刻度标签
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', margin.left - 12);
+        label.setAttribute('y', y + 4);
+        label.setAttribute('text-anchor', 'end');
+        label.setAttribute('font-size', '11');
+        label.setAttribute('font-weight', '500');
+        label.setAttribute('fill', '#374151');
+        label.textContent = value > 0 ? value.toExponential(1) : '0';
+        svg.appendChild(label);
+    }
+    
+    // 添加轴标签
     const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     xLabel.setAttribute('x', margin.left + width / 2);
-    xLabel.setAttribute('y', margin.top + height + 30);
+    xLabel.setAttribute('y', margin.top + height + 55);
     xLabel.setAttribute('text-anchor', 'middle');
-    xLabel.setAttribute('font-size', '12');
+    xLabel.setAttribute('font-size', '14');
+    xLabel.setAttribute('font-weight', '600');
     xLabel.setAttribute('fill', '#374151');
     xLabel.textContent = '总排放量 (kg CO₂-当量/年)';
     svg.appendChild(xLabel);
     
     const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    yLabel.setAttribute('x', 10);
+    yLabel.setAttribute('x', 20);
     yLabel.setAttribute('y', margin.top + height / 2);
     yLabel.setAttribute('text-anchor', 'middle');
-    yLabel.setAttribute('font-size', '12');
+    yLabel.setAttribute('font-size', '14');
+    yLabel.setAttribute('font-weight', '600');
     yLabel.setAttribute('fill', '#374151');
-    yLabel.setAttribute('transform', 'rotate(-90, 10, ' + (margin.top + height / 2) + ')');
+    yLabel.setAttribute('transform', 'rotate(-90, 20, ' + (margin.top + height / 2) + ')');
     yLabel.textContent = '概率密度';
     svg.appendChild(yLabel);
     
-    // 添加图例
+    // 添加标题
+    const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    title.setAttribute('x', margin.left + width / 2);
+    title.setAttribute('y', 25);
+    title.setAttribute('text-anchor', 'middle');
+    title.setAttribute('font-size', '16');
+    title.setAttribute('font-weight', '700');
+    title.setAttribute('fill', '#1f2937');
+    title.textContent = `蒙特卡洛模拟结果分布 (${rawData.length} 次模拟)`;
+    svg.appendChild(title);
+    
+    // 重新设计图例 - 移到底部
     const legend = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    legend.setAttribute('transform', 'translate(' + (margin.left + width - 200) + ', ' + (margin.top + 20) + ')');
+    legend.setAttribute('transform', 'translate(' + (margin.left + 20) + ', ' + (margin.top + height + 65) + ')');
+    
+    // 图例背景
+    const legendBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    legendBg.setAttribute('x', -10);
+    legendBg.setAttribute('y', -5);
+    legendBg.setAttribute('width', width - 20);
+    legendBg.setAttribute('height', 25);
+    legendBg.setAttribute('fill', '#f9fafb');
+    legendBg.setAttribute('stroke', '#e5e7eb');
+    legendBg.setAttribute('stroke-width', '1');
+    legendBg.setAttribute('rx', '6');
+    legend.appendChild(legendBg);
+    
+    // 直方图图例
+    const histLegend = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const histLegendRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    histLegendRect.setAttribute('x', 0);
+    histLegendRect.setAttribute('y', 0);
+    histLegendRect.setAttribute('width', 16);
+    histLegendRect.setAttribute('height', 12);
+    histLegendRect.setAttribute('fill', 'url(#barGradient)');
+    histLegendRect.setAttribute('stroke', '#1e40af');
+    histLegendRect.setAttribute('stroke-width', '1');
+    histLegendRect.setAttribute('rx', '2');
+    histLegend.appendChild(histLegendRect);
+    
+    const histLegendText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    histLegendText.setAttribute('x', 22);
+    histLegendText.setAttribute('y', 9);
+    histLegendText.setAttribute('font-size', '12');
+    histLegendText.setAttribute('font-weight', '500');
+    histLegendText.setAttribute('fill', '#374151');
+    histLegendText.textContent = '模拟数据分布';
+    histLegend.appendChild(histLegendText);
+    legend.appendChild(histLegend);
+    
+    // 正态分布曲线图例
+    const normalLegend = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    normalLegend.setAttribute('transform', 'translate(140, 0)');
+    const normalLegendLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    normalLegendLine.setAttribute('x1', 0);
+    normalLegendLine.setAttribute('y1', 6);
+    normalLegendLine.setAttribute('x2', 16);
+    normalLegendLine.setAttribute('y2', 6);
+    normalLegendLine.setAttribute('stroke', '#f59e0b');
+    normalLegendLine.setAttribute('stroke-width', '3');
+    normalLegend.appendChild(normalLegendLine);
+    
+    const normalLegendText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    normalLegendText.setAttribute('x', 22);
+    normalLegendText.setAttribute('y', 9);
+    normalLegendText.setAttribute('font-size', '12');
+    normalLegendText.setAttribute('font-weight', '500');
+    normalLegendText.setAttribute('fill', '#374151');
+    normalLegendText.textContent = '正态分布拟合';
+    normalLegend.appendChild(normalLegendText);
+    legend.appendChild(normalLegend);
     
     // 均值线图例
     const meanLegend = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    meanLegend.setAttribute('transform', 'translate(270, 0)');
     const meanLegendLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     meanLegendLine.setAttribute('x1', 0);
-    meanLegendLine.setAttribute('y1', 0);
-    meanLegendLine.setAttribute('x2', 20);
-    meanLegendLine.setAttribute('y2', 0);
+    meanLegendLine.setAttribute('y1', 6);
+    meanLegendLine.setAttribute('x2', 16);
+    meanLegendLine.setAttribute('y2', 6);
     meanLegendLine.setAttribute('stroke', '#ef4444');
-    meanLegendLine.setAttribute('stroke-width', '2');
-    meanLegendLine.setAttribute('stroke-dasharray', '5,5');
+    meanLegendLine.setAttribute('stroke-width', '3');
+    meanLegendLine.setAttribute('stroke-dasharray', '8,4');
     meanLegend.appendChild(meanLegendLine);
     
     const meanLegendText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    meanLegendText.setAttribute('x', 25);
-    meanLegendText.setAttribute('y', 5);
+    meanLegendText.setAttribute('x', 22);
+    meanLegendText.setAttribute('y', 9);
     meanLegendText.setAttribute('font-size', '12');
+    meanLegendText.setAttribute('font-weight', '500');
     meanLegendText.setAttribute('fill', '#374151');
-    meanLegendText.textContent = '均值';
+    meanLegendText.textContent = `均值 (${formatNumber(mean)})`;
     meanLegend.appendChild(meanLegendText);
     legend.appendChild(meanLegend);
     
     // 置信区间图例
     const ciLegend = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    ciLegend.setAttribute('transform', 'translate(0, 20)');
-    
+    ciLegend.setAttribute('transform', 'translate(450, 0)');
     const ciLegendRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     ciLegendRect.setAttribute('x', 0);
-    ciLegendRect.setAttribute('y', -5);
-    ciLegendRect.setAttribute('width', 20);
-    ciLegendRect.setAttribute('height', 10);
-    ciLegendRect.setAttribute('fill', 'rgba(59, 130, 246, 0.2)');
-    ciLegendRect.setAttribute('stroke', '#3b82f6');
+    ciLegendRect.setAttribute('y', 0);
+    ciLegendRect.setAttribute('width', 16);
+    ciLegendRect.setAttribute('height', 12);
+    ciLegendRect.setAttribute('fill', 'rgba(16, 185, 129, 0.15)');
+    ciLegendRect.setAttribute('stroke', '#10b981');
     ciLegendRect.setAttribute('stroke-width', '1');
+    ciLegendRect.setAttribute('rx', '2');
     ciLegend.appendChild(ciLegendRect);
     
     const ciLegendText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    ciLegendText.setAttribute('x', 25);
-    ciLegendText.setAttribute('y', 5);
+    ciLegendText.setAttribute('x', 22);
+    ciLegendText.setAttribute('y', 9);
     ciLegendText.setAttribute('font-size', '12');
+    ciLegendText.setAttribute('font-weight', '500');
     ciLegendText.setAttribute('fill', '#374151');
     ciLegendText.textContent = '95% 置信区间';
     ciLegend.appendChild(ciLegendText);
@@ -1238,4 +1443,10 @@ function drawUncertaintyChart(uncertainty) {
     // 清空容器并添加SVG
     chartContainer.innerHTML = '';
     chartContainer.appendChild(svg);
+    
+    // 确保图表容器可以显示所有元素，包括横坐标和图例
+    chartContainer.style.overflow = 'visible';
+    chartContainer.style.position = 'relative';
+    chartContainer.style.zIndex = '1';
+    chartContainer.style.marginBottom = '80px'; // 为横坐标和图例预留足够空间
 }

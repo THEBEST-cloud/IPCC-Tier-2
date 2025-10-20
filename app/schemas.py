@@ -58,6 +58,7 @@ class UncertaintyResults(BaseModel):
     percentile_50: float
     percentile_75: float
     percentile_95: float
+    raw_data: Optional[List[float]] = Field(None, description="Raw simulation data points for plotting")
 
 class SensitivityResults(BaseModel):
     """Sensitivity analysis results"""
