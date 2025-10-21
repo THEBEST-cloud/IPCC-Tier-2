@@ -11,6 +11,9 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 import os
 import jwt
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 
 from . import models, schemas, auth
@@ -38,6 +41,88 @@ app = FastAPI(
 
 # Security
 security = HTTPBearer()
+
+# Email configuration
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USER = os.getenv("EMAIL_USER", "")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "")
+EMAIL_FROM = os.getenv("EMAIL_FROM", EMAIL_USER)
+
+def send_password_reset_email(email: str, token: str, request: Request):
+    """Send password reset email"""
+    try:
+        # 构建重置链接
+        reset_url = f"{request.url.scheme}://{request.url.netloc}/reset-password?token={token}"
+        
+        # 创建邮件内容
+        subject = "水库碳核算系统 - 密码重置"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; }}
+                .content {{ padding: 20px; background: #f9f9f9; }}
+                .button {{ display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+                .footer {{ padding: 20px; text-align: center; color: #666; font-size: 12px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>密码重置请求</h1>
+                </div>
+                <div class="content">
+                    <p>您好，</p>
+                    <p>我们收到了您的密码重置请求。请点击下面的按钮来重置您的密码：</p>
+                    <a href="{reset_url}" class="button">重置密码</a>
+                    <p>如果按钮无法点击，请复制以下链接到浏览器地址栏：</p>
+                    <p style="word-break: break-all; background: #eee; padding: 10px;">{reset_url}</p>
+                    <p><strong>注意：</strong>此链接将在1小时后过期。</p>
+                    <p>如果您没有请求密码重置，请忽略此邮件。</p>
+                </div>
+                <div class="footer">
+                    <p>水库碳核算系统 | Reservoir Carbon Accounting</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # 如果配置了邮件服务，发送邮件
+        if EMAIL_USER and EMAIL_PASSWORD:
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = EMAIL_FROM
+            msg['To'] = email
+            
+            html_part = MIMEText(html_content, 'html', 'utf-8')
+            msg.attach(html_part)
+            
+            server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
+            server.starttls()
+            server.login(EMAIL_USER, EMAIL_PASSWORD)
+            server.send_message(msg)
+            server.quit()
+            
+            return True
+        else:
+            # 如果没有配置邮件服务，在控制台输出重置链接（开发环境）
+            print(f"=== 密码重置链接 ===")
+            print(f"邮箱: {email}")
+            print(f"重置链接: {reset_url}")
+            print(f"令牌: {token}")
+            print(f"==================")
+            return True
+            
+    except Exception as e:
+        print(f"邮件发送失败: {e}")
+        return False
 
 # JWT Token verification function
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
@@ -280,6 +365,16 @@ async def profile_page(request: Request):
     """Serve profile page"""
     return templates.TemplateResponse("profile.html", {"request": request})
 
+@app.get("/forgot-password", response_class=HTMLResponse)
+async def forgot_password_page(request: Request):
+    """Serve forgot password page"""
+    return templates.TemplateResponse("forgot-password.html", {"request": request})
+
+@app.get("/reset-password", response_class=HTMLResponse)
+async def reset_password_page(request: Request, token: str = None):
+    """Serve reset password page"""
+    return templates.TemplateResponse("reset-password.html", {"request": request, "token": token})
+
 @app.get("/api/user/profile")
 async def get_user_profile(token: str = Depends(verify_token), db: Session = Depends(get_db)):
     """Get current user profile"""
@@ -381,6 +476,58 @@ async def register(user_data: schemas.RegisterRequest, db: Session = Depends(get
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+
+@app.post("/api/auth/forgot-password", response_model=schemas.MessageResponse)
+async def forgot_password(request_data: schemas.ForgotPasswordRequest, request: Request, db: Session = Depends(get_db)):
+    """Request password reset"""
+    token = auth.create_password_reset_token(db, request_data.email)
+    
+    if token:
+        # 发送密码重置邮件
+        email_sent = send_password_reset_email(request_data.email, token, request)
+        
+        if email_sent:
+            return schemas.MessageResponse(
+                success=True,
+                message="如果该邮箱地址存在，您将收到密码重置链接"
+            )
+        else:
+            return schemas.MessageResponse(
+                success=False,
+                message="邮件发送失败，请稍后重试"
+            )
+    else:
+        # 为了安全起见，即使邮箱不存在也返回相同的消息
+        return schemas.MessageResponse(
+            success=True,
+            message="如果该邮箱地址存在，您将收到密码重置链接"
+        )
+
+@app.post("/api/auth/reset-password", response_model=schemas.MessageResponse)
+async def reset_password(request: schemas.ResetPasswordRequest, db: Session = Depends(get_db)):
+    """Reset password using token"""
+    success = auth.reset_user_password(db, request.token, request.new_password)
+    
+    if success:
+        return schemas.MessageResponse(
+            success=True,
+            message="密码重置成功，请使用新密码登录"
+        )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="无效或已过期的重置令牌"
+        )
+
+@app.get("/api/auth/verify-reset-token/{token}")
+async def verify_reset_token(token: str, db: Session = Depends(get_db)):
+    """Verify if a reset token is valid"""
+    user = auth.verify_password_reset_token(db, token)
+    
+    if user:
+        return {"valid": True, "email": user.email}
+    else:
+        return {"valid": False}
 
 @app.get("/health")
 async def health_check():

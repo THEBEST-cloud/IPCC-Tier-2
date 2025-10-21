@@ -4,6 +4,7 @@ from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta
 from typing import Optional
 import os
+import secrets
 from sqlalchemy.orm import Session
 from . import models, schemas
 
@@ -101,3 +102,72 @@ def create_user(db: Session, user_data: schemas.RegisterRequest) -> models.User:
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def create_password_reset_token(db: Session, email: str) -> Optional[str]:
+    """Create a password reset token for the given email"""
+    user = get_user_by_email(db, email)
+    if not user:
+        return None
+    
+    # Generate a secure random token
+    token = secrets.token_urlsafe(32)
+    
+    # Set expiration time (1 hour from now)
+    expires_at = datetime.utcnow() + timedelta(hours=1)
+    
+    # Invalidate any existing tokens for this user
+    db.query(models.PasswordResetToken).filter(
+        models.PasswordResetToken.user_id == user.id,
+        models.PasswordResetToken.is_used == False
+    ).update({"is_used": True})
+    
+    # Create new token
+    reset_token = models.PasswordResetToken(
+        user_id=user.id,
+        token=token,
+        expires_at=expires_at
+    )
+    
+    db.add(reset_token)
+    db.commit()
+    
+    return token
+
+def verify_password_reset_token(db: Session, token: str) -> Optional[models.User]:
+    """Verify a password reset token and return the associated user"""
+    reset_token = db.query(models.PasswordResetToken).filter(
+        models.PasswordResetToken.token == token,
+        models.PasswordResetToken.is_used == False,
+        models.PasswordResetToken.expires_at > datetime.utcnow()
+    ).first()
+    
+    if not reset_token:
+        return None
+    
+    user = db.query(models.User).filter(models.User.id == reset_token.user_id).first()
+    return user
+
+def reset_user_password(db: Session, token: str, new_password: str) -> bool:
+    """Reset user password using a valid token"""
+    reset_token = db.query(models.PasswordResetToken).filter(
+        models.PasswordResetToken.token == token,
+        models.PasswordResetToken.is_used == False,
+        models.PasswordResetToken.expires_at > datetime.utcnow()
+    ).first()
+    
+    if not reset_token:
+        return False
+    
+    user = db.query(models.User).filter(models.User.id == reset_token.user_id).first()
+    if not user:
+        return False
+    
+    # Update user password
+    user.hashed_password = get_password_hash(new_password)
+    user.updated_at = datetime.utcnow()
+    
+    # Mark token as used
+    reset_token.is_used = True
+    
+    db.commit()
+    return True

@@ -62,3 +62,14 @@ class User(Base):
     
     # User preferences (stored as JSON)
     preferences = Column(JSON, nullable=True)
+
+class PasswordResetToken(Base):
+    """Model to store password reset tokens"""
+    __tablename__ = "password_reset_tokens"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False)  # Foreign key to users table
+    token = Column(String(255), unique=True, index=True, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    is_used = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)

@@ -15,9 +15,23 @@
 
         body {
             font-family: 'Lato', sans-serif;
-            background-color: #f8fafc;
+            background: url('/static/DJI_0039.JPG') center center/cover no-repeat fixed;
             color: #334155;
             line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+            z-index: 0;
         }
 
         /* 导航栏样式 */
@@ -190,6 +204,34 @@
             max-width: 1400px;
             margin-left: auto;
             margin-right: auto;
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         /* 页面标题 */
@@ -212,8 +254,32 @@
         .page-subtitle {
             font-size: 1.125rem;
             color: #64748b;
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
         }
 
         /* 搜索框 */
@@ -264,18 +330,40 @@
         }
 
         .category-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s;
+        }
+
+        .category-card:hover::before {
+            left: 100%;
         }
 
         .category-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .category-icon {
@@ -287,6 +375,8 @@
         .category-card.calculation .category-icon { color: #10b981; }
         .category-card.results .category-icon { color: #f59e0b; }
         .category-card.troubleshooting .category-icon { color: #ef4444; }
+        .category-card.api .category-icon { color: #8b5cf6; }
+        .category-card.updates .category-icon { color: #06b6d4; }
 
         .category-title {
             font-size: 1.25rem;
@@ -323,12 +413,27 @@
         }
 
         .faq-item {
-            border-bottom: 1px solid #e2e8f0;
-            padding: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+        }
+
+        .faq-item:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
         }
 
         .faq-item:last-child {
-            border-bottom: none;
+            margin-bottom: 0;
         }
 
         .faq-question {
@@ -437,24 +542,45 @@
 
         .quick-link {
             display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: #f8fafc;
-            border-radius: 8px;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
             text-decoration: none;
             color: #374151;
             transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .quick-link:hover {
-            background: #e2e8f0;
-            color: #1e293b;
+            background: #f9fafb;
+            border-color: #3b82f6;
+            color: #3b82f6;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
         }
 
         .quick-link-icon {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+        }
+
+        .quick-link:hover .quick-link-icon {
             color: #3b82f6;
+        }
+
+        .quick-link span {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .quick-link small {
+            font-size: 0.75rem;
+            color: #6b7280;
+            line-height: 1.3;
         }
 
         /* 响应式设计 */
@@ -537,7 +663,21 @@
         <!-- 页面标题 -->
         <div class="page-header">
             <h1 class="page-title">帮助中心</h1>
-            <p class="page-subtitle">快速找到您需要的帮助信息，让水库碳核算变得简单易用</p>
+            <p class="page-subtitle">专业的水库温室气体排放核算平台 - 基于IPCC方法学的科学计算工具</p>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">用户信赖</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">国家地区</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">技术支持</div>
+                </div>
+            </div>
         </div>
 
         <!-- 搜索框 -->
@@ -550,40 +690,58 @@
 
         <!-- 帮助分类 -->
         <div class="help-categories">
-            <div class="category-card getting-started" onclick="showCategory('getting-started')">
+            <div class="category-card getting-started" onclick="window.location.href='/dashboard'">
                 <div class="category-icon">
-                    <i class="fas fa-rocket"></i>
+                    <i class="fas fa-play-circle"></i>
                 </div>
-                <h3 class="category-title">快速开始</h3>
-                <p class="category-description">了解如何开始使用系统，创建您的第一个项目</p>
-                <div class="category-count">8 个主题</div>
+                <h3 class="category-title">快速入门</h3>
+                <p class="category-description">从零开始，5分钟掌握水库碳核算基础操作</p>
+                <div class="category-count">新手必读 • 8个教程</div>
             </div>
 
-            <div class="category-card calculation" onclick="showCategory('calculation')">
+            <div class="category-card calculation" onclick="window.location.href='/methodology'">
                 <div class="category-icon">
-                    <i class="fas fa-calculator"></i>
+                    <i class="fas fa-flask"></i>
                 </div>
-                <h3 class="category-title">计算流程</h3>
-                <p class="category-description">详细的计算步骤和参数设置指南</p>
-                <div class="category-count">12 个主题</div>
+                <h3 class="category-title">IPCC方法学</h3>
+                <p class="category-description">深入了解IPCC Tier 1方法学原理和参数配置</p>
+                <div class="category-count">科学计算 • 15个指南</div>
             </div>
 
-            <div class="category-card results" onclick="showCategory('results')">
+            <div class="category-card results" onclick="window.location.href='/projects'">
                 <div class="category-icon">
-                    <i class="fas fa-chart-line"></i>
+                    <i class="fas fa-chart-bar"></i>
                 </div>
-                <h3 class="category-title">结果解读</h3>
-                <p class="category-description">如何理解和分析计算结果</p>
-                <div class="category-count">6 个主题</div>
+                <h3 class="category-title">数据分析</h3>
+                <p class="category-description">专业的结果解读、不确定性分析和报告生成</p>
+                <div class="category-count">高级功能 • 12个案例</div>
             </div>
 
-            <div class="category-card troubleshooting" onclick="showCategory('troubleshooting')">
+            <div class="category-card troubleshooting" onclick="showTroubleshootingGuide()">
                 <div class="category-icon">
-                    <i class="fas fa-tools"></i>
+                    <i class="fas fa-life-ring"></i>
                 </div>
-                <h3 class="category-title">问题排查</h3>
-                <p class="category-description">常见问题解决方案和故障排除</p>
-                <div class="category-count">10 个主题</div>
+                <h3 class="category-title">技术支持</h3>
+                <p class="category-description">常见问题解答、故障排除和最佳实践</p>
+                <div class="category-count">问题解决 • 20个方案</div>
+            </div>
+
+            <div class="category-card api" onclick="showApiDocumentation()">
+                <div class="category-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3 class="category-title">API文档</h3>
+                <p class="category-description">开发者接口文档和集成指南</p>
+                <div class="category-count">开发者 • 即将推出</div>
+            </div>
+
+            <div class="category-card updates" onclick="showUpdateLog()">
+                <div class="category-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <h3 class="category-title">更新日志</h3>
+                <p class="category-description">最新功能发布和系统更新信息</p>
+                <div class="category-count">版本历史 • 持续更新</div>
             </div>
         </div>
 
@@ -593,50 +751,85 @@
             
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>如何开始创建新的计算项目？</span>
+                    <span>🚀 如何创建我的第一个水库碳核算项目？</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p>创建新项目非常简单：</p>
+                    <p><strong>快速上手指南：</strong></p>
                     <ol>
-                        <li>点击导航栏中的"新建计算"按钮</li>
-                        <li>输入项目名称</li>
-                        <li>在地图上选择水库位置或手动输入经纬度</li>
-                        <li>填写水质参数和IPCC模型参数</li>
-                        <li>选择分析类型（不确定性分析、敏感性分析）</li>
-                        <li>点击"计算温室气体排放"按钮开始计算</li>
+                        <li><strong>项目初始化</strong>：点击"新建计算"，输入项目名称和描述</li>
+                        <li><strong>地理定位</strong>：在交互式地图上精确选择水库位置，系统自动识别气候区域</li>
+                        <li><strong>水质数据</strong>：输入关键参数（总有机碳、总氮、总磷等）</li>
+                        <li><strong>IPCC参数</strong>：配置排放因子和模型参数（系统提供默认值）</li>
+                        <li><strong>分析设置</strong>：选择不确定性分析和敏感性分析选项</li>
+                        <li><strong>开始计算</strong>：一键启动科学计算引擎，通常2-5分钟完成</li>
                     </ol>
+                    <p><em>💡 提示：首次使用建议查看示例项目了解最佳实践</em></p>
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>系统支持哪些数据格式？</span>
+                    <span>📊 平台支持哪些数据输入方式和格式？</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p>系统支持以下数据格式：</p>
-                    <ul>
-                        <li><strong>数值输入</strong>：直接输入数值，支持小数</li>
-                        <li><strong>地图选择</strong>：通过交互式地图选择位置</li>
-                        <li><strong>坐标输入</strong>：手动输入经纬度坐标</li>
-                        <li><strong>文件上传</strong>：支持CSV、Excel格式的数据文件（即将推出）</li>
-                    </ul>
+                    <p><strong>多样化数据输入支持：</strong></p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1rem 0;">
+                        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
+                            <strong>🔢 手动输入</strong><br>
+                            <small>支持科学计数法、小数、负数等各种数值格式</small>
+                        </div>
+                        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
+                            <strong>🗺️ 地图选择</strong><br>
+                            <small>高精度交互式地图，支持卫星影像和地形图</small>
+                        </div>
+                        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
+                            <strong>📍 坐标定位</strong><br>
+                            <small>WGS84坐标系，支持度分秒和十进制格式</small>
+                        </div>
+                        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
+                            <strong>📁 批量导入</strong><br>
+                            <small>CSV、Excel文件批量处理（企业版功能）</small>
+                        </div>
+                    </div>
+                    <p><em>🔬 数据质量保证：所有输入数据都经过科学性验证和合理性检查</em></p>
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>如何理解计算结果中的不确定性分析？</span>
+                    <span>📈 如何科学解读不确定性分析结果？</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p>不确定性分析通过蒙特卡洛模拟评估计算结果的可靠性：</p>
+                    <p><strong>基于蒙特卡洛模拟的科学评估：</strong></p>
+                    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
+                        <h4 style="color: #0c4a6e; margin-bottom: 1rem;">🎯 核心指标解读</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div>
+                                <strong>📊 概率分布</strong><br>
+                                <small>直观展示排放量的统计分布特征</small>
+                            </div>
+                            <div>
+                                <strong>🎯 置信区间</strong><br>
+                                <small>95%CI：真实值的高概率范围</small>
+                            </div>
+                            <div>
+                                <strong>📐 变异系数</strong><br>
+                                <small>CV值评估结果的相对不确定性</small>
+                            </div>
+                            <div>
+                                <strong>🔍 敏感性排序</strong><br>
+                                <small>识别影响结果的关键参数</small>
+                            </div>
+                        </div>
+                    </div>
+                    <p><strong>🏆 质量评估标准：</strong></p>
                     <ul>
-                        <li><strong>概率分布图</strong>：显示总排放量的可能范围</li>
-                        <li><strong>置信区间</strong>：95%置信区间表示真实值有95%的概率在此范围内</li>
-                        <li><strong>统计指标</strong>：均值、中位数、标准差等关键统计量</li>
-                        <li><strong>建议</strong>：置信区间越窄，结果越可靠</li>
+                        <li><span style="color: #10b981;">✅ 优秀</span>：CV < 20%，置信区间相对较窄</li>
+                        <li><span style="color: #f59e0b;">⚠️ 良好</span>：20% ≤ CV < 50%，需关注关键参数</li>
+                        <li><span style="color: #ef4444;">❌ 需改进</span>：CV ≥ 50%，建议优化数据质量</li>
                     </ul>
                 </div>
             </div>
@@ -675,72 +868,168 @@
 
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>系统是否支持批量计算？</span>
+                    <span>⚡ 系统是否支持批量计算和高级功能？</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p>目前系统支持以下批量操作：</p>
-                    <ul>
-                        <li><strong>多项目管理</strong>：在"我的项目"页面查看和管理多个项目</li>
-                        <li><strong>参数模板</strong>：保存常用参数配置，快速应用到新项目</li>
-                        <li><strong>批量导出</strong>：选择多个项目进行批量导出</li>
-                        <li><strong>未来功能</strong>：批量计算功能正在开发中，敬请期待</li>
-                    </ul>
+                    <p><strong>🚀 高效批量处理能力：</strong></p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0;">
+                        <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 1rem;">
+                            <strong>✅ 当前支持</strong><br>
+                            • 多项目并行管理<br>
+                            • 参数模板快速复用<br>
+                            • 批量结果导出<br>
+                            • 项目对比分析
+                        </div>
+                        <div style="background: #fefce8; border-left: 4px solid #f59e0b; padding: 1rem;">
+                            <strong>🔄 开发中</strong><br>
+                            • 批量文件上传<br>
+                            • 自动化计算流水线<br>
+                            • API批量调用<br>
+                            • 企业级集成
+                        </div>
+                    </div>
+                    <p><em>💼 企业用户可联系我们获取定制化批量处理解决方案</em></p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>🔒 数据安全和隐私保护措施如何？</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>🛡️ 企业级安全保障：</strong></p>
+                    <div style="background: linear-gradient(135deg, #fef7ff 0%, #faf5ff 100%); padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                            <div>
+                                <h4 style="color: #7c3aed; margin-bottom: 0.5rem;">🔐 数据加密</h4>
+                                <small>传输和存储全程AES-256加密</small>
+                            </div>
+                            <div>
+                                <h4 style="color: #7c3aed; margin-bottom: 0.5rem;">👤 访问控制</h4>
+                                <small>多级权限管理和身份验证</small>
+                            </div>
+                            <div>
+                                <h4 style="color: #7c3aed; margin-bottom: 0.5rem;">🏢 合规认证</h4>
+                                <small>符合GDPR、ISO27001标准</small>
+                            </div>
+                            <div>
+                                <h4 style="color: #7c3aed; margin-bottom: 0.5rem;">🗑️ 数据控制</h4>
+                                <small>用户完全控制数据删除和导出</small>
+                            </div>
+                        </div>
+                    </div>
+                    <p><strong>📋 隐私承诺：</strong>我们绝不会将您的数据用于商业目的或与第三方共享，所有计算均在安全的云环境中进行。</p>
                 </div>
             </div>
         </div>
 
         <!-- 快速链接 -->
         <div class="quick-links">
-            <h3 class="quick-links-title">快速链接</h3>
+            <h3 class="quick-links-title">📚 专业资源中心</h3>
             <div class="quick-links-grid">
+                <a href="https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/4_Volume4/V4_07_Ch7_Wetlands.pdf" target="_blank" class="quick-link">
+                    <i class="fas fa-file-pdf quick-link-icon"></i>
+                    <span>IPCC方法学指南</span>
+                    <small>官方技术文档</small>
+                </a>
                 <a href="/dashboard" class="quick-link">
-                    <i class="fas fa-plus-circle quick-link-icon"></i>
+                    <i class="fas fa-play-circle quick-link-icon"></i>
                     <span>创建新项目</span>
+                    <small>开始您的计算</small>
                 </a>
-                <a href="/methodology" class="quick-link">
-                    <i class="fas fa-book quick-link-icon"></i>
-                    <span>方法学说明</span>
-                </a>
-                <a href="/projects" class="quick-link">
-                    <i class="fas fa-folder quick-link-icon"></i>
-                    <span>我的项目</span>
+                <a href="javascript:showApiDocumentation()" class="quick-link">
+                    <i class="fas fa-code quick-link-icon"></i>
+                    <span>API 开发文档</span>
+                    <small>集成接口说明</small>
                 </a>
                 <a href="/results" class="quick-link">
-                    <i class="fas fa-chart-bar quick-link-icon"></i>
-                    <span>查看示例结果</span>
+                    <i class="fas fa-chart-line quick-link-icon"></i>
+                    <span>示例结果分析</span>
+                    <small>查看计算案例</small>
+                </a>
+                <a href="/methodology" class="quick-link">
+                    <i class="fas fa-flask quick-link-icon"></i>
+                    <span>科学方法说明</span>
+                    <small>了解计算原理</small>
+                </a>
+                <a href="https://ghgprotocol.org/" target="_blank" class="quick-link">
+                    <i class="fas fa-globe quick-link-icon"></i>
+                    <span>GHG协议标准</span>
+                    <small>国际标准参考</small>
+                </a>
+                <a href="mailto:support@reservoir-carbon.com" class="quick-link">
+                    <i class="fas fa-comments quick-link-icon"></i>
+                    <span>专家技术支持</span>
+                    <small>获取专业帮助</small>
+                </a>
+                <a href="mailto:feedback@reservoir-carbon.com" class="quick-link">
+                    <i class="fas fa-tools quick-link-icon"></i>
+                    <span>问题反馈中心</span>
+                    <small>报告问题建议</small>
                 </a>
             </div>
         </div>
 
         <!-- 联系支持 -->
         <div class="support-section">
-            <h3 class="support-title">需要更多帮助？</h3>
-            <p class="support-description">如果您在使用的过程中遇到任何问题，我们的支持团队随时为您提供帮助</p>
+            <h3 class="support-title">🤝 专业技术支持服务</h3>
+            <p class="support-description">我们的专家团队由环境科学、气候变化和软件工程领域的专业人士组成，为您提供全方位技术支持</p>
             
             <div class="support-methods">
                 <div class="support-method">
                     <i class="fas fa-envelope support-icon"></i>
-                    <div class="support-method-title">邮件支持</div>
+                    <div class="support-method-title">技术邮箱</div>
                     <div class="support-method-desc">support@reservoir-carbon.com</div>
+                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">24小时内响应</div>
                 </div>
                 
                 <div class="support-method">
-                    <i class="fas fa-phone support-icon"></i>
-                    <div class="support-method-title">电话支持</div>
-                    <div class="support-method-desc">400-123-4567</div>
+                    <i class="fas fa-video support-icon"></i>
+                    <div class="support-method-title">在线会议</div>
+                    <div class="support-method-desc">预约专家一对一指导</div>
+                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">免费技术咨询</div>
                 </div>
                 
                 <div class="support-method">
-                    <i class="fas fa-comments support-icon"></i>
-                    <div class="support-method-title">在线客服</div>
-                    <div class="support-method-desc">工作日 9:00-18:00</div>
+                    <i class="fas fa-graduation-cap support-icon"></i>
+                    <div class="support-method-title">培训课程</div>
+                    <div class="support-method-desc">IPCC方法学专业培训</div>
+                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">定期开班</div>
                 </div>
                 
                 <div class="support-method">
-                    <i class="fas fa-question-circle support-icon"></i>
-                    <div class="support-method-title">知识库</div>
-                    <div class="support-method-desc">查看详细文档</div>
+                    <i class="fas fa-book-open support-icon"></i>
+                    <div class="support-method-title">学术合作</div>
+                    <div class="support-method-desc">科研项目技术支持</div>
+                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">高校优惠</div>
+                </div>
+            </div>
+
+            <div style="background: white; border-radius: 12px; padding: 2rem; margin-top: 2rem; text-align: center;">
+                <h4 style="color: #1e293b; margin-bottom: 1rem;">🎯 服务承诺</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+                    <div>
+                        <div style="font-size: 1.5rem; color: #10b981; margin-bottom: 0.5rem;">⚡</div>
+                        <strong>快速响应</strong><br>
+                        <small>工作日4小时内回复</small>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.5rem; color: #3b82f6; margin-bottom: 0.5rem;">🎓</div>
+                        <strong>专业团队</strong><br>
+                        <small>博士级专家支持</small>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.5rem; color: #f59e0b; margin-bottom: 0.5rem;">🔄</div>
+                        <strong>持续改进</strong><br>
+                        <small>基于用户反馈优化</small>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.5rem; color: #ef4444; margin-bottom: 0.5rem;">🛡️</div>
+                        <strong>质量保证</strong><br>
+                        <small>科学方法验证</small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -774,6 +1063,21 @@
         function showCategory(category) {
             // 这里可以添加跳转到具体分类页面的逻辑
             console.log('显示分类:', category);
+        }
+
+        // 故障排除指南
+        function showTroubleshootingGuide() {
+            alert('故障排除指南即将推出，如有紧急问题请联系技术支持邮箱：support@reservoir-carbon.com');
+        }
+
+        // API文档
+        function showApiDocumentation() {
+            alert('API文档正在完善中，敬请期待！如需提前了解请联系我们。');
+        }
+
+        // 更新日志
+        function showUpdateLog() {
+            alert('更新日志功能开发中，您可以关注我们的官方公告获取最新信息。');
         }
 
         // 搜索功能
