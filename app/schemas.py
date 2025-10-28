@@ -58,6 +58,7 @@ class UncertaintyResults(BaseModel):
     percentile_50: float
     percentile_75: float
     percentile_95: float
+    raw_data: Optional[List[float]] = Field(None, description="Raw simulation data points for plotting")
 
 class SensitivityResults(BaseModel):
     """Sensitivity analysis results"""
@@ -130,3 +131,17 @@ class TokenResponse(BaseModel):
     """Authentication token response"""
     access_token: str
     token_type: str
+
+class ForgotPasswordRequest(BaseModel):
+    """Forgot password request"""
+    email: str = Field(..., description="Email address")
+
+class ResetPasswordRequest(BaseModel):
+    """Reset password request"""
+    token: str = Field(..., description="Password reset token")
+    new_password: str = Field(..., min_length=8, description="New password")
+
+class MessageResponse(BaseModel):
+    """Generic message response"""
+    success: bool
+    message: str
