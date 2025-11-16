@@ -4,7 +4,12 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 # Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/reservoir_emissions.db")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_PATH = os.path.join(BASE_DIR, "data", "reservoir_emissions.db")
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATABASE_PATH}")
+
+# 确保数据目录存在
+os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
 
 # Create engine
 engine = create_engine(

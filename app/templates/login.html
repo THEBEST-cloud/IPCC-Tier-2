@@ -15,22 +15,58 @@
 
         body {
             font-family: 'Lato', sans-serif;
-            background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #334155;
+            margin: 0;
+            padding: 0;
+            background-image: url('/static/DJI_0039.JPG');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
         }
 
         .login-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            padding: 3rem;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             width: 100%;
-            max-width: 400px;
-            margin: 2rem;
+            max-width: 420px;
+            margin: 2rem auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #059669, #047857);
+            border-radius: 20px 20px 0 0;
         }
 
         .logo-section {
@@ -72,16 +108,30 @@
             left: 18px;
         }
 
-        .app-title {
-            font-size: 1.5rem;
-            font-weight: 700;
+        .app-title-chinese {
+            font-size: 2rem;
+            font-weight: 800;
             color: #1e293b;
             margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .app-title-english {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
         }
 
         .app-subtitle {
             color: #64748b;
             font-size: 0.875rem;
+            font-style: italic;
         }
 
         .login-form {
@@ -167,68 +217,49 @@
 
         .login-btn {
             width: 100%;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px -3px rgba(59, 130, 246, 0.3);
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 2rem 0;
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #e2e8f0;
-        }
-
-        .divider span {
-            padding: 0 1rem;
-        }
-
-        .social-login {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .social-btn {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            background: white;
-            border-radius: 8px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
 
-        .social-btn:hover {
-            border-color: #cbd5e1;
-            background: #f8fafc;
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
         }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+
 
         .register-link {
             text-align: center;
@@ -268,19 +299,17 @@
                 margin: 1rem;
                 padding: 2rem;
             }
-
-            .social-login {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
 <body>
+
     <div class="login-container">
         <div class="logo-section">
             <div class="logo"></div>
-            <h1 class="app-title">Reservoir Carbon Accounting</h1>
-            <p class="app-subtitle">水库碳核算系统</p>
+            <h1 class="app-title-chinese">水库碳核算系统</h1>
+            <p class="app-title-english">Reservoir Carbon Accounting</p>
+            <p class="app-subtitle">专业的水库碳排放核算平台</p>
         </div>
 
         <div class="error-message" id="errorMessage">
@@ -310,7 +339,7 @@
                     <input type="checkbox" id="rememberMe">
                     <label for="rememberMe">记住我</label>
                 </div>
-                <a href="#" class="forgot-password">忘记密码？</a>
+                <a href="/forgot-password" class="forgot-password">忘记密码？</a>
             </div>
 
             <button type="submit" class="login-btn">
@@ -319,20 +348,7 @@
             </button>
         </form>
 
-        <div class="divider">
-            <span>或</span>
-        </div>
 
-        <div class="social-login">
-            <button class="social-btn" onclick="socialLogin('google')">
-                <i class="fab fa-google" style="color: #db4437;"></i>
-                Google
-            </button>
-            <button class="social-btn" onclick="socialLogin('github')">
-                <i class="fab fa-github" style="color: #333;"></i>
-                GitHub
-            </button>
-        </div>
 
         <div class="register-link">
             还没有账户？<a href="/register">立即注册</a>
@@ -386,15 +402,7 @@
             });
         });
 
-        // 社交登录
-        function socialLogin(provider) {
-            showLoading();
-            // 这里应该调用实际的社交登录API
-            setTimeout(() => {
-                hideLoading();
-                alert(`${provider} 登录功能正在开发中`);
-            }, 1000);
-        }
+
 
         // 显示错误信息
         function showError(message) {

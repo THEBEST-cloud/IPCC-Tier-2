@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="/static/style.css">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%233b82f6'/%3E%3Ccircle cx='16' cy='16' r='8' fill='white'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%233b82f6'/%3E%3C/svg%3E">
 </head>
 <body>
     <!-- 导航栏 -->
@@ -20,7 +22,7 @@
             </div>
             <nav class="nav-links">
                 <a href="/dashboard" class="nav-link active">新建计算</a>
-                <a href="/projects" class="nav-link">我的项目</a>
+                <a href="/projects" class="nav-link">我的水库</a>
                 <a href="/methodology" class="nav-link">方法学说明</a>
                 <a href="/help" class="nav-link">帮助</a>
             </nav>
@@ -36,7 +38,7 @@
                         </a>
                         <a href="/projects" class="dropdown-item">
                             <i class="fas fa-folder"></i>
-                            我的项目
+                            我的水库
                         </a>
                         <a href="/settings" class="dropdown-item">
                             <i class="fas fa-cog"></i>
@@ -55,18 +57,18 @@
 
     <!-- 主内容区域 -->
     <main class="main-content">
-        <!-- 第一步：项目信息与位置 -->
+        <!-- 第一步：水库信息与位置 -->
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">第一步：项目信息与位置</h2>
-                <p class="card-subtitle">输入项目基本信息并选择水库位置</p>
+                <h2 class="card-title">第一步：水库信息与位置</h2>
+                <p class="card-subtitle">输入水库基本信息并选择水库位置</p>
             </div>
             <div class="card-body">
                 <div class="form-group">
                     <label for="projectName" class="form-label">
-                        项目名称 <span class="required">*</span>
+                        水库名称 <span class="required">*</span>
                     </label>
-                    <input type="text" id="projectName" class="form-input" placeholder="请输入项目名称" required>
+                    <input type="text" id="projectName" class="form-input" placeholder="请输入水库名称" required>
                 </div>
 
                 <div class="map-container">
@@ -85,8 +87,11 @@
                             <input type="number" id="longitude" class="form-input" placeholder="例如: 116.4074" step="0.0001" required>
                         </div>
                         <div class="form-group">
-                            <label for="climateRegion" class="form-label">气候区域</label>
-                            <input type="text" id="climateRegion" class="form-input" placeholder="根据位置自动填充" readonly>
+                            <label for="climateRegionSelect" class="form-label">气候区域</label>
+                            <select class="form-input" id="climateRegionSelect">
+                              <!-- 动态填充原始标准气候区 -->
+                            </select>
+                            <div class="form-text">自动识别，可手动修正</div>
                         </div>
                     </div>
                 </div>
@@ -205,7 +210,7 @@
                             <input type="checkbox" id="enableSensitivity" checked>
                             <label for="enableSensitivity">启用敏感性分析</label>
                         </div>
-                        <div class="checkbox-group">
+                        <!-- <div class="checkbox-group">
                             <div class="checkbox-item">
                                 <input type="checkbox" id="sensitivityArea" checked>
                                 <label for="sensitivityArea">水库面积</label>
@@ -218,7 +223,7 @@
                                 <input type="checkbox" id="sensitivityPhosphorus" checked>
                                 <label for="sensitivityPhosphorus">总磷浓度</label>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -253,5 +258,37 @@
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/static/app.js"></script>
-</body>
+
+    <!-- 助理机器人：悬浮入口与聊天窗口脚本 -->
+    <iframe src="http://172.16.98.219/next-chats/widget?shared_id=8e0dcab0818411f0adcade9059b7f5a8&from=chat&auth=I0OTk3NmFjNTBmYjExZjA4NGUzYmFmY2&locale=zh&streaming=true&mode=master&streaming=true"
+      style="position:fixed;bottom:0;right:0;width:100px;height:100px;border:none;background:transparent;z-index:9999"
+      frameborder="0" allow="microphone;camera"></iframe>
+
+    <script>
+      // 监听来自聊天入口的消息，创建/切换聊天窗口并处理滚动透传
+      window.addEventListener('message', (e) => {
+        if (e.origin !== 'http://172.16.98.219') return;
+        const data = e.data || {};
+
+        if (data.type === 'CREATE_CHAT_WINDOW') {
+          if (document.getElementById('chat-win')) return;
+          const i = document.createElement('iframe');
+          i.id = 'chat-win';
+          i.src = data.src;
+          i.style.cssText = 'position:fixed;bottom:104px;right:24px;width:380px;height:500px;border:none;background:transparent;z-index:9998;display:none';
+          i.frameBorder = '0';
+          i.allow = 'microphone;camera';
+          document.body.appendChild(i);
+
+          // 首次创建时显示欢迎卡片（自动隐藏）
+          // 取消欢迎卡片展示，避免视觉干扰，仅创建聊天窗口
+        } else if (data.type === 'TOGGLE_CHAT') {
+          const w = document.getElementById('chat-win');
+          if (w) w.style.display = data.isOpen ? 'block' : 'none';
+        } else if (data.type === 'SCROLL_PASSTHROUGH') {
+          window.scrollBy(0, data.deltaY || 0);
+        }
+      });
+    </script>
+  </body>
 </html>

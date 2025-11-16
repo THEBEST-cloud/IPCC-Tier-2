@@ -1,97 +1,111 @@
-# Reservoir GHG Emissions Tool
+# 水库温室气体排放计算工具 (IPCC Tier-2)
 
-A comprehensive web-based software tool for estimating greenhouse gas emissions from reservoirs using the **IPCC Tier 1 methodology**, with integrated uncertainty and sensitivity analyses.
+基于IPCC Tier-2方法的水库温室气体排放计算工具，集成了不确定性分析和敏感性分析功能。
 
-## 🌟 Features
+## 🌟 主要功能
 
-- **IPCC Tier 1 Methodology**: Standard methodology for reservoir GHG emission calculations
-- **Automatic Climate Region Detection**: Based on geographical coordinates (latitude/longitude)
-- **Trophic Status Assessment**: Automatic assessment from water quality parameters
-- **Uncertainty Analysis**: Monte Carlo simulation with 100-10,000 iterations
-- **Sensitivity Analysis**: Identifies most influential parameters using correlation methods
-- **Database Storage**: Persistent storage of all analyses using SQLite
-- **Modern Web Interface**: Responsive, user-friendly interface with real-time results
-- **REST API**: Full RESTful API for programmatic access
-- **Docker Deployment**: Containerized deployment for easy installation
+- **IPCC Tier-2方法**: 基于IPCC指南的水库温室气体排放计算
+- **自动气候区域识别**: 根据地理坐标（纬度/经度）自动确定气候区域
+- **营养状态评估**: 支持不同营养状态的排放计算
+- **不确定性分析**: 基于蒙特卡洛模拟的不确定性分析
+- **敏感性分析**: 使用相关性方法识别最具影响力的参数
+- **现代化Web界面**: 响应式、用户友好的界面，实时显示结果
+- **Docker部署**: 容器化部署，便于安装和使用
 
-## 📊 Methodology
+## 📊 不确定性与敏感性分析
 
-### Greenhouse Gases Calculated
-- **Methane (CH₄)**: Major GHG from anaerobic decomposition
-- **Carbon Dioxide (CO₂)**: From organic matter oxidation
-- **Nitrous Oxide (N₂O)**: From nitrogen cycling processes
+### 不确定性分析
+不确定性分析采用蒙特卡洛模拟方法，通过以下步骤实现：
+1. **参数随机采样**: 对关键参数（如排放因子、营养状态调整系数等）进行随机采样
+2. **多次迭代计算**: 默认进行10,000次迭代，每次使用不同的参数组合
+3. **统计分析**: 计算均值、标准差、置信区间和分位数
+4. **可视化展示**: 生成排放量分布直方图和累积概率图
 
-### Climate Regions
-The tool automatically determines the climate region based on latitude:
-- **Tropical**: 0° to 23.5°
-- **Subtropical**: 23.5° to 35°
-- **Temperate**: 35° to 60°
-- **Boreal**: 60° to 90°
+分析结果包括：
+- 均值和标准差
+- 95%置信区间（2.5%~97.5%）
+- 关键分位数（P5、P25、P50、P75、P95）
+- 排放量分布图
 
-Each region has default emission factors that can be overridden by the user.
+### 敏感性分析
+敏感性分析通过相关性方法识别对结果影响最大的参数：
+1. **参数采样**: 对所有输入参数进行随机采样
+2. **相关性计算**: 计算每个参数与最终排放结果的相关系数
+   - Pearson相关系数（线性相关性）
+   - Spearman等级相关系数（非线性相关性）
+3. **参数排序**: 根据相关系数绝对值大小对参数进行排序
+4. **结果展示**: 以图表形式展示各参数的影响程度
 
-### Trophic Status Assessment
-Water quality parameters are used to assess trophic status:
-- **Oligotrophic**: Low nutrient levels
-- **Mesotrophic**: Moderate nutrient levels
-- **Eutrophic**: High nutrient levels
-- **Hypereutrophic**: Very high nutrient levels
+敏感性分析帮助用户了解哪些参数对最终结果影响最大，从而在实际应用中更加关注这些关键参数的准确性。
 
-Trophic status adjusts emission factors accordingly.
+## 📊 方法学
 
-## 🚀 Quick Start
+### 计算的温室气体
+- **甲烷 (CH₄)**: 厌氧分解产生的主要温室气体
+- **二氧化碳 (CO₂)**: 有机物氧化产生
 
-### Prerequisites
-- Docker and Docker Compose installed on Ubuntu 22.04
-- At least 512MB RAM available
-- Port 8080 available
+### 气候区域
+工具使用Beck-Köppen-Geiger气候分类系统，基于地理坐标自动确定IPCC聚合气候区:
+- **热带湿润** (Tropical moist)
+- **热带干旱** (Tropical dry)
+- **暖温带湿润** (Warm temperate moist)
+- **暖温带干旱** (Warm temperate dry)
+- **冷温带湿润** (Cool temperate moist)
+- **寒带** (Boreal)
 
-### Installation and Launch
+系统通过高精度地理数据文件(Beck_KG_V1_present_0p0083.tif)进行精确判断，而不仅仅依赖纬度范围。
 
-1. **Clone or download the project files to your system**
+### 营养状态
+支持不同的营养状态评估:
+- **贫营养**: 低营养水平
+- **中营养**: 中等营养水平
+- **富营养**: 高营养水平
+- **超富营养**: 极高营养水平
 
-2. **Navigate to the project directory:**
+## 🚀 快速开始
+
+### 前提条件
+- 安装了Docker和Docker Compose
+- 至少512MB可用RAM
+- 端口8000可用
+
+### 安装和启动
+
+1. **克隆或下载项目文件**
+
+2. **进入项目目录:**
    ```bash
-   cd /path/to/reservoir-emissions-tool
+   cd /path/to/IPCC-Tier-2
    ```
 
-3. **Create the data directory:**
-   ```bash
-   mkdir -p data
-   ```
-
-4. **Build and start the Docker container:**
+3. **构建并启动Docker容器:**
    ```bash
    docker-compose up --build -d
    ```
 
-5. **Access the application:**
-   Open your web browser and navigate to:
+4. **访问应用程序:**
+   打开浏览器并访问:
    ```
-   http://localhost:8080
+   http://localhost:8000
    ```
 
-### Launch Commands
+### 常用命令
 
 ```bash
-# Build and start the container (first time or after code changes)
+# 构建并启动容器（首次或代码更改后）
 docker-compose up --build -d
 
-# Start existing container
+# 启动现有容器
 docker-compose start
 
-# Stop the container
+# 停止容器
 docker-compose stop
 
-# View logs
+# 查看日志
 docker-compose logs -f
 
-# Stop and remove container
+# 停止并移除容器
 docker-compose down
-
-# Rebuild from scratch
-docker-compose down
-docker-compose up --build -d
 ```
 
 ## 📖 Usage Guide

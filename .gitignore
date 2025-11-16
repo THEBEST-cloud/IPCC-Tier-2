@@ -30,6 +30,9 @@ wheels/
 *.sqlite3
 data/*.db
 
+# Allow committing app database for reproducible snapshots
+!app/data/*.db
+
 # IDE
 .vscode/
 .idea/
