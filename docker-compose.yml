@@ -8,6 +8,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./app/static:/app/app/static
+      - ./app/templates:/app/app/templates
     environment:
       - DATABASE_URL=sqlite:///./data/reservoir_emissions.db
       - SECRET_KEY=your-secret-key-change-in-production

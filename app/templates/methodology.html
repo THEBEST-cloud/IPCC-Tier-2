@@ -416,36 +416,10 @@
             </div>
             <nav class="nav-links">
                 <a href="/dashboard" class="nav-link">新建计算</a>
-                <a href="/projects" class="nav-link">我的项目</a>
                 <a href="/methodology" class="nav-link active">方法学说明</a>
                 <a href="/help" class="nav-link">帮助</a>
             </nav>
-            <div class="user-section">
-                <div class="user-dropdown">
-                    <div class="user-avatar" onclick="toggleUserDropdown()">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="dropdown-menu" id="userDropdown">
-                        <a href="/profile" class="dropdown-item">
-                            <i class="fas fa-user-circle"></i>
-                            个人信息
-                        </a>
-                        <a href="/projects" class="dropdown-item">
-                            <i class="fas fa-folder"></i>
-                            我的项目
-                        </a>
-                        <a href="/settings" class="dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            设置
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="/login" class="dropdown-item">
-                            <i class="fas fa-sign-out-alt"></i>
-                            退出登录
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
         </div>
     </header>
 
@@ -453,227 +427,459 @@
     <main class="main-content">
         <!-- 页面标题 -->
         <div class="page-header">
-            <h1 class="page-title">IPCC Tier 1 方法学说明</h1>
-            <p class="page-subtitle">基于政府间气候变化专门委员会第一层级方法的水库温室气体排放计算指南</p>
+            <h1 class="page-title">IPCC水淹地（Flooded Land）温室气体排放核算方法</h1>
+            <p class="page-subtitle">基于 IPCC 2019 修订版第 7 章（湿地）的说明与公式，用于演示与教学。</p>
         </div>
 
         <!-- 主要内容 -->
         <div class="main-content-area">
-                <!-- 方法学概述 -->
+                <!-- 1. 什么是水淹地（Flooded Land） -->
                 <section class="content-section">
-                    <h2 class="section-title">方法学概述</h2>
+                    <h2 class="section-title">1. 什么是水淹地（Flooded Land）</h2>
                     <div class="section-content">
-                        <p>IPCC Tier 1 方法是政府间气候变化专门委员会（IPCC）推荐的最基础、最简化的温室气体排放计算方法。该方法通过使用默认参数和简化的计算公式来估算水库的温室气体排放，特别适用于缺乏详细监测数据的情况。</p>
-                        
-                        <div class="highlight-box">
-                            <div class="highlight-title">核心特点</div>
-                            <ul>
-                                <li>使用经过验证的默认排放因子和参数</li>
-                                <li>计算过程简单，易于实施和验证</li>
-                                <li>适用于大尺度、快速评估</li>
-                                <li>数据要求相对较低，成本效益高</li>
-                            </ul>
-                        </div>
+                        <h3 class="section-subtitle">（1）定义</h3>
+                        <p>水淹地是指人为创造或被人为工程显著改造的、显著改变了水文条件且具有持续淹没特征的水生态系统，亦被称之为“人造水体”或“管理水体”。</p>
+                        <p>关于“人为创造或人为工程显著改造”的划分标准：较自然状态或未受人类干扰的条件下，<strong>水面面积相对增加≥10%</strong>或<strong>水力停留时间增加≥10%</strong>。</p>
 
-                        <p>本系统基于 IPCC 2019 年修订的《2006年IPCC国家温室气体清单指南》中关于内陆水域温室气体排放的相关章节，专门针对水库环境进行了优化和调整，确保计算结果的科学性和准确性。</p>
+                        <h3 class="section-subtitle">（2）核心特征：人工干预或人为管理</h3>
+                        <p>IPCC 定义水淹地的核心在于“人为活动”，包括几种主要情形：</p>
+                        <ul>
+                            <li><strong>A. 新建水体：</strong>通过人类活动完全新造出来的水体。典型案例：修建大坝形成水库；挖掘形成的农业灌溉塘、水产养殖塘；开挖的运河和排水沟渠。</li>
+                            <li><strong>B. 改造自然水体：</strong>对已有的自然水体（如湖泊、河流）进行人为改造，显著改变其水文特征。典型案例：在自然湖泊出口修建水闸大坝，显著扩大其面积或延长其水体停留时间（变化超过10%）。如果一个天然湖泊只是被用作水源，但其面积和水量没有被人为工程显著改变，则不属于水淹地。</li>
+                            <li><strong>C. 水文条件：持续性淹没：</strong>“水淹地”通常指长期或永久性被淹没的区域。对于水库消落带而言，一般认为它在全年都会保持一定的淹没面积且受到强烈的人为干扰。水库消落带也应纳入“水淹地”范畴。</li>
+                        </ul>
+
+                        <h3 class="section-subtitle">（3）什么情况不算是“水淹地”？</h3>
+                        <p><strong>受自然径流影响的季节性洪水淹没情形：</strong>IPCC 指南特别指出，纯粹自然、季节性被淹没的湿地，如季节性淹没河岸带、河流下游的洪泛区等不属于本章定义的“水淹地”。</p>
+                        <p><strong>受降雨影响的短暂积水：</strong>“水淹地”被认为是在正常情况下全年都能保留部分淹没区域或具有持续的淹没特征。因此，雨后短暂积水的田地、湿地等不考虑为“水淹地”。</p>
+
+                        <h3 class="section-subtitle">表1 水淹地（Flooded Land）的典型示例</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>类别</th>
+                                    <th>示例</th>
+                                    <th>是否属于“水淹地”？</th>
+                                    <th>原因/归属</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>水库</td>
+                                    <td>水电站水库、供水水库</td>
+                                    <td>是</td>
+                                    <td>典型的人为新建水体</td>
+                                </tr>
+                                <tr>
+                                    <td>池塘</td>
+                                    <td>农业储水塘、水产养殖塘</td>
+                                    <td>是</td>
+                                    <td>典型的人为新建水体</td>
+                                </tr>
+                                <tr>
+                                    <td>沟渠、运河</td>
+                                    <td>排水沟、灌溉渠、运输运河</td>
+                                    <td>是</td>
+                                    <td>典型的人为新建水体</td>
+                                </tr>
+                                <tr>
+                                    <td>自然湖泊</td>
+                                    <td>未经人为工程显著改造的湖泊</td>
+                                    <td>否</td>
+                                    <td>被视为自然水体，其排放不计入国家人为排放清单</td>
+                                </tr>
+                                <tr>
+                                    <td>水稻田</td>
+                                    <td>种植水稻的淹水农田</td>
+                                    <td>否</td>
+                                    <td>因水稻种植活动的独特性，归入“耕地”类别核算</td>
+                                </tr>
+                                <tr>
+                                    <td>污水处理中的人工湿地</td>
+                                    <td>用于水质净化的人工湿地</td>
+                                    <td>否</td>
+                                    <td>归入“污水处理”或根据《2013年湿地增补章节》核算</td>
+                                </tr>
+                                <tr>
+                                    <td>季节性淹没的农业草地</td>
+                                    <td>管理的湿草地或牧场</td>
+                                    <td>否</td>
+                                    <td>归入《2013年湿地增补章节》核算</td>
+                                </tr>
+                                <tr>
+                                    <td>沿海红树林改建的水产养殖塘</td>
+                                    <td>在红树林区域开挖的虾塘</td>
+                                    <td>CO₂排放：否；CH₄排放：是</td>
+                                    <td>CO₂排放（由土地转化引起）在《2013年湿地增补章节》中核算；CH₄排放（来自池塘水体）在“水淹地”章节核算</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>核算水淹地温室气体排放的基本逻辑为：</p>
+                        <div class="formula">总排放量 = 活动数据（AD） × 排放因子（EF）</div>
+                        <p>其中 AD 通常为面积数据（ha），EF 为单位面积的年排放速率（例如 kg CH₄·ha⁻¹·yr⁻¹）。</p>
+
+                        <h3 class="section-subtitle">第1步：分类（Categorization）</h3>
+                        <p>首先判断目标土地利用是否属于“水淹地”。若为人工建造（如池塘、运河），或自然水体被人类活动显著改变（例如大坝导致水面扩大＞10%或水体停留时间显著变化），则纳入核算范围。</p>
+
+                        <h3 class="section-subtitle">第2步：定年（Age Classification）</h3>
+                        <p>这是核算水库时最关键的一步。依据库龄将水库分为两类：</p>
+                        <ul>
+                            <li><strong>土地转化为水淹地（Land Converted to Flooded Land, LCFL）：</strong>库龄 ≤ 20 年的新建水库。</li>
+                            <li><strong>水淹地保持为水淹地（Flooded Land Remaining Flooded Land, FLRFL）：</strong>库龄 ＞ 20 年的老水库。</li>
+                        </ul>
+                        <p>“库龄”通常指水库首次蓄水至正常运行水位之日起至当前年份的年限，在排放核算中常以“是否超过 20 年”作为分类依据。</p>
+
+                        <h3 class="section-subtitle">第3步：选择层级（Tier Selection）</h3>
+                        <p>根据数据可得性、资源与该排放源的重要性，选择 IPCC 提供的三个层级之一（Tier 1/2/3）。</p>
+
+                        <h3 class="section-subtitle">第4步：收集数据与计算（Data & Calculation）</h3>
+                        <ul>
+                            <li><strong>活动数据（AD）：</strong>各类水淹地的总面积（单位：公顷 ha）。</li>
+                            <li><strong>排放因子（EF）：</strong>单位面积的排放速率（例如 kg CH₄·ha⁻¹·yr⁻¹）。</li>
+                        </ul>
+                    </div>
+                </section>
+                
+                <!-- 层级方法学对比分析 -->
+                <section class="content-section">
+                    <h2 class="section-title">6.x 不同层级方法学的对比分析</h2>
+                    <div class="section-content">
+                        <p>IPCC 对水淹地温室气体排放采用分层级方法：</p>
+                        <ul>
+                            <li><strong>一级方法（Tier 1）：</strong>使用全球默认排放因子和简化活动数据，保证各国在数据有限时也能给出可比估算。</li>
+                            <li><strong>二级方法（Tier 2）：</strong>建立本国排放因子和关键参数，体现气候带与工程类型差异。</li>
+                            <li><strong>三级方法（Tier 3）：</strong>依托长期监测、过程模型和高分辨率数据进行精细模拟。</li>
+                        </ul>
+                        <p>方法学分级设置遵循“完整、可比、透明、准确”和与数据能力相匹配的原则，将水淹地明确视作人为源，在“面积×排放因子/模型”的统一框架下，鼓励对关键排放源采用更高层级，以提高清单结果的科学性与政策有效性。</p>
+
+                        <h3 class="section-subtitle">表3 不同层级方法学的描述</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>层级 (Tier)</th>
+                                    <th>特点</th>
+                                    <th>适用范围</th>
+                                    <th>核算要求</th>
+                                    <th>不确定性</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Tier 1（第一层级）</td>
+                                    <td>采用 IPCC 默认排放因子与简单“面积×因子”公式，不区分本国气候与工程差异。</td>
+                                    <td>数据匮乏、排放贡献相对较小或尚未被认定为关键类别的水淹地。</td>
+                                    <td>获取各类水淹地面积，套用指南默认 EF，按气体分别计算，总体满足“可比、可报告”。</td>
+                                    <td>最高，仅提供量级估算，难以反映本国真实排放水平。</td>
+                                </tr>
+                                <tr>
+                                    <td>Tier 2（第二层级）</td>
+                                    <td>使用本国/区域自主建立的排放因子，按气候带、水库类型、营养状态等细分类别。</td>
+                                    <td>对国家清单贡献较大或政策关注度高的水库、水淹地；已有一定监测与基础研究。</td>
+                                    <td>建立科学的本地 EF、明确分区分型面积数据，加强 QA/QC 与不确定性评估。</td>
+                                    <td>中等，明显低于 Tier 1，可支持定量比较与政策决策。</td>
+                                </tr>
+                                <tr>
+                                    <td>Tier 3（第三层级）</td>
+                                    <td>采用长期监测网络、过程模型或高分辨率统计模型，对排放进行动态、分过程精细模拟。</td>
+                                    <td>国家重点水电基地、大型典型库区、需要精准评估减排潜力和项目绩效的关键源。</td>
+                                    <td>需开展连续观测（含 CH₄ 扩散、冒泡、下泄脱气等）、参数校准、模型验证和系统不确定性分析。</td>
+                                    <td>最低，但对数据、技术和管理能力要求最高，需长期投入与透明方法文档。</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
 
-                <!-- 适用范围 -->
+                <!-- 2. 为什么要开展水淹地温室气体清单的编制 -->
                 <section class="content-section">
-                    <h2 class="section-title">适用范围</h2>
+                    <h2 class="section-title">2. 为什么要开展水淹地温室气体清单的编制</h2>
                     <div class="section-content">
-                        <p>IPCC Tier 1 方法适用于以下情况：</p>
+                        <h3 class="section-subtitle">（1）要把“水下排放账”算清楚，避免系统性低估人为排放</h3>
+                        <p>水库、小池塘、滞洪区等人为水淹地已成为全球重要甲烷（CH₄）来源之一，其排放具有“高增温效应＋持续增长”双重特征。如不单独核算，这部分排放会被当作“自然背景”忽略，导致国家和行业的温室气体排放被明显低估，减排责任与气候风险判断失真。</p>
+
+                        <h3 class="section-subtitle">（2）有助于识别高排放热点与减排潜力，服务科学管理</h3>
+                        <p>新建水库早期常出现营养物和有机质集中分解释放，前20年 CH₄ 排放明显偏高，小型水体和库湾也可能是“高排放斑块”。建立清单，有助于找出哪些区域、哪些运行方式排放最高，从而通过水位调度、入库污染控制、底泥管理等手段进行精准减排，而不是“盲目喊口号”。</p>
+
+                        <h3 class="section-subtitle">（3）响应 IPCC 指南要求，提升国家报告透明度与公信力</h3>
+                        <p>IPCC 2019 指南已明确提出需将水淹地视为人为排放源进行核算与报告。编制水淹地温室气体清单，可以使我国温室气体清单更加完整、规范、可比，体现对国际规则的积极响应，增强在全球气候治理中的话语权与可信度。</p>
+
+                        <h3 class="section-subtitle">（4）真实评估水电等工程的净气候效益，防止“漂绿”</h3>
+                        <p>很多水淹地与水电工程紧密相关。只有把水库及相关水淹地排放计入全生命周期核算，才能判断某个工程是否真正“低碳”。这对能源规划、项目审批、绿色金融和企业 ESG 信息披露至关重要，有助于避免将高排放项目误包装为“清洁工程”，引导未来基础设施向更安全、更真实的低碳路径演进。</p>
+                    </div>
+                </section>
+
+                <!-- 3. 水淹地温室气体排放核算的基本原理 -->
+                <section class="content-section">
+                    <h2 class="section-title">3. 水淹地温室气体排放核算的基本原理</h2>
+                    <div class="section-content">
+                        <p>当陆地被水淹没形成水库、池塘、沟渠等水体时，原有的生态系统会发生显著改变。被淹没的植物和土壤中的有机质在缺氧环境下，会通过微生物分解产生温室气体，包括 CO₂、CH₄、N₂O 等。</p>
+
+                        <h3 class="section-subtitle">CO₂ 排放</h3>
+                        <p>主要来自水体中或从流域进入水体的土壤有机质和其他有机质的分解，以及生物（如细菌、鱼类等）的呼吸。特别是在初次淹没阶段，被淹没的有机物（如植被和土壤）迅速分解，导致 CO₂ 排放上升。</p>
+
+                        <h3 class="section-subtitle">CH₄ 排放</h3>
+                        <p>主要在沉积物的缺氧条件下由产甲烷菌活动产生；同时，水库沉积物与水柱中的甲烷氧化菌（如有氧甲烷氧化菌）可通过氧化作用削减部分甲烷。</p>
+
+                        <h3 class="section-subtitle">N₂O 排放</h3>
+                        <p>水淹地也排放 N₂O，但排放主要与来自流域的氮输入相关。通常，流域氮输入已在农业土壤管理或废水管理中核算，为避免重复，“水淹地”章节不再提供 N₂O 的核算方法。</p>
+
+                        <div class="highlight-box">
+                            <div class="highlight-title">管理土地替代原则（Managed Land Proxy, MLP）</div>
+                            <p>在 IPCC 的核算体系中，遵循 MLP 原则，即所有来自管理土地（包括水淹地）的排放都被视为人为排放。该原则通过以“管理”作为人为属性的替代，简化核算过程，避免对自然本底值或基线的复杂估计。</p>
+                        </div>
+
+                        <h3 class="section-subtitle">理想核算与 MLP 实际核算的比较</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>维度</th>
+                                    <th>理想条件下核算</th>
+                                    <th>基于 MLP 的实际核算</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>目标</td>
+                                    <td>找出净人为排放（人为影响 − 自然本底）。</td>
+                                    <td>报告管理土地上的总排放/清除。</td>
+                                </tr>
+                                <tr>
+                                    <td>前提</td>
+                                    <td>假设在无人为干预下，排放与清除处于自然平衡（净影响为零）。</td>
+                                    <td>假设对土地的管理行为代表排放/清除的“人为”属性。</td>
+                                </tr>
+                                <tr>
+                                    <td>关键区别</td>
+                                    <td>水淹地：若水库修建前（自然河流/湿地状态）也排放 CH₄，理论上需扣除该本底。</td>
+                                    <td>水淹地：报告水淹地总排放；IPCC 默认该总排放即为人为管理的后果。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h3 class="section-subtitle">指示性人为排放部分（可选）</h3>
+                        <ul>
+                            <li><strong>清单报告：</strong>编制者应首先报告基于 MLP 原则的水淹地总排放量。</li>
+                            <li><strong>背景值调整（可选）：</strong>可从总排放中减去未管理水体（如修建前的自然湖泊、河流）的排放，形成“净人为排放量”，用于提升透明度；并非所有国家都必须进行。</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- 4. 适用范围与边界条件 -->
+                <section class="content-section">
+                    <h2 class="section-title">4. 适用范围与边界条件</h2>
+                    <div class="section-content">
+                        <p>Tier 1 的适用与不适用的典型场景如下：</p>
                         
                         <h3 class="section-subtitle">适用条件</h3>
                         <ul>
-                            <li>水库面积大于 0.1 km²</li>
-                            <li>缺乏详细的现场监测数据</li>
-                            <li>需要进行快速、初步的排放估算</li>
-                            <li>作为更高级别方法（Tier 2/3）的初步评估</li>
+                            <li>人为创造或显著改造的水体，具有持续性淹没特征</li>
+                            <li>缺乏详细监测数据，需要进行快速、初步的排放估算</li>
+                            <li>用于更高层级（Tier 2/3）之前的初步评估</li>
                         </ul>
 
                         <h3 class="section-subtitle">不适用情况</h3>
                         <ul>
-                            <li>水库面积小于 0.1 km² 的小型水体</li>
-                            <li>需要高精度排放估算的详细研究</li>
-                            <li>具有特殊地质或气候条件的水库</li>
-                            <li>已进行过详细监测和建模的水库</li>
+                            <li>纯粹自然的季节性洪泛区或河岸带等未显著受人为工程影响的水体</li>
+                            <li>需要高精度排放估算或已有充分监测与建模支撑的场景</li>
                         </ul>
                     </div>
                 </section>
 
-                <!-- 关键参数 -->
+                <!-- 5. 关键参数与符号 -->
                 <section class="content-section">
-                    <h2 class="section-title">关键参数</h2>
+                    <h2 class="section-title">5. 关键参数与符号</h2>
                     <div class="section-content">
-                        <p>IPCC Tier 1 方法主要依赖以下关键参数：</p>
-
+                        <p>Tier 1 用于甲烷估算时涉及以下活动数据（AD）与符号：</p>
+                        
                         <div class="parameter-cards">
                             <div class="parameter-card">
-                                <div class="parameter-name">水库面积 (A)</div>
-                                <div class="parameter-description">水库的水面面积，单位为 km²</div>
+                                <div class="parameter-name">面积 A<sub>w</sub></div>
+                                <div class="parameter-description">水体类型 w 的面积（单位：ha；若为 km² 需转换）</div>
                                 <div class="parameter-details">
-                                    <strong>获取方式：</strong>卫星遥感、地形图测量<br>
-                                    <strong>精度要求：</strong>±10%<br>
-                                    <strong>默认值：</strong>根据气候区域确定
+                                    <strong>获取方式：</strong>遥感、地籍与工程资料<br>
+                                    <strong>注意：</strong>1 km² = 100 ha；小型水体面积不确定性可能较高
                                 </div>
                             </div>
 
                             <div class="parameter-card">
-                                <div class="parameter-name">水库年龄 (Age)</div>
-                                <div class="parameter-description">水库建成后的年数</div>
+                                <div class="parameter-name">EF<sub>CH4,w</sub></div>
+                                <div class="parameter-description">类型 w 的甲烷排放默认因子（kg CH₄·ha⁻¹·yr⁻¹）</div>
                                 <div class="parameter-details">
-                                    <strong>获取方式：</strong>历史记录查询<br>
-                                    <strong>精度要求：</strong>±1年<br>
-                                    <strong>影响：</strong>影响甲烷排放强度
+                                    <strong>来源：</strong>IPCC 2019 修订版表 7.12<br>
+                                    <strong>说明：</strong>Tier 1 默认因子不区分气候区
                                 </div>
                             </div>
 
                             <div class="parameter-card">
-                                <div class="parameter-name">年平均水温 (T)</div>
-                                <div class="parameter-description">水库年平均水温，单位为 °C</div>
+                                <div class="parameter-name">R<sub>d</sub></div>
+                                <div class="parameter-description">下游排放比例，推荐值 0.09（无数据时）</div>
                                 <div class="parameter-details">
-                                    <strong>获取方式：</strong>现场监测、气候数据<br>
-                                    <strong>精度要求：</strong>±2°C<br>
-                                    <strong>默认值：</strong>基于气候区域
+                                    <strong>依赖：</strong>取水深度、热分层与水库运行方式<br>
+                                    <strong>用途：</strong>估算下游排放
                                 </div>
                             </div>
 
                             <div class="parameter-card">
-                                <div class="parameter-name">总磷浓度 (TP)</div>
-                                <div class="parameter-description">水体总磷浓度，单位为 μg/L</div>
+                                <div class="parameter-name">GWP<sub>CH₄</sub></div>
+                                <div class="parameter-description">甲烷的全球变暖潜势（100 年尺度，取 28）</div>
                                 <div class="parameter-details">
-                                    <strong>获取方式：</strong>水质监测<br>
-                                    <strong>精度要求：</strong>±20%<br>
-                                    <strong>用途：</strong>营养状态评估
+                                    <strong>用途：</strong>计算 CO₂ 当量
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 计算方法 -->
+                <!-- 6. 水淹地温室气体排放核算的基本流程 -->
                 <section class="content-section">
-                    <h2 class="section-title">计算方法</h2>
+                    <h2 class="section-title">6. 水淹地温室气体排放核算的基本流程</h2>
                     <div class="section-content">
-                        <h3 class="section-subtitle">甲烷排放 (CH₄)</h3>
-                        <p>甲烷是水库温室气体排放的主要成分，其计算基于以下公式：</p>
-                        
-                        <div class="formula">
-                            CH₄ = A × EF_CH₄ × f_age × f_temp
-                        </div>
+                        <p>核算水淹地温室气体排放的基本逻辑为：</p>
+                        <div class="formula">总排放量 = 活动数据（AD） × 排放因子（EF）</div>
+                        <p>其中 AD 通常为面积数据（ha），EF 为单位面积的年排放速率（例如 kg CH₄·ha⁻¹·yr⁻¹）。</p>
 
-                        <p>其中：</p>
+                        <h3 class="section-subtitle">第1步：分类（Categorization）</h3>
+                        <p>首先判断目标土地利用是否属于“水淹地”。若为人工建造（如池塘、运河），或自然水体被人类活动显著改变（例如大坝导致水面扩大＞10%或水体停留时间显著变化），则纳入核算范围。</p>
+
+                        <h3 class="section-subtitle">第2步：定年（Age Classification）</h3>
+                        <p>这是核算水库时最关键的一步。依据库龄将水库分为两类：</p>
                         <ul>
-                            <li><strong>A</strong>：水库面积 (km²)</li>
-                            <li><strong>EF_CH₄</strong>：甲烷排放因子 (kg CH₄/km²/年)</li>
-                            <li><strong>f_age</strong>：年龄修正因子</li>
-                            <li><strong>f_temp</strong>：温度修正因子</li>
+                            <li><strong>土地转化为水淹地（Land Converted to Flooded Land, LCFL）：</strong>库龄 ≤ 20 年的新建水库。</li>
+                            <li><strong>水淹地保持为水淹地（Flooded Land Remaining Flooded Land, FLRFL）：</strong>库龄 ＞ 20 年的老水库。</li>
+                        </ul>
+                        <p>“库龄”通常指水库首次蓄水至正常运行水位之日起至当前年份的年限，在排放核算中常以“是否超过 20 年”作为分类依据。</p>
+
+                        <h3 class="section-subtitle">第3步：选择层级（Tier Selection）</h3>
+                        <p>根据数据可得性、资源与该排放源的重要性，选择 IPCC 提供的三个层级之一（Tier 1/2/3）。</p>
+
+                        <h3 class="section-subtitle">第4步：收集数据与计算（Data & Calculation）</h3>
+                        <ul>
+                            <li><strong>活动数据（AD）：</strong>各类水淹地的总面积（单位：公顷 ha）。</li>
+                            <li><strong>排放因子（EF）：</strong>单位面积的排放速率（例如 kg CH₄·ha⁻¹·yr⁻¹）。</li>
+                        </ul>
+                        <p>核算水淹地温室气体排放的基本逻辑为：</p>
+                        <div class="formula">总排放量 = 活动数据（AD） × 排放因子（EF）</div>
+                        <p>其中 AD 通常为面积数据（ha），EF 为单位面积的年排放速率（例如 kg CH₄·ha⁻¹·yr⁻¹）。</p>
+
+                        <h3 class="section-subtitle">第1步：分类（Categorization）</h3>
+                        <p>首先判断目标土地利用是否属于“水淹地”。若为人工建造（如池塘、运河），或自然水体被人类活动显著改变（例如大坝导致水面扩大＞10%或水体停留时间显著变化），则纳入核算范围。</p>
+
+                        <h3 class="section-subtitle">第2步：定年（Age Classification）</h3>
+                        <p>这是核算水库时最关键的一步。依据库龄将水库分为两类：</p>
+                        <ul>
+                            <li><strong>土地转化为水淹地（Land Converted to Flooded Land, LCFL）：</strong>库龄 ≤ 20 年的新建水库。</li>
+                            <li><strong>水淹地保持为水淹地（Flooded Land Remaining Flooded Land, FLRFL）：</strong>库龄 ＞ 20 年的老水库。</li>
+                        </ul>
+                        <p>“库龄”通常指水库首次蓄水至正常运行水位之日起至当前年份的年限，在排放核算中常以“是否超过 20 年”作为分类依据。</p>
+
+                        <h3 class="section-subtitle">第3步：选择层级（Tier Selection）</h3>
+                        <p>根据数据可得性、资源与该排放源的重要性，选择 IPCC 提供的三个层级之一（Tier 1/2/3）。</p>
+
+                        <h3 class="section-subtitle">第4步：收集数据与计算（Data & Calculation）</h3>
+                        <ul>
+                            <li><strong>活动数据（AD）：</strong>各类水淹地的总面积（单位：公顷 ha）。</li>
+                            <li><strong>排放因子（EF）：</strong>单位面积的排放速率（例如 kg CH₄·ha⁻¹·yr⁻¹）。</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- 计算方法 / 详解 -->
+                <section class="content-section">
+                    <h2 class="section-title">7. 第一层级方法学（Tier 1）具体核算详解</h2>
+                    <div class="section-content">
+                        <h3 class="section-subtitle">甲烷表面排放 (CH₄, Surface)</h3>
+                        <p>按照 IPCC 2019 修订版（湿地章节）第一层级（Tier 1）方法，甲烷表面排放可按不同水体类型面积与默认排放因子计算：</p>
+                        <div class="formula">E<sub>CH4,surface</sub> = Σ A<sub>w</sub> × EF<sub>CH4,w</sub></div>
+
+                        <p>符号说明：</p>
+                        <ul>
+                            <li><strong>A<sub>w</sub></strong>：水体类型 <em>w</em> 的面积（单位：ha）。</li>
+                            <li><strong>EF<sub>CH4,w</sub></strong>：类型 <em>w</em> 的甲烷排放默认因子（单位：kg CH₄·ha⁻¹·yr⁻¹）。Tier 1 默认因子不区分气候区。</li>
                         </ul>
 
-                        <h3 class="section-subtitle">二氧化碳排放 (CO₂)</h3>
-                        <p>二氧化碳排放主要来源于有机碳的分解：</p>
-                        
-                        <div class="formula">
-                            CO₂ = A × EF_CO₂ × f_nutrient
+                        <div class="highlight-box">
+                            <div class="highlight-title">单位换算</div>
+                            <p>1 km² = 100 ha；若输入面积为 km²，需要先换算为 ha 再代入公式。</p>
                         </div>
 
-                        <h3 class="section-subtitle">氧化亚氮排放 (N₂O)</h3>
-                        <p>氧化亚氮排放与氮循环过程相关：</p>
-                        
-                        <div class="formula">
-                            N₂O = A × EF_N₂O × f_nitrogen
-                        </div>
+                        <h3 class="section-subtitle">库龄与类别分组</h3>
+                        <p>核算时按库龄与类型分为三类，以便选用恰当的排放因子与说明：</p>
+                        <ul>
+                            <li><strong>类别 1：</strong>库龄 ≤ 20 年（Land Converted to Flooded Land）。除 CH₄ 外，可参考指南中的 CO₂ 因子；N₂O 通常不计列。</li>
+                            <li><strong>类别 2：</strong>库龄 > 20 年（Flooded Land Remaining Flooded Land）。CO₂ 在 Tier 1 不计列，主要核算 CH₄ 表面排放与下游排放。</li>
+                            <li><strong>类别 3：</strong>其他人工水体（如盐水/淡水池塘、运河与沟渠）。甲烷默认因子见 IPCC 表 7.12，示例值已在下表列出。</li>
+                        </ul>
 
-                        <h3 class="section-subtitle">总排放量计算</h3>
-                        <p>将各气体排放量转换为 CO₂ 当量：</p>
-                        
-                        <div class="formula">
-                            Total = CH₄ × GWP_CH₄ + CO₂ × 1 + N₂O × GWP_N₂O
-                        </div>
+                        <h3 class="section-subtitle">下游排放 (Degassing & Downstream)</h3>
+                        <p>Tier 1 可用固定比例 <strong>R<sub>d</sub></strong> 近似估算下游排放，推荐值 <strong>R<sub>d</sub>=0.09</strong>：</p>
+                        <div class="formula">E<sub>downstream</sub> = R<sub>d</sub> × E<sub>CH4,surface</sub></div>
+                        <p>实际的下游排放受取水深度、热分层与水利运行方式影响较大，0.09 仅作为缺乏数据时的近似值。</p>
 
-                        <p>其中 GWP 为全球变暖潜势值（CH₄ = 28, N₂O = 265）。</p>
+                        <h3 class="section-subtitle">总量与当量</h3>
+                        <p>甲烷总量与 CO₂ 当量计算：</p>
+                        <div class="formula">E<sub>CH4,total</sub> = E<sub>CH4,surface</sub> + E<sub>downstream</sub></div>
+                        <div class="formula">E<sub>CO2e</sub> = E<sub>CH4,total</sub> × GWP<sub>CH4</sub></div>
+                        <p>其中 <strong>GWP<sub>CH₄</sub>=28</strong>（100 年尺度）。当前版本不包含 CO₂ 与 N₂O 的 Tier 1 计算与折算。</p>
+
+                        <h3 class="section-subtitle">默认排放因子示例（IPCC 表 7.12 摘要）</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>水体类型 w</th>
+                                    <th>EF<sub>CH4,w</sub>（kg CH₄·ha⁻¹·yr⁻¹）</th>
+                                    <th>说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>盐水池塘 (Saline ponds)</td>
+                                    <td>30</td>
+                                    <td>示例值；具体取值以 IPCC 原表为准</td>
+                                </tr>
+                                <tr>
+                                    <td>淡水池塘 (Freshwater ponds)</td>
+                                    <td>183</td>
+                                    <td>示例值；不区分气候区</td>
+                                </tr>
+                                <tr>
+                                    <td>运河与沟渠 (Canals & ditches)</td>
+                                    <td>416</td>
+                                    <td>示例值；用于初步估算</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="reference">
+                            <p>注：以上为示例摘录，完整与最新数值请参阅 IPCC 2019 修订版（湿地，第 7 章）表 7.12。</p>
+                        </div>
                     </div>
                 </section>
 
                 <!-- 不确定性分析 -->
                 <section class="content-section">
-                    <h2 class="section-title">不确定性分析</h2>
+                    <h2 class="section-title">8. 第一层级方法学（Tier 1）的不确定性分析</h2>
                     <div class="section-content">
-                        <p>IPCC Tier 1 方法的不确定性主要来源于以下几个方面：</p>
-
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>不确定性来源</th>
-                                    <th>不确定性范围</th>
-                                    <th>影响程度</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>排放因子</td>
-                                    <td>±50%</td>
-                                    <td>高</td>
-                                </tr>
-                                <tr>
-                                    <td>水库面积</td>
-                                    <td>±10%</td>
-                                    <td>中</td>
-                                </tr>
-                                <tr>
-                                    <td>水温数据</td>
-                                    <td>±20%</td>
-                                    <td>中</td>
-                                </tr>
-                                <tr>
-                                    <td>水质参数</td>
-                                    <td>±30%</td>
-                                    <td>中</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <p>Tier 1 具有显著不确定性，主要来源包括：</p>
+                        <ul>
+                            <li><strong>活动数据（AD）— 面积不确定性：</strong>缺乏国家数据库时，小型水库、农场池塘与沟渠的总面积不确定性可能超过 50%，通常是最大来源。</li>
+                            <li><strong>排放因子（EF）— 变异性高：</strong>默认因子基于全球数据的平均值，区间较宽。例如热带湿润区 >20 年水库的 CH₄ 因子均值为约 141.1，95%CI 为 131.1–152.7，使用均值本身即存在不确定性。</li>
+                            <li><strong>下游排放（R<sub>d</sub>）— 运行依赖：</strong>Tier 1 取 R<sub>d</sub>=0.09，但实际与热分层、取水深度密切相关，在部分水库中下游排放可能微小，另一些可能占比较大。</li>
+                        </ul>
 
                         <div class="highlight-box">
-                            <div class="highlight-title">建议</div>
-                            <p>为提高计算精度，建议进行蒙特卡洛模拟分析，通过多次随机采样来评估总排放量的概率分布和置信区间。</p>
+                            <div class="highlight-title">方法建议</div>
+                            <p>在报告或决策场景中，应给出不确定性说明；如条件允许，采用更高层级（Tier 2/3）或进行蒙特卡洛分析与敏感性研究。</p>
                         </div>
                     </div>
                 </section>
 
-                <!-- 数据质量要求 -->
+                <!-- 输出结果解读与免责声明 -->
                 <section class="content-section">
-                    <h2 class="section-title">数据质量要求</h2>
+                    <h2 class="section-title">9. 第一层级方法学（Tier 1）输出结果解读</h2>
                     <div class="section-content">
-                        <h3 class="section-subtitle">数据来源优先级</h3>
-                        <ol>
-                            <li><strong>现场监测数据</strong>：最准确，但成本高</li>
-                            <li><strong>卫星遥感数据</strong>：中等精度，覆盖范围大</li>
-                            <li><strong>气候模型数据</strong>：精度较低，但易于获取</li>
-                            <li><strong>默认参数</strong>：精度最低，但简单易用</li>
-                        </ol>
-
-                        <h3 class="section-subtitle">数据质量控制</h3>
-                        <ul>
-                            <li>所有输入数据应进行合理性检查</li>
-                            <li>异常值应进行标记和说明</li>
-                            <li>数据来源应记录在案</li>
-                            <li>定期更新默认参数值</li>
-                        </ul>
-                    </div>
-                </section>
-
-                <!-- 参考文献 -->
-                <section class="content-section">
-                    <h2 class="section-title">参考文献</h2>
-                    <div class="section-content">
+                        <p>Tier 1 的结果用于初步估算与演示，受活动数据、默认因子与下游排放比例假设的影响较大。结果呈现时应配套不确定性说明，避免作为严格核算或合规用途。</p>
                         <div class="reference">
-                            <p><strong>主要参考文献：</strong></p>
-                            <p>1. IPCC (2019). 2019 Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories. Geneva, Switzerland: IPCC.</p>
-                            <p>2. Deemer, B.R., et al. (2016). Greenhouse gas emissions from reservoir water surfaces: a new global synthesis. BioScience, 66(11), 949-964.</p>
-                            <p>3. Barros, N., et al. (2011). Carbon emission from hydroelectric reservoirs linked to reservoir age and latitude. Nature Geoscience, 4(9), 593-596.</p>
-                            <p>4. 中国水利部 (2020). 水库温室气体排放监测技术指南. 北京: 中国水利水电出版社.</p>
+                            <p><strong>免责声明：</strong>本内容基于 IPCC 2019 修订版第 7 章（湿地）文件总结，数值与方法以 IPCC 官方指南原文为准。在国家温室气体清单编制工作中，应始终参考最新官方指南。</p>
                         </div>
                     </div>
                 </section>
@@ -682,21 +888,7 @@
     </main>
 
     <script>
-        // 用户下拉菜单功能
-        function toggleUserDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        // 点击外部关闭下拉菜单
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('userDropdown');
-            const avatar = document.querySelector('.user-avatar');
-            
-            if (!avatar.contains(event.target)) {
-                dropdown.classList.remove('show');
-            }
-        });
+        // 已移除头像与下拉菜单相关脚本
     </script>
 </body>
 </html>

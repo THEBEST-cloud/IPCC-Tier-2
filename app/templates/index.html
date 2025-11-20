@@ -22,36 +22,11 @@
             </div>
             <nav class="nav-links">
                 <a href="/dashboard" class="nav-link active">新建计算</a>
-                <a href="/projects" class="nav-link">我的水库</a>
+                
                 <a href="/methodology" class="nav-link">方法学说明</a>
                 <a href="/help" class="nav-link">帮助</a>
             </nav>
-            <div class="user-section">
-                <div class="user-dropdown">
-                    <div class="user-avatar" onclick="toggleUserDropdown()">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="dropdown-menu" id="userDropdown">
-                        <a href="/profile" class="dropdown-item">
-                            <i class="fas fa-user-circle"></i>
-                            个人信息
-                        </a>
-                        <a href="/projects" class="dropdown-item">
-                            <i class="fas fa-folder"></i>
-                            我的水库
-                        </a>
-                        <a href="/settings" class="dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            设置
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="/login" class="dropdown-item">
-                            <i class="fas fa-sign-out-alt"></i>
-                            退出登录
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
         </div>
     </header>
 
@@ -108,9 +83,9 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="totalPhosphorus" class="form-label">
-                            总磷 (μg/L) <i class="fas fa-info-circle info-icon" title="总磷浓度，用于评估水体富营养化程度"></i>
+                            总磷 (mg/L) <i class="fas fa-info-circle info-icon" title="总磷浓度，用于评估水体富营养化程度"></i>
                         </label>
-                        <input type="number" id="totalPhosphorus" class="form-input" placeholder="例如: 25.5" step="0.1">
+                        <input type="number" id="totalPhosphorus" class="form-input" placeholder="例如: 0.025" step="0.001">
                     </div>
                     <div class="form-group">
                         <label for="totalNitrogen" class="form-label">
@@ -121,7 +96,7 @@
                 </div>
                 <div class="form-group">
                     <label for="chlorophyllA" class="form-label">
-                        叶绿素a (μg/L) <i class="fas fa-info-circle info-icon" title="叶绿素a浓度，反映浮游植物生物量"></i>
+                        叶绿素a (ug/L) <i class="fas fa-info-circle info-icon" title="叶绿素a浓度，反映浮游植物生物量"></i>
                     </label>
                     <input type="number" id="chlorophyllA" class="form-input" placeholder="例如: 8.3" step="0.1">
                 </div>
@@ -157,25 +132,25 @@
                         <label for="surfaceArea" class="form-label">水库面积 (km²)</label>
                         <div style="display: flex; align-items: center; gap: 1rem;">
                             <input type="number" id="surfaceArea" class="form-input" placeholder="例如: 15.5" step="0.1" required>
-                            <label class="toggle-switch">
+                            <!-- <label class="toggle-switch">
                                 <input type="checkbox" id="useDefaultArea">
                                 <span class="slider"></span>
                             </label>
-                            <span style="font-size: 0.875rem; color: #6b7280;">使用默认值</span>
+                            <span style="font-size: 0.875rem; color: #6b7280;">使用默认值</span> -->
                         </div>
-                        <p class="help-text">基于气候区域的推荐默认值：<span id="defaultArea">10.0</span> km²</p>
+                        <!-- <p class="help-text">基于气候区域的推荐默认值：<span id="defaultArea">10.0</span> km²</p> -->
                     </div>
                     <div class="form-group">
                         <label for="reservoirAge" class="form-label">水库年龄 (年)</label>
                         <div style="display: flex; align-items: center; gap: 1rem;">
                             <input type="number" id="reservoirAge" class="form-input" placeholder="例如: 25" step="1">
-                            <label class="toggle-switch">
+                            <!-- <label class="toggle-switch">
                                 <input type="checkbox" id="useDefaultAge">
                                 <span class="slider"></span>
-                            </label>
-                            <span style="font-size: 0.875rem; color: #6b7280;">使用默认值</span>
+                            </label> -->
+                            <!-- <span style="font-size: 0.875rem; color: #6b7280;">使用默认值</span> -->
                         </div>
-                        <p class="help-text">水库建成后的年数</p>
+                        <p class="help-text"> 水库库龄是指从水库开始蓄水（首次蓄水）到水库第一次达到设计最高水位所经历的时间段</p>
                     </div>
                 </div>
             </div>

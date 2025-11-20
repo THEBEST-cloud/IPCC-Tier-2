@@ -25,10 +25,44 @@ from .ipcc_tier1 import (
     calculate_ipcc_tier1_emissions,
     clean_numeric_value
 )
+from .climate_zones import get_climate_zone_details, map_standard_to_aggregated_cn
 from .analysis import run_full_analysis
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
+
+# Initialize default users
+def init_default_users():
+    """Initialize default users for testing"""
+    db = next(get_db())
+    try:
+        # Check if demo user already exists
+        existing_user = auth.get_user_by_username(db, "demo")
+        if not existing_user:
+            # Create demo user
+            demo_user = models.User(
+                username="demo",
+                email="demo@example.com",
+                hashed_password=auth.get_password_hash("demo123"),
+                first_name="Demo",
+                last_name="User",
+                organization="Demo Organization",
+                is_active=True,
+                is_verified=True
+            )
+            db.add(demo_user)
+            db.commit()
+            print("Demo user created successfully: demo/demo123")
+        else:
+            print("Demo user already exists")
+    except Exception as e:
+        print(f"Error creating demo user: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+# Initialize default users on startup
+init_default_users()
 
 # JWT Configuration (moved to auth.py)
 
@@ -136,10 +170,11 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     return username
 
 # Setup templates
-templates = Jinja2Templates(directory="/app/app/templates")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 # Serve static files
-app.mount("/static", StaticFiles(directory="/app/app/static"), name="static")
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -162,7 +197,21 @@ async def analyze_reservoir(
     Analyze reservoir emissions using IPCC Tier 1 methodology
     """
     # Determine climate region
-    climate_region = get_climate_region(reservoir_input.latitude, reservoir_input.longitude)
+    # 支持两种覆盖值：
+    # 1) 中文聚合气候区（前端下拉现在传中文）
+    # 2) 英文标准气候区（兼容旧前端）
+    if reservoir_input.climate_region_override:
+        # 如果传来的是中文六大聚合气候区，直接使用
+        cn_override = reservoir_input.climate_region_override
+        available_cn = {"北方", "冷温带", "暖温带干旱", "暖温带湿润", "热带干旱/山地", "热带湿润/潮湿"}
+        if cn_override in available_cn:
+            climate_region = cn_override
+        else:
+            # 否则尝试把英文标准映射为中文聚合
+            mapped_cn = map_standard_to_aggregated_cn(reservoir_input.climate_region_override)
+            climate_region = mapped_cn or get_climate_region(reservoir_input.latitude, reservoir_input.longitude)
+    else:
+        climate_region = get_climate_region(reservoir_input.latitude, reservoir_input.longitude)
     
     # Assess trophic status
     trophic_status = None
@@ -189,7 +238,8 @@ async def analyze_reservoir(
         latitude=reservoir_input.latitude,
         longitude=reservoir_input.longitude,
         trophic_status=trophic_status,
-        reservoir_age=reservoir_input.reservoir_age
+        reservoir_age=reservoir_input.reservoir_age,
+        climate_region_override=climate_region
     )
     
     # 提取主要结果
@@ -343,10 +393,39 @@ async def delete_analysis(analysis_id: int, db: Session = Depends(get_db)):
 @app.get("/api/climate-region/{latitude}/{longitude}")
 async def get_climate_info(latitude: float, longitude: float):
     """
-    Get climate region for given latitude and longitude
+    根据经纬度返回气候带信息：
+    - raw_standard_en: 映射前的IPCC标准气候区（英文）
+    - aggregated_en: 映射后的IPCC聚合气候区（英文）
+    - aggregated_cn: 映射后的IPCC聚合气候区（中文）
+    - koppen_code: 原始柯本代码（字符串）
+
+    前端仅显示 raw_standard_en；后端计算继续使用 aggregated_cn。
     """
-    climate_region = get_climate_region(latitude, longitude)
-    return {"latitude": latitude, "longitude": longitude, "climate_region": climate_region}
+    details = get_climate_zone_details(latitude, longitude)
+    if details is None:
+        # 回退到旧逻辑，确保接口稳定
+        fallback = get_climate_region(latitude, longitude)
+        return {
+            "latitude": latitude,
+            "longitude": longitude,
+            "climate_region": fallback,
+            "raw_standard_en": None,
+            "aggregated_en": None,
+            "aggregated_cn": fallback,
+            "koppen_code": None,
+        }
+
+    return {
+        "latitude": latitude,
+        "longitude": longitude,
+        "climate_region": details.get("aggregated_zone_cn"),
+        "raw_standard_en": details.get("standard_zone_en"),
+        "aggregated_en": details.get("aggregated_zone_en"),
+        "aggregated_cn": details.get("aggregated_zone_cn"),
+        "koppen_code": details.get("koppen_code"),
+        "koppen_code_str": details.get("koppen_code_str"),
+        "koppen_cn_name": details.get("koppen_cn_name"),
+    }
 
 
 # User Authentication Routes
@@ -363,7 +442,7 @@ async def register_page(request: Request):
 @app.get("/profile", response_class=HTMLResponse)
 async def profile_page(request: Request):
     """Serve profile page"""
-    return templates.TemplateResponse("profile.html", {"request": request})
+    raise HTTPException(status_code=404, detail="Not Found")
 
 @app.get("/forgot-password", response_class=HTMLResponse)
 async def forgot_password_page(request: Request):
@@ -375,62 +454,12 @@ async def reset_password_page(request: Request, token: str = None):
     """Serve reset password page"""
     return templates.TemplateResponse("reset-password.html", {"request": request, "token": token})
 
-@app.get("/api/user/profile")
-async def get_user_profile(token: str = Depends(verify_token), db: Session = Depends(get_db)):
-    """Get current user profile"""
-    user = db.query(models.User).filter(models.User.username == token).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    return {
-        "username": user.username,
-        "email": user.email,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "organization": user.organization,
-        "created_at": user.created_at
-    }
-
-@app.put("/api/user/profile")
-async def update_user_profile(
-    profile_data: dict,
-    token: str = Depends(verify_token),
-    db: Session = Depends(get_db)
-):
-    """Update current user profile"""
-    user = db.query(models.User).filter(models.User.username == token).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # 更新允许的字段
-    if "first_name" in profile_data:
-        user.first_name = profile_data["first_name"]
-    if "last_name" in profile_data:
-        user.last_name = profile_data["last_name"]
-    if "organization" in profile_data:
-        user.organization = profile_data["organization"]
-    
-    db.commit()
-    db.refresh(user)
-    
-    return {
-        "username": user.username,
-        "email": user.email,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "organization": user.organization,
-        "created_at": user.created_at
-    }
 
 @app.get("/settings", response_class=HTMLResponse)
 async def settings_page(request: Request):
     """Serve user settings page"""
-    return templates.TemplateResponse("settings.html", {"request": request})
+    raise HTTPException(status_code=404, detail="Not Found")
 
-@app.get("/projects", response_class=HTMLResponse)
-async def projects_page(request: Request):
-    """Serve projects page"""
-    return templates.TemplateResponse("my-projects.html", {"request": request})
 
 @app.get("/methodology", response_class=HTMLResponse)
 async def methodology_page(request: Request):

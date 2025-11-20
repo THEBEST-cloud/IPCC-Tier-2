@@ -66,6 +66,32 @@ function setupEventListeners() {
     
     // 营养状态选择变化
     document.getElementById('trophicStatusSelect').addEventListener('change', updateTrophicStatus);
+
+    // 气候区域下拉选择变化（用户可覆盖自动识别）
+    const climateSelect = document.getElementById('climateRegionSelect');
+    if (climateSelect) {
+        climateSelect.addEventListener('change', function() {
+            climateSelect.dataset.autoSelected = 'false';
+            const selected = climateSelect.value;
+            if (selected) {
+                // 用户选择柯本代码时，直接映射到IPCC六类中文
+                const mappedCN = KOPPEN_CODE_TO_AGG_CN && KOPPEN_CODE_TO_AGG_CN[selected] ? KOPPEN_CODE_TO_AGG_CN[selected] : null;
+                if (mappedCN) {
+                    selectedAggregatedOverride = mappedCN;
+                } else {
+                    const lat = parseFloat(document.getElementById('latitude').value);
+                    const rawStd = latestClimateInfo && latestClimateInfo.raw_standard_en ? latestClimateInfo.raw_standard_en : null;
+                    const autoAggCN = latestClimateInfo && latestClimateInfo.aggregated_cn ? latestClimateInfo.aggregated_cn : null;
+                    selectedAggregatedOverride = mapFiveToAggregatedCN(selected, rawStd, lat, autoAggCN) || null;
+                }
+                updateDefaultValues(selectedAggregatedOverride || '暖温带湿润');
+            } else {
+                // 恢复为基于自动识别的默认值
+                selectedAggregatedOverride = null;
+                updateClimateRegion();
+            }
+        });
+    }
 }
 
 // 设置切换开关
@@ -95,17 +121,23 @@ function setupAnalysisOptions() {
     const monteCarloSelect = document.getElementById('monteCarloRuns');
     const sensitivityOptions = document.querySelector('.checkbox-group');
 
-    uncertaintyCheckbox.addEventListener('change', function() {
-        monteCarloSelect.style.display = this.checked ? 'block' : 'none';
-    });
+    if (uncertaintyCheckbox && monteCarloSelect) {
+        uncertaintyCheckbox.addEventListener('change', function() {
+            monteCarloSelect.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // 初始状态
+        monteCarloSelect.style.display = 'block';
+    }
 
-    sensitivityCheckbox.addEventListener('change', function() {
-        sensitivityOptions.style.display = this.checked ? 'block' : 'none';
-    });
-
-    // 初始状态
-    monteCarloSelect.style.display = 'block';
-    sensitivityOptions.style.display = 'block';
+    if (sensitivityCheckbox && sensitivityOptions) {
+        sensitivityCheckbox.addEventListener('change', function() {
+            sensitivityOptions.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // 初始状态
+        sensitivityOptions.style.display = 'block';
+    }
 }
 
 // 设置坐标输入
@@ -117,6 +149,169 @@ function setupCoordinateInputs() {
     latitudeInput.value = '39.9042';
     longitudeInput.value = '116.4074';
     updateClimateRegion();
+}
+
+// 保存最近一次自动识别结果与用户覆盖
+let latestClimateInfo = null;
+let selectedAggregatedOverride = null;
+
+// 标准英文到中文聚合气候区映射（用于默认值显示）
+const STANDARD_TO_AGGREGATED_CN = {
+    'Boreal dry': '北方',
+    'Boreal moist': '北方',
+    'Polar dry': '北方',
+    'Polar moist': '北方',
+    'Cool temperate dry': '冷温带',
+    'Cool temperate moist': '冷温带',
+    'Warm temperate dry': '暖温带干旱',
+    'Warm temperate moist': '暖温带湿润',
+    'Tropical dry': '热带干旱/山地',
+    'Tropical montane': '热带干旱/山地',
+    'Tropical moist': '热带湿润/潮湿',
+    'Tropical wet': '热带湿润/潮湿'
+};
+
+// 将中文5类主气候带映射为IPCC六类中文聚合
+function mapFiveToAggregatedCN(fiveCN, rawStandard, latitude, autoAggregatedCN) {
+    if (!fiveCN) return autoAggregatedCN || null;
+    const byStd = rawStandard ? STANDARD_TO_AGGREGATED_CN[rawStandard] : null;
+    switch (fiveCN) {
+        case '寒带':
+            return '北方';
+        case '亚寒带/温带':
+            return '冷温带';
+        case '温暖带':
+            if (rawStandard && rawStandard.includes('Warm temperate')) {
+                return rawStandard.includes('dry') ? '暖温带干旱' : '暖温带湿润';
+            }
+            if (autoAggregatedCN && (autoAggregatedCN === '暖温带干旱' || autoAggregatedCN === '暖温带湿润')) {
+                return autoAggregatedCN;
+            }
+            return '暖温带湿润';
+        case '热带':
+            if (rawStandard && rawStandard.startsWith('Tropical')) {
+                return (rawStandard.includes('dry') || rawStandard.includes('montane')) ? '热带干旱/山地' : '热带湿润/潮湿';
+            }
+            if (autoAggregatedCN && (autoAggregatedCN === '热带干旱/山地' || autoAggregatedCN === '热带湿润/潮湿')) {
+                return autoAggregatedCN;
+            }
+            return '热带湿润/潮湿';
+        case '干旱带':
+            if (byStd) return byStd;
+            if (rawStandard) {
+                if (rawStandard.includes('Warm temperate dry')) return '暖温带干旱';
+                if (rawStandard.includes('Cool temperate dry')) return '冷温带';
+                if (rawStandard.includes('Boreal') || rawStandard.includes('Polar')) return '北方';
+            }
+            if (typeof latitude === 'number') {
+                const absLat = Math.abs(latitude);
+                if (absLat < 23.5) return '热带干旱/山地';
+                if (absLat < 40) return '暖温带干旱';
+                return '冷温带';
+            }
+            return autoAggregatedCN || '暖温带干旱';
+        default:
+            return autoAggregatedCN || null;
+    }
+}
+
+// 柯本代码到中文名称（下拉显示）
+const KOPPEN_CODE_TO_CN = {
+    Af: '热带雨林',
+    Am: '热带季风',
+    Aw: '热带草原',
+    BWh: '热沙漠',
+    BWk: '冷沙漠',
+    BSh: '热草原（半干旱）',
+    BSk: '冷草原（半干旱）',
+    Csa: '地中海炎热夏季',
+    Csb: '地中海暖夏',
+    Csc: '地中海冷夏',
+    Cwa: '温带冬季干燥·炎热夏季',
+    Cwb: '温带冬季干燥·温暖夏季',
+    Cwc: '温带冬季干燥·寒冷夏季',
+    Cfa: '温带无干季·炎热夏季',
+    Cfb: '温带无干季·温和夏季',
+    Cfc: '温带无干季·寒冷夏季',
+    Dsa: '冷带夏季干燥·炎热夏季',
+    Dsb: '冷带夏季干燥·温暖夏季',
+    Dsc: '冷带夏季干燥·寒冷夏季',
+    Dsd: '冷带夏季干燥·严寒冬季',
+    Dwa: '冷带冬季干燥·炎热夏季',
+    Dwb: '冷带冬季干燥·温暖夏季',
+    Dwc: '冷带冬季干燥·寒冷夏季',
+    Dwd: '冷带冬季干燥·严寒冬季',
+    Dfa: '冷带无干季·炎热夏季',
+    Dfb: '冷带无干季·温暖夏季',
+    Dfc: '冷带无干季·寒冷夏季',
+    Dfd: '冷带无干季·严寒冬季',
+    ET: '苔原',
+    EF: '冰原'
+};
+
+// 柯本代码到IPCC六类中文聚合映射（提交）
+const KOPPEN_CODE_TO_AGG_CN = {
+    Af: '热带湿润/潮湿',
+    Am: '热带湿润/潮湿',
+    Aw: '热带干旱/山地',
+    BWh: '暖温带干旱',
+    BSh: '暖温带干旱',
+    BWk: '冷温带',
+    BSk: '冷温带',
+    Csa: '暖温带干旱',
+    Csb: '暖温带干旱',
+    Csc: '暖温带干旱',
+    Cwa: '暖温带湿润',
+    Cfa: '暖温带湿润',
+    Cwb: '冷温带',
+    Cwc: '冷温带',
+    Cfb: '冷温带',
+    Cfc: '冷温带',
+    Dsa: '冷温带',
+    Dsb: '冷温带',
+    Dsc: '冷温带',
+    Dsd: '冷温带',
+    Dwa: '冷温带',
+    Dwb: '冷温带',
+    Dwc: '冷温带',
+    Dwd: '冷温带',
+    Dfa: '冷温带',
+    Dfb: '冷温带',
+    Dfc: '北方',
+    Dfd: '北方',
+    ET: '北方',
+    EF: '北方'
+};
+
+// 填充中文5大主气候带到下拉框（只执行一次）
+function populateClimateSelect() {
+    const select = document.getElementById('climateRegionSelect');
+    if (!select) return;
+
+    // 如果已经填充过（除了第一个“自动识别”外还有选项），则不重复填充
+    if (select.options.length > 1) return;
+
+    // 柯本30类，值为代码；显示中文
+    const koppenEntries = Object.entries(KOPPEN_CODE_TO_CN);
+
+    // 确保第一个选项是“自动识别（推荐）”
+    if (select.options.length === 0) {
+        const auto = document.createElement('option');
+        auto.value = '';
+        auto.textContent = '自动识别（推荐）';
+        select.appendChild(auto);
+    } else {
+        // 将第一个选项文本修正为“自动识别（推荐）”
+        select.options[0].value = '';
+        select.options[0].textContent = '自动识别（推荐）';
+    }
+
+    koppenEntries.forEach(([code, name]) => {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = name;
+        select.appendChild(opt);
+    });
 }
 
 // 更新气候区域
@@ -131,29 +326,47 @@ async function updateClimateRegion() {
     try {
         const response = await fetch(`/api/climate-region/${latitude}/${longitude}`);
         const data = await response.json();
-        
-        document.getElementById('climateRegion').value = data.climate_region;
-        
-        // 更新默认值
-        updateDefaultValues(data.climate_region);
+        latestClimateInfo = data;
+        const aggregatedCN = data.aggregated_cn || '';
+        const select = document.getElementById('climateRegionSelect');
+        if (select) {
+            // 确保下拉已填充为柯本30类
+            populateClimateSelect();
+            // 自动识别后展示识别的柯本代码，不作为覆盖
+            if (data.koppen_code_str && KOPPEN_CODE_TO_CN[data.koppen_code_str]) {
+                select.value = data.koppen_code_str;
+            } else {
+                select.value = '';
+            }
+            select.dataset.autoSelected = 'true';
+        }
+        // 默认值仍按聚合中文区分类
+        updateDefaultValues(aggregatedCN);
     } catch (error) {
         console.error('Error fetching climate region:', error);
     }
 }
 
 // 更新默认值
-function updateDefaultValues(climateRegion) {
-    const defaults = {
-        'Tropical': { area: 15.0, depth: 25.0 },
-        'Temperate': { area: 10.0, depth: 20.0 },
-        'Boreal': { area: 8.0, depth: 15.0 },
-        'Polar': { area: 5.0, depth: 10.0 }
+function updateDefaultValues(climateRegionCN) {
+    // 若页面不存在默认值展示元素，则直接返回，避免空引用
+    const areaEl = document.getElementById('defaultArea');
+    const depthEl = document.getElementById('defaultDepth');
+    if (!areaEl || !depthEl) return;
+
+    // 根据中文聚合气候区设定默认值
+    const defaultsCN = {
+        '热带湿润/潮湿': { area: 15.0, depth: 25.0 },
+        '热带干旱/山地': { area: 14.0, depth: 22.0 },
+        '暖温带湿润': { area: 10.0, depth: 20.0 },
+        '暖温带干旱': { area: 9.0, depth: 18.0 },
+        '冷温带': { area: 8.0, depth: 15.0 },
+        '北方': { area: 7.0, depth: 12.0 }
     };
-    
-    const regionDefaults = defaults[climateRegion] || defaults['Temperate'];
-    
-    document.getElementById('defaultArea').textContent = regionDefaults.area;
-    document.getElementById('defaultDepth').textContent = regionDefaults.depth;
+
+    const regionDefaults = defaultsCN[climateRegionCN] || defaultsCN['暖温带湿润'];
+    areaEl.textContent = regionDefaults.area;
+    depthEl.textContent = regionDefaults.depth;
 }
 
 // 设置默认值
@@ -308,6 +521,24 @@ function collectFormData() {
             secchi_depth: null
         },
         trophic_status: document.getElementById('trophicStatusSelect').value || null,
+        // 用户覆盖的气候区域（始终传中文聚合气候区）
+        climate_region_override: (function() {
+            const sel = document.getElementById('climateRegionSelect');
+            if (!sel || !sel.value) return null;
+            // 若选择为柯本代码，则用代码→IPCC六类映射；否则回退到旧的五类中文逻辑
+            const code = sel.value;
+            if (sel.dataset && sel.dataset.autoSelected === 'true') {
+                // 自动选择的情况下，不视为覆盖
+                return null;
+            }
+            if (KOPPEN_CODE_TO_AGG_CN && KOPPEN_CODE_TO_AGG_CN[code]) {
+                return KOPPEN_CODE_TO_AGG_CN[code];
+            }
+            const lat = parseFloat(document.getElementById('latitude').value);
+            const rawStd = latestClimateInfo && latestClimateInfo.raw_standard_en ? latestClimateInfo.raw_standard_en : null;
+            const autoAggCN = latestClimateInfo && latestClimateInfo.aggregated_cn ? latestClimateInfo.aggregated_cn : null;
+            return mapFiveToAggregatedCN(code, rawStd, lat, autoAggCN);
+        })(),
         run_uncertainty: document.getElementById('enableUncertainty').checked,
         run_sensitivity: document.getElementById('enableSensitivity').checked,
         uncertainty_iterations: parseInt(document.getElementById('monteCarloRuns').value)
@@ -400,7 +631,7 @@ function generateUncertaintyHTML(uncertainty) {
             <div class="card-header">
                 <h2 class="card-title">
                     <i class="fas fa-chart-line"></i>
-                    不确定性分析结果
+                    不确定度分析结果
                 </h2>
                 <p class="card-subtitle">基于蒙特卡洛模拟的概率分布分析</p>
             </div>
@@ -911,21 +1142,7 @@ function saveResults() {
     showSuccess('结果保存功能正在开发中');
 }
 
-// 用户下拉菜单功能
-function toggleUserDropdown() {
-    const dropdown = document.getElementById('userDropdown');
-    dropdown.classList.toggle('show');
-}
-
-// 点击外部关闭下拉菜单
-document.addEventListener('click', function(event) {
-    const dropdown = document.getElementById('userDropdown');
-    const avatar = document.querySelector('.user-avatar');
-    
-    if (!avatar.contains(event.target)) {
-        dropdown.classList.remove('show');
-    }
-});
+// 已移除头像与下拉菜单相关功能
 
 // 初始化交互式地图
 function initializeMap() {
@@ -938,6 +1155,9 @@ function initializeMap() {
         return;
     }
     
+    console.log('Map container found:', mapContainer);
+    console.log('Map container dimensions:', mapContainer.offsetWidth, 'x', mapContainer.offsetHeight);
+    
     // 检查Leaflet是否已加载
     if (typeof L === 'undefined') {
         console.error('Leaflet library not loaded, retrying in 1 second...');
@@ -945,23 +1165,43 @@ function initializeMap() {
         return;
     }
     
-    console.log('Leaflet loaded, creating map...');
+    console.log('Leaflet loaded successfully, version:', L.version);
+    console.log('Creating map...');
     
     try {
+        // 如果地图已经存在，先销毁它
+        if (map) {
+            map.remove();
+            map = null;
+        }
+        
         // 创建地图实例，默认显示中国
         map = L.map('map', {
             center: [35.0, 105.0],
             zoom: 4,
-            zoomControl: true
+            zoomControl: true,
+            attributionControl: true
         });
         
         console.log('Map created successfully');
         
-        // 添加地图图层
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 18
-        }).addTo(map);
+        // 立即刷新地图尺寸
+        map.invalidateSize();
+        console.log('Map size invalidated after creation');
+        
+        // 添加地图图层 - 使用多个备用源
+        const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+            minZoom: 2
+        });
+        
+        // 添加错误处理
+        tileLayer.on('tileerror', function(error) {
+            console.warn('Tile loading error:', error);
+        });
+        
+        tileLayer.addTo(map);
         
         console.log('Tile layer added');
         
@@ -976,42 +1216,108 @@ function initializeMap() {
             console.log('Map clicked:', lat, lng, '-> normalized:', normalized);
             
             // 更新坐标输入框
-            document.getElementById('latitude').value = normalized.lat.toFixed(4);
-            document.getElementById('longitude').value = normalized.lng.toFixed(4);
+            const latInput = document.getElementById('latitude');
+            const lngInput = document.getElementById('longitude');
             
-            // 更新标记
-            if (marker) {
-                map.removeLayer(marker);
+            if (latInput && lngInput) {
+                latInput.value = normalized.lat.toFixed(4);
+                lngInput.value = normalized.lng.toFixed(4);
+                
+                // 触发输入事件以更新气候区域
+                latInput.dispatchEvent(new Event('input'));
+                lngInput.dispatchEvent(new Event('input'));
             }
             
-            marker = L.marker([normalized.lat, normalized.lng]).addTo(map);
-            marker.bindPopup(`位置: ${normalized.lat.toFixed(4)}, ${normalized.lng.toFixed(4)}`).openPopup();
-            
-            // 更新气候区域
-            updateClimateRegion();
+            // 更新标记
+            updateMapMarker(normalized.lat, normalized.lng);
         });
         
-        // 添加默认标记（北京）
-        marker = L.marker([39.9042, 116.4074]).addTo(map);
-        marker.bindPopup('默认位置: 北京').openPopup();
-        
-        // 设置初始坐标
-        document.getElementById('latitude').value = '39.9042';
-        document.getElementById('longitude').value = '116.4074';
+        // 添加地图加载完成事件
+        map.whenReady(function() {
+            console.log('Map is ready');
+            
+            // 强制刷新地图尺寸
+            setTimeout(function() {
+                map.invalidateSize();
+                console.log('Map size invalidated');
+            }, 100);
+            
+            // 添加默认标记（北京）
+            updateMapMarker(39.9042, 116.4074);
+            
+            // 设置初始坐标
+            const latInput = document.getElementById('latitude');
+            const lngInput = document.getElementById('longitude');
+            if (latInput && lngInput) {
+                latInput.value = '39.9042';
+                lngInput.value = '116.4074';
+            }
+        });
         
         console.log('Map initialized successfully');
         
     } catch (error) {
         console.error('Error initializing map:', error);
         // 显示错误信息
-        mapContainer.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 14px;"><i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>地图加载失败，请刷新页面重试</div>';
+        mapContainer.innerHTML = `
+            <div style="
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                height: 400px; 
+                color: #666; 
+                font-size: 14px;
+                background: #f8fafc;
+                border: 2px dashed #e2e8f0;
+                border-radius: 8px;
+                flex-direction: column;
+                gap: 8px;
+            ">
+                <i class="fas fa-exclamation-triangle" style="font-size: 24px; color: #f59e0b;"></i>
+                <div>地图加载失败，请检查网络连接或刷新页面重试</div>
+                <button onclick="initializeMap()" style="
+                    padding: 8px 16px;
+                    background: #3b82f6;
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 12px;
+                ">重新加载地图</button>
+            </div>
+        `;
+    }
+}
+
+// 更新地图标记的辅助函数
+function updateMapMarker(lat, lng) {
+    if (!map) return;
+    
+    try {
+        // 移除现有标记
+        if (marker) {
+            map.removeLayer(marker);
+        }
+        
+        // 添加新标记
+        marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup(`位置: ${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
+        
+        console.log('Marker updated:', lat, lng);
+    } catch (error) {
+        console.error('Error updating marker:', error);
     }
 }
 
 // 从坐标输入框更新地图标记
 function updateMapFromCoordinates() {
-    const lat = parseFloat(document.getElementById('latitude').value);
-    const lng = parseFloat(document.getElementById('longitude').value);
+    const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
+    
+    if (!latInput || !lngInput) return;
+    
+    const lat = parseFloat(latInput.value);
+    const lng = parseFloat(lngInput.value);
     
     if (!isNaN(lat) && !isNaN(lng) && map) {
         // 标准化坐标
@@ -1019,20 +1325,19 @@ function updateMapFromCoordinates() {
         
         // 如果坐标被标准化了，更新输入框
         if (normalized.lat !== lat || normalized.lng !== lng) {
-            document.getElementById('latitude').value = normalized.lat.toFixed(4);
-            document.getElementById('longitude').value = normalized.lng.toFixed(4);
+            latInput.value = normalized.lat.toFixed(4);
+            lngInput.value = normalized.lng.toFixed(4);
         }
         
-        // 更新地图视图
-        map.setView([normalized.lat, normalized.lng], 10);
-        
-        // 更新标记
-        if (marker) {
-            map.removeLayer(marker);
+        try {
+            // 更新地图视图
+            map.setView([normalized.lat, normalized.lng], 10);
+            
+            // 更新标记
+            updateMapMarker(normalized.lat, normalized.lng);
+        } catch (error) {
+            console.error('Error updating map from coordinates:', error);
         }
-        
-        marker = L.marker([normalized.lat, normalized.lng]).addTo(map);
-        marker.bindPopup(`位置: ${normalized.lat.toFixed(4)}, ${normalized.lng.toFixed(4)}`).openPopup();
     }
 }
 

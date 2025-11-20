@@ -31,6 +31,8 @@ class ReservoirInput(BaseModel):
     run_uncertainty: bool = Field(True, description="Run uncertainty analysis")
     run_sensitivity: bool = Field(True, description="Run sensitivity analysis")
     uncertainty_iterations: int = Field(1000, ge=100, le=10000, description="Monte Carlo iterations")
+    # User override: climate region (raw standard EN from dropdown)
+    climate_region_override: Optional[str] = Field(None, description="User-selected climate region (IPCC standard zone, EN)")
 
 class EmissionResults(BaseModel):
     """Emission calculation results"""

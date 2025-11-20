@@ -625,36 +625,10 @@
             </div>
             <nav class="nav-links">
                 <a href="/dashboard" class="nav-link">新建计算</a>
-                <a href="/projects" class="nav-link">我的项目</a>
                 <a href="/methodology" class="nav-link">方法学说明</a>
                 <a href="/help" class="nav-link active">帮助</a>
             </nav>
-            <div class="user-section">
-                <div class="user-dropdown">
-                    <div class="user-avatar" onclick="toggleUserDropdown()">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="dropdown-menu" id="userDropdown">
-                        <a href="/profile" class="dropdown-item">
-                            <i class="fas fa-user-circle"></i>
-                            个人信息
-                        </a>
-                        <a href="/projects" class="dropdown-item">
-                            <i class="fas fa-folder"></i>
-                            我的项目
-                        </a>
-                        <a href="/settings" class="dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            设置
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="/login" class="dropdown-item">
-                            <i class="fas fa-sign-out-alt"></i>
-                            退出登录
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
         </div>
     </header>
 
@@ -663,21 +637,7 @@
         <!-- 页面标题 -->
         <div class="page-header">
             <h1 class="page-title">帮助中心</h1>
-            <p class="page-subtitle">专业的水库温室气体排放核算平台 - 基于IPCC方法学的科学计算工具</p>
-            <div class="header-stats">
-                <div class="stat-item">
-                    <div class="stat-number">1000+</div>
-                    <div class="stat-label">用户信赖</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">50+</div>
-                    <div class="stat-label">国家地区</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">24/7</div>
-                    <div class="stat-label">技术支持</div>
-                </div>
-            </div>
+            <p class="page-subtitle">本页面介绍当前版本的实际功能与使用方法。系统提供基于 IPCC Tier 1 的基础计算与结果查看，部分高级功能尚在开发中。</p>
         </div>
 
         <!-- 搜索框 -->
@@ -695,8 +655,8 @@
                     <i class="fas fa-play-circle"></i>
                 </div>
                 <h3 class="category-title">快速入门</h3>
-                <p class="category-description">从零开始，5分钟掌握水库碳核算基础操作</p>
-                <div class="category-count">新手必读 • 8个教程</div>
+                <p class="category-description">输入基本参数并运行一次示例计算</p>
+                <div class="category-count">入门指南</div>
             </div>
 
             <div class="category-card calculation" onclick="window.location.href='/methodology'">
@@ -704,17 +664,17 @@
                     <i class="fas fa-flask"></i>
                 </div>
                 <h3 class="category-title">IPCC方法学</h3>
-                <p class="category-description">深入了解IPCC Tier 1方法学原理和参数配置</p>
-                <div class="category-count">科学计算 • 15个指南</div>
+                <p class="category-description">了解本系统采用的默认参数与计算流程</p>
+                <div class="category-count">方法学说明</div>
             </div>
 
-            <div class="category-card results" onclick="window.location.href='/projects'">
+            <div class="category-card results">
                 <div class="category-icon">
                     <i class="fas fa-chart-bar"></i>
                 </div>
                 <h3 class="category-title">数据分析</h3>
-                <p class="category-description">专业的结果解读、不确定性分析和报告生成</p>
-                <div class="category-count">高级功能 • 12个案例</div>
+                <p class="category-description">查看计算结果与基础图表（报告导出开发中）</p>
+                <div class="category-count">结果页面说明</div>
             </div>
 
             <div class="category-card troubleshooting" onclick="showTroubleshootingGuide()">
@@ -751,86 +711,55 @@
             
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>🚀 如何创建我的第一个水库碳核算项目？</span>
+                    <span>如何进行一次基础计算？</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p><strong>快速上手指南：</strong></p>
+                    <p><strong>步骤：</strong></p>
                     <ol>
-                        <li><strong>项目初始化</strong>：点击"新建计算"，输入项目名称和描述</li>
-                        <li><strong>地理定位</strong>：在交互式地图上精确选择水库位置，系统自动识别气候区域</li>
-                        <li><strong>水质数据</strong>：输入关键参数（总有机碳、总氮、总磷等）</li>
-                        <li><strong>IPCC参数</strong>：配置排放因子和模型参数（系统提供默认值）</li>
-                        <li><strong>分析设置</strong>：选择不确定性分析和敏感性分析选项</li>
-                        <li><strong>开始计算</strong>：一键启动科学计算引擎，通常2-5分钟完成</li>
+                        <li><strong>打开页面</strong>：点击“新建计算”进入表单</li>
+                        <li><strong>输入必填参数</strong>：经纬度、水库面积</li>
+                        <li><strong>可选参数</strong>：水质数据用于估算营养状态</li>
+                        <li><strong>确认气候区域</strong>：自动识别或手动选择</li>
+                        <li><strong>开始计算</strong>：点击“开始计算”，系统返回结果并展示基础图表</li>
                     </ol>
-                    <p><em>💡 提示：首次使用建议查看示例项目了解最佳实践</em></p>
+                    <p><em>说明：当前版本为演示原型，不包含项目管理与高级配置。</em></p>
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>📊 平台支持哪些数据输入方式和格式？</span>
+                    <span>平台支持哪些数据输入方式？</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p><strong>多样化数据输入支持：</strong></p>
+                    <p><strong>当前版本支持：</strong></p>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1rem 0;">
                         <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
-                            <strong>🔢 手动输入</strong><br>
-                            <small>支持科学计数法、小数、负数等各种数值格式</small>
+                            <strong>手动输入</strong><br>
+                            <small>经纬度、水库面积等基础参数（十进制坐标）</small>
                         </div>
                         <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
-                            <strong>🗺️ 地图选择</strong><br>
-                            <small>高精度交互式地图，支持卫星影像和地形图</small>
+                            <strong>地图选点</strong><br>
+                            <small>在页面地图上选取位置以辅助坐标输入</small>
                         </div>
                         <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
-                            <strong>📍 坐标定位</strong><br>
-                            <small>WGS84坐标系，支持度分秒和十进制格式</small>
-                        </div>
-                        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
-                            <strong>📁 批量导入</strong><br>
-                            <small>CSV、Excel文件批量处理（企业版功能）</small>
+                            <strong>水质参数</strong><br>
+                            <small>可选项，用于估算营养状态</small>
                         </div>
                     </div>
-                    <p><em>🔬 数据质量保证：所有输入数据都经过科学性验证和合理性检查</em></p>
+                    <p><em>说明：批量导入、企业版功能与复杂坐标格式暂不支持。</em></p>
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>📈 如何科学解读不确定性分析结果？</span>
+                    <span>不确定性与敏感性功能说明</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p><strong>基于蒙特卡洛模拟的科学评估：</strong></p>
-                    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
-                        <h4 style="color: #0c4a6e; margin-bottom: 1rem;">🎯 核心指标解读</h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                            <div>
-                                <strong>📊 概率分布</strong><br>
-                                <small>直观展示排放量的统计分布特征</small>
-                            </div>
-                            <div>
-                                <strong>🎯 置信区间</strong><br>
-                                <small>95%CI：真实值的高概率范围</small>
-                            </div>
-                            <div>
-                                <strong>📐 变异系数</strong><br>
-                                <small>CV值评估结果的相对不确定性</small>
-                            </div>
-                            <div>
-                                <strong>🔍 敏感性排序</strong><br>
-                                <small>识别影响结果的关键参数</small>
-                            </div>
-                        </div>
-                    </div>
-                    <p><strong>🏆 质量评估标准：</strong></p>
-                    <ul>
-                        <li><span style="color: #10b981;">✅ 优秀</span>：CV < 20%，置信区间相对较窄</li>
-                        <li><span style="color: #f59e0b;">⚠️ 良好</span>：20% ≤ CV < 50%，需关注关键参数</li>
-                        <li><span style="color: #ef4444;">❌ 需改进</span>：CV ≥ 50%，建议优化数据质量</li>
-                    </ul>
+                    <p>当前版本提供基础占位与简要指标展示，完整的蒙特卡洛模拟与敏感性分析仍在开发中，结果仅供演示参考。</p>
+                    <p>建议以方法学页面的说明为准，不将演示结果用于正式报告或监管提交。</p>
                 </div>
             </div>
 
@@ -852,187 +781,43 @@
 
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>如何导出和分享计算结果？</span>
+                    <span>当前版本的导出与分享</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p>系统提供多种导出和分享方式：</p>
                     <ul>
-                        <li><strong>PDF报告</strong>：点击"下载报告"按钮生成完整的PDF报告</li>
-                        <li><strong>数据导出</strong>：支持CSV、Excel格式的原始数据导出</li>
-                        <li><strong>图表保存</strong>：右键点击图表可保存为图片</li>
-                        <li><strong>项目分享</strong>：通过"我的项目"页面管理项目访问权限</li>
+                        <li><strong>报告导出</strong>：下载报告功能开发中，可使用浏览器打印保存为 PDF。</li>
+                        <li><strong>图表保存</strong>：可通过截图或右键另存方式保存图表。</li>
+                        <li><strong>数据导出/项目分享</strong>：暂未提供，后续版本视需求规划。</li>
                     </ul>
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>⚡ 系统是否支持批量计算和高级功能？</span>
+                    <span>批量与高级功能状态</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p><strong>🚀 高效批量处理能力：</strong></p>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0;">
-                        <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 1rem;">
-                            <strong>✅ 当前支持</strong><br>
-                            • 多项目并行管理<br>
-                            • 参数模板快速复用<br>
-                            • 批量结果导出<br>
-                            • 项目对比分析
-                        </div>
-                        <div style="background: #fefce8; border-left: 4px solid #f59e0b; padding: 1rem;">
-                            <strong>🔄 开发中</strong><br>
-                            • 批量文件上传<br>
-                            • 自动化计算流水线<br>
-                            • API批量调用<br>
-                            • 企业级集成
-                        </div>
-                    </div>
-                    <p><em>💼 企业用户可联系我们获取定制化批量处理解决方案</em></p>
+                    <p>当前版本不支持批量上传、自动化流水线与企业级集成。后续版本将视需求评估 API 批量调用等功能。</p>
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>🔒 数据安全和隐私保护措施如何？</span>
+                    <span>数据存储与隐私说明</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p><strong>🛡️ 企业级安全保障：</strong></p>
-                    <div style="background: linear-gradient(135deg, #fef7ff 0%, #faf5ff 100%); padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                            <div>
-                                <h4 style="color: #7c3aed; margin-bottom: 0.5rem;">🔐 数据加密</h4>
-                                <small>传输和存储全程AES-256加密</small>
-                            </div>
-                            <div>
-                                <h4 style="color: #7c3aed; margin-bottom: 0.5rem;">👤 访问控制</h4>
-                                <small>多级权限管理和身份验证</small>
-                            </div>
-                            <div>
-                                <h4 style="color: #7c3aed; margin-bottom: 0.5rem;">🏢 合规认证</h4>
-                                <small>符合GDPR、ISO27001标准</small>
-                            </div>
-                            <div>
-                                <h4 style="color: #7c3aed; margin-bottom: 0.5rem;">🗑️ 数据控制</h4>
-                                <small>用户完全控制数据删除和导出</small>
-                            </div>
-                        </div>
-                    </div>
-                    <p><strong>📋 隐私承诺：</strong>我们绝不会将您的数据用于商业目的或与第三方共享，所有计算均在安全的云环境中进行。</p>
+                    <p>本项目为本地运行的演示原型，数据存储于本地 SQLite 数据库，不涉及云端存储。</p>
+                    <p>当前版本不提供企业级加密、权限管理或合规认证，建议勿上传敏感信息。</p>
                 </div>
             </div>
         </div>
 
-        <!-- 快速链接 -->
-        <div class="quick-links">
-            <h3 class="quick-links-title">📚 专业资源中心</h3>
-            <div class="quick-links-grid">
-                <a href="https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/4_Volume4/V4_07_Ch7_Wetlands.pdf" target="_blank" class="quick-link">
-                    <i class="fas fa-file-pdf quick-link-icon"></i>
-                    <span>IPCC方法学指南</span>
-                    <small>官方技术文档</small>
-                </a>
-                <a href="/dashboard" class="quick-link">
-                    <i class="fas fa-play-circle quick-link-icon"></i>
-                    <span>创建新项目</span>
-                    <small>开始您的计算</small>
-                </a>
-                <a href="javascript:showApiDocumentation()" class="quick-link">
-                    <i class="fas fa-code quick-link-icon"></i>
-                    <span>API 开发文档</span>
-                    <small>集成接口说明</small>
-                </a>
-                <a href="/results" class="quick-link">
-                    <i class="fas fa-chart-line quick-link-icon"></i>
-                    <span>示例结果分析</span>
-                    <small>查看计算案例</small>
-                </a>
-                <a href="/methodology" class="quick-link">
-                    <i class="fas fa-flask quick-link-icon"></i>
-                    <span>科学方法说明</span>
-                    <small>了解计算原理</small>
-                </a>
-                <a href="https://ghgprotocol.org/" target="_blank" class="quick-link">
-                    <i class="fas fa-globe quick-link-icon"></i>
-                    <span>GHG协议标准</span>
-                    <small>国际标准参考</small>
-                </a>
-                <a href="mailto:support@reservoir-carbon.com" class="quick-link">
-                    <i class="fas fa-comments quick-link-icon"></i>
-                    <span>专家技术支持</span>
-                    <small>获取专业帮助</small>
-                </a>
-                <a href="mailto:feedback@reservoir-carbon.com" class="quick-link">
-                    <i class="fas fa-tools quick-link-icon"></i>
-                    <span>问题反馈中心</span>
-                    <small>报告问题建议</small>
-                </a>
-            </div>
-        </div>
 
-        <!-- 联系支持 -->
-        <div class="support-section">
-            <h3 class="support-title">🤝 专业技术支持服务</h3>
-            <p class="support-description">我们的专家团队由环境科学、气候变化和软件工程领域的专业人士组成，为您提供全方位技术支持</p>
-            
-            <div class="support-methods">
-                <div class="support-method">
-                    <i class="fas fa-envelope support-icon"></i>
-                    <div class="support-method-title">技术邮箱</div>
-                    <div class="support-method-desc">support@reservoir-carbon.com</div>
-                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">24小时内响应</div>
-                </div>
-                
-                <div class="support-method">
-                    <i class="fas fa-video support-icon"></i>
-                    <div class="support-method-title">在线会议</div>
-                    <div class="support-method-desc">预约专家一对一指导</div>
-                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">免费技术咨询</div>
-                </div>
-                
-                <div class="support-method">
-                    <i class="fas fa-graduation-cap support-icon"></i>
-                    <div class="support-method-title">培训课程</div>
-                    <div class="support-method-desc">IPCC方法学专业培训</div>
-                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">定期开班</div>
-                </div>
-                
-                <div class="support-method">
-                    <i class="fas fa-book-open support-icon"></i>
-                    <div class="support-method-title">学术合作</div>
-                    <div class="support-method-desc">科研项目技术支持</div>
-                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">高校优惠</div>
-                </div>
-            </div>
 
-            <div style="background: white; border-radius: 12px; padding: 2rem; margin-top: 2rem; text-align: center;">
-                <h4 style="color: #1e293b; margin-bottom: 1rem;">🎯 服务承诺</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
-                    <div>
-                        <div style="font-size: 1.5rem; color: #10b981; margin-bottom: 0.5rem;">⚡</div>
-                        <strong>快速响应</strong><br>
-                        <small>工作日4小时内回复</small>
-                    </div>
-                    <div>
-                        <div style="font-size: 1.5rem; color: #3b82f6; margin-bottom: 0.5rem;">🎓</div>
-                        <strong>专业团队</strong><br>
-                        <small>博士级专家支持</small>
-                    </div>
-                    <div>
-                        <div style="font-size: 1.5rem; color: #f59e0b; margin-bottom: 0.5rem;">🔄</div>
-                        <strong>持续改进</strong><br>
-                        <small>基于用户反馈优化</small>
-                    </div>
-                    <div>
-                        <div style="font-size: 1.5rem; color: #ef4444; margin-bottom: 0.5rem;">🛡️</div>
-                        <strong>质量保证</strong><br>
-                        <small>科学方法验证</small>
-                    </div>
-                </div>
-            </div>
-        </div>
+
     </main>
 
     <script>
@@ -1097,21 +882,7 @@
             });
         });
 
-        // 用户下拉菜单功能
-        function toggleUserDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        // 点击外部关闭下拉菜单
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('userDropdown');
-            const avatar = document.querySelector('.user-avatar');
-            
-            if (!avatar.contains(event.target)) {
-                dropdown.classList.remove('show');
-            }
-        });
+        // 已移除头像与下拉菜单相关脚本
     </script>
 </body>
 </html>

@@ -60,6 +60,23 @@ def clean_numeric_value(value):
         return 0.0
     return float(value)
 
+def assess_trophic_status_by_TSI(
+    total_phosphorus: Optional[float] = None,
+    chlorophyll_a: Optional[float] = None,
+    secchi_depth: Optional[float] = None
+) -> str:
+    pass
+
+def assess_trophic_status_by_TLI(
+    total_phosphorus: Optional[float] = None,
+    total_nitrogen: Optional[float] = None,
+    chlorophyll_a: Optional[float] = None,
+    secchi_depth: Optional[float] = None,
+    cod_min: Optional[float] = None
+) -> str:
+    pass
+
+
 def assess_trophic_status(
     total_phosphorus: Optional[float] = None,
     total_nitrogen: Optional[float] = None,
